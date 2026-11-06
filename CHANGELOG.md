@@ -1,3 +1,10 @@
+## v0.1.15
+
+- Backdrop and card now fill the screen (max-width: calc(100vw - 48px), max-height: calc(100vh - 48px), padding 24px)
+- Draft system respects drilled folder: currentDraft() uses drilledFolder when drilled in
+- loadDraft() only restores folder input when not drilled into a folder
+- Draft persists the drilled folder name automatically
+
 ## v0.1.14
 
 - Back button in drill view auto-cancels edit mode

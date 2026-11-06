@@ -110,7 +110,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 24px;
   background: var(--cs-backdrop);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -122,8 +122,8 @@
 .cs-card {
   position: relative;
   width: 100%;
-  max-width: 1280px;
-  max-height: calc(100vh - 32px);
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 48px);
   padding: 24px;
   background: var(--cs-bg-card);
   border: 1px solid var(--cs-border);

@@ -28,6 +28,22 @@
     }
   }
 
+  function updateFolderInputState() {
+    const ui = CS.ui;
+    if (!ui || !ui.folderInput) return;
+    
+    if (CS.state.drilledFolder !== null) {
+      ui.folderInput.value = CS.state.drilledFolder;
+      ui.folderInput.disabled = true;
+      ui.folderInput.removeAttribute("list");
+      ui.folderInput.placeholder = "Folder (locked)";
+    } else {
+      ui.folderInput.disabled = false;
+      ui.folderInput.setAttribute("list", "cs-folder-list");
+      ui.folderInput.placeholder = "Folder";
+    }
+  }
+
   function hasEditChanges() {
     if (!CS.state.editingSnippetId || !CS.state.originalEditData) return false;
     const ui = CS.ui;
@@ -79,7 +95,6 @@
   }
 
   function startRenameFolder(oldName) {
-    // Find the DOM element containing this folder's name and swap it for an input
     const listEl = CS.ui.listEl;
     if (!listEl) return;
     
@@ -105,10 +120,9 @@
         const newName = input.value.trim();
         if (newName && newName !== oldName) {
           await renameFolder(oldName, newName);
-          return; // renderSnippets will be called by renameFolder
+          return;
         }
       }
-      // Revert if cancelled or unchanged
       parent.replaceChild(target, input);
     };
 
@@ -189,7 +203,6 @@
       bindFolderContextMenu(nameSpan, group.name);
 
       headerBtn.addEventListener("click", (e) => {
-        // Don't toggle if we are editing the text
         if (e.target.tagName === "INPUT") return;
         if (CS.state.collapsedFolders.has(group.name)) CS.state.collapsedFolders.delete(group.name);
         else CS.state.collapsedFolders.add(group.name);
@@ -219,7 +232,8 @@
       const group = groups.find((g) => g.name === CS.state.drilledFolder);
       if (!group) {
         CS.state.drilledFolder = null;
-        if (CS.state.editingSnippetId) CS.snippets.cancelEdit();
+        if (CS.state.editingSnippetId) cancelEdit();
+        updateFolderInputState();
         return renderGridView();
       }
       const drillHeader = el("div", "cs-drill-header");
@@ -227,7 +241,8 @@
       backBtn.type = "button";
       backBtn.addEventListener("click", () => {
         CS.state.drilledFolder = null;
-        if (CS.state.editingSnippetId) CS.snippets.cancelEdit();
+        if (CS.state.editingSnippetId) cancelEdit();
+        updateFolderInputState();
         renderSnippets();
       });
       drillHeader.appendChild(backBtn);
@@ -261,6 +276,8 @@
       tile.addEventListener("click", (e) => {
         if (e.target.tagName === "INPUT") return;
         CS.state.drilledFolder = group.name;
+        if (CS.state.editingSnippetId) cancelEdit();
+        updateFolderInputState();
         renderSnippets();
       });
       grid.appendChild(tile);
@@ -278,6 +295,7 @@
       const snippets = await CS.storage.getSnippets();
       CS.state.snippets = snippets;
       renderFolderList(snippets);
+      updateFolderInputState();
       renderSnippets();
       return snippets;
     } catch (err) {
@@ -310,7 +328,7 @@
     if (ui.saveBtn) ui.saveBtn.textContent = "Update";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = false;
     
-    // Clear new snippet draft state
+    updateFolderInputState();
     CS.drafts.clearDraft();
 
     if (ui.contentInput) ui.contentInput.focus();
@@ -322,13 +340,14 @@
     CS.state.originalEditData = null;
     
     if (ui.titleInput) ui.titleInput.value = "";
-    if (ui.folderInput) ui.folderInput.value = "";
+    if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
     if (ui.contentInput) ui.contentInput.value = "";
     
     if (ui.formLabel) ui.formLabel.textContent = "New snippet";
     if (ui.saveBtn) ui.saveBtn.textContent = "Save";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
     
+    updateFolderInputState();
     CS.drafts.clearDraft();
     if (ui.titleInput) ui.titleInput.focus();
   }
@@ -336,7 +355,13 @@
   async function handleSave() {
     const ui = CS.ui;
     const title = ui.titleInput ? ui.titleInput.value.trim() : "";
-    const folder = ui.folderInput ? ui.folderInput.value.trim() : "";
+    
+    // If locked, force the drilled folder
+    let folder = ui.folderInput ? ui.folderInput.value.trim() : "";
+    if (CS.state.drilledFolder !== null) {
+      folder = CS.state.drilledFolder;
+    }
+
     const content = ui.contentInput ? ui.contentInput.value.trim() : "";
     if (!title && !content) {
       CS.recordError("save", new Error("Both title and content are empty"));
@@ -377,13 +402,14 @@
       CS.state.originalEditData = null;
       
       if (ui.titleInput) ui.titleInput.value = "";
-      if (ui.folderInput) ui.folderInput.value = "";
+      if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
       if (ui.contentInput) ui.contentInput.value = "";
       
       if (ui.formLabel) ui.formLabel.textContent = "New snippet";
       if (ui.saveBtn) ui.saveBtn.textContent = "Save";
       if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
 
+      updateFolderInputState();
       await CS.drafts.clearDraft();
       await load();
       CS.toast.showToast(isEditing ? "Updated" : "Saved");
@@ -415,6 +441,6 @@
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
     renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder
+    startRenameFolder, deleteFolder, updateFolderInputState
   };
 })();

@@ -10,9 +10,14 @@
 
   function currentDraft() {
     const ui = CS.ui || {};
+    // If drilled into a folder, that folder overrides everything
+    const folderVal = CS.state.drilledFolder !== null
+      ? CS.state.drilledFolder
+      : (ui.folderInput ? ui.folderInput.value : "");
+
     return {
       title: ui.titleInput ? ui.titleInput.value : "",
-      folder: ui.folderInput ? ui.folderInput.value : "",
+      folder: folderVal,
       content: ui.contentInput ? ui.contentInput.value : "",
       updatedAt: Date.now(),
     };
@@ -47,7 +52,7 @@
   }
 
   function scheduleDraft() {
-    if (CS.state.editingSnippetId) return; // Ignore typing in edit mode
+    if (CS.state.editingSnippetId) return;
     setDraftState("dirty");
     clearTimeout(CS.state.draftTimer);
     CS.state.draftTimer = setTimeout(persistDraft, CS.constants.DRAFT_DEBOUNCE_MS);
@@ -72,7 +77,9 @@
         return;
       }
       if (CS.ui.titleInput) CS.ui.titleInput.value = typeof draft.title === "string" ? draft.title : "";
-      if (CS.ui.folderInput) CS.ui.folderInput.value = typeof draft.folder === "string" ? draft.folder : "";
+      if (CS.ui.folderInput && CS.state.drilledFolder === null) {
+        CS.ui.folderInput.value = typeof draft.folder === "string" ? draft.folder : "";
+      }
       if (CS.ui.contentInput) CS.ui.contentInput.value = typeof draft.content === "string" ? draft.content : "";
       setDraftState("saved");
     } catch (err) {
