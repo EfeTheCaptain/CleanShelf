@@ -1,3 +1,9 @@
+## v0.1.14
+
+- Back button in drill view auto-cancels edit mode
+- Deleting a snippet that is currently being edited auto-cancels edit mode
+- Prevents form from staying stuck in "Edit snippet" mode
+
 ## v0.1.13
 
 - Updated footnote: three-line hint with tip, privacy notice, and backup warning

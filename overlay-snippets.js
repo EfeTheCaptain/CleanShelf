@@ -219,6 +219,7 @@
       const group = groups.find((g) => g.name === CS.state.drilledFolder);
       if (!group) {
         CS.state.drilledFolder = null;
+        if (CS.state.editingSnippetId) CS.snippets.cancelEdit();
         return renderGridView();
       }
       const drillHeader = el("div", "cs-drill-header");
@@ -226,6 +227,7 @@
       backBtn.type = "button";
       backBtn.addEventListener("click", () => {
         CS.state.drilledFolder = null;
+        if (CS.state.editingSnippetId) CS.snippets.cancelEdit();
         renderSnippets();
       });
       drillHeader.appendChild(backBtn);
@@ -396,6 +398,9 @@
   async function deleteSnippet(id) {
     if (!confirm("Delete this snippet?")) return;
     try {
+      if (CS.state.editingSnippetId === id) {
+        cancelEdit();
+      }
       const snippets = await CS.storage.getSnippets();
       const filtered = snippets.filter((s) => s.id !== id);
       await CS.storage.saveSnippets(filtered);
