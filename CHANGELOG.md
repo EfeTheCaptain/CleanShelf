@@ -1,3 +1,7 @@
+## v0.1.32
+
+- Added Draft Save Rate option (Fast: 400ms debounce, Relaxed: 2000ms debounce)
+
 ## v0.1.31
 
 - Added duplicate title detection on save: replace existing or auto-append (2), (3), etc.

@@ -55,7 +55,12 @@
     if (CS.state.editingSnippetId) return;
     setDraftState("dirty");
     clearTimeout(CS.state.draftTimer);
-    CS.state.draftTimer = setTimeout(persistDraft, CS.constants.DRAFT_DEBOUNCE_MS);
+    
+    const delay = CS.state.settings.draftRate === "relaxed" 
+      ? 2000 
+      : CS.constants.DRAFT_DEBOUNCE_MS;
+      
+    CS.state.draftTimer = setTimeout(persistDraft, delay);
   }
 
   function flushDraft() {

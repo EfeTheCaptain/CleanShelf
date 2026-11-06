@@ -39,7 +39,8 @@
         if (!["dark", "light", "sepia", "dracula", "nord"].includes(s.theme)) throw new Error("theme: " + s.theme);
         if (!["normal", "high"].includes(s.contrast)) throw new Error("contrast: " + s.contrast);
         if (!["sm", "md", "lg"].includes(s.fontSize)) throw new Error("fontSize: " + s.fontSize);
-        return `${s.layout}/${s.theme}/${s.contrast}/${s.fontSize}`;
+        if (!["fast", "relaxed"].includes(s.draftRate)) throw new Error("draftRate: " + s.draftRate);
+        return `${s.layout}/${s.theme}/${s.contrast}/${s.fontSize}/${s.draftRate}`;
       },
     },
     {

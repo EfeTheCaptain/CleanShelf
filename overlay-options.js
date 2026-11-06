@@ -71,6 +71,16 @@
     ]);
     body.appendChild(radioGroups.fontSize.group);
 
+    radioGroups.draftRate = buildRadioGroup("Draft Save Rate", "cs-draftrate", [
+      { value: "fast", label: "Fast (400ms after typing stops)", onSelect: setDraftRate },
+      { value: "relaxed", label: "Relaxed (2 seconds after typing stops)", onSelect: setDraftRate },
+    ]);
+    const draftHint = document.createElement("p");
+    draftHint.className = "cs-options-hint";
+    draftHint.textContent = "Fast prevents data loss if you accidentally close the window, but causes more frequent background writes. Relaxed saves less often, which is slightly better for performance on slow machines.";
+    radioGroups.draftRate.group.appendChild(draftHint);
+    body.appendChild(radioGroups.draftRate.group);
+
     const dataGroup = el("div", "cs-options-group");
     dataGroup.appendChild(el("label", "cs-label", "Data"));
     const exportBtn = el("button", "cs-btn cs-option-action", "Export JSON");
@@ -120,6 +130,10 @@
       radioGroups.fontSize.inputs.md.checked = s.fontSize === "md";
       radioGroups.fontSize.inputs.lg.checked = s.fontSize === "lg";
     }
+    if (radioGroups.draftRate) {
+      radioGroups.draftRate.inputs.fast.checked = s.draftRate === "fast";
+      radioGroups.draftRate.inputs.relaxed.checked = s.draftRate === "relaxed";
+    }
   }
 
   function applySettingsToDom() {
@@ -128,6 +142,13 @@
     host.dataset.theme = CS.state.settings.theme;
     host.dataset.contrast = CS.state.settings.contrast;
     host.dataset.size = CS.state.settings.fontSize;
+  }
+
+  function setDraftRate(rate) {
+    if (rate !== "fast" && rate !== "relaxed") return;
+    if (CS.state.settings.draftRate === rate) return;
+    CS.state.settings.draftRate = rate;
+    CS.storage.persistSettings();
   }
 
   function setLayout(layout) {
@@ -164,5 +185,5 @@
     CS.storage.persistSettings();
   }
 
-  CS.options = { buildOptionsView, syncOptionRadios, applySettingsToDom, setLayout, setTheme, setContrast, setFontSize };
+  CS.options = { buildOptionsView, syncOptionRadios, applySettingsToDom, setLayout, setTheme, setContrast, setFontSize, setDraftRate };
 })();
