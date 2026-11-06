@@ -181,9 +181,11 @@
     if (ui.contentInput) ui.contentInput.value = snippet.content || "";
     CS.state.editingSnippetId = snippet.id;
 
+
+    if (ui.formLabel) ui.formLabel.textContent = "Edit snippet";
     if (ui.saveBtn) ui.saveBtn.textContent = "Update";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = false;
-    if (ui.titleInput) ui.titleInput.focus();
+    if (ui.contentInput) ui.contentInput.focus();
     CS.drafts.scheduleDraft();
   }
 
@@ -193,6 +195,8 @@
     if (ui.titleInput) ui.titleInput.value = "";
     if (ui.folderInput) ui.folderInput.value = "";
     if (ui.contentInput) ui.contentInput.value = "";
+
+    if (ui.formLabel) ui.formLabel.textContent = "New snippet";
     if (ui.saveBtn) ui.saveBtn.textContent = "Save";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
     CS.drafts.clearDraft();
@@ -223,13 +227,14 @@
       CS.toast.showToast("Add a title or content", "error");
       return;
     }
-    
+
     const isEditing = !!CS.state.editingSnippetId;
     if (ui.saveBtn) ui.saveBtn.disabled = true;
 
+
     try {
       const snippets = await CS.storage.getSnippets();
-      
+
       if (isEditing) {
         const idx = snippets.findIndex((s) => s.id === CS.state.editingSnippetId);
         if (idx !== -1) {
@@ -251,14 +256,18 @@
         });
       }
 
+
       await CS.storage.saveSnippets(snippets);
-      
+
       CS.state.editingSnippetId = null;
       if (ui.titleInput) ui.titleInput.value = "";
       if (ui.folderInput) ui.folderInput.value = "";
       if (ui.contentInput) ui.contentInput.value = "";
+
+      if (ui.formLabel) ui.formLabel.textContent = "New snippet";
       if (ui.saveBtn) ui.saveBtn.textContent = "Save";
       if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+
 
       await CS.drafts.clearDraft();
       await load();

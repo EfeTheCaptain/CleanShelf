@@ -1,3 +1,11 @@
+## v0.1.10
+
+- Right panel becomes editor (New or Edit mode); left panel holds "Your snippets"
+- Textarea fills available vertical height
+- Right-click → Edit changes panel title to "Edit snippet", button to "Update", shows "Cancel" button, focuses textarea
+- Cancel or successful Update resets right panel to "New snippet" mode
+- startEdit/cancelEdit/handleSave updated in overlay-snippets.js
+
 ## v0.1.9
 
 - Right panel becomes the editor (New or Edit mode); left panel holds "Your snippets"
