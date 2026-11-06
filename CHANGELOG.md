@@ -1,3 +1,8 @@
+## v0.1.17
+
+- Card height changed to calc(100vh - 100px) for 50px top/bottom margin
+- Backdrop uses align-items: center for perfect vertical centering
+
 ## v0.1.16
 
 - Reverted card max-width to fixed 1280px (prevents absurd stretching on ultrawide monitors)

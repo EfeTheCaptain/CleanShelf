@@ -123,7 +123,7 @@
   position: relative;
   width: 100%;
   max-width: 1280px;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 100px);
   padding: 24px;
   background: var(--cs-bg-card);
   border: 1px solid var(--cs-border);
