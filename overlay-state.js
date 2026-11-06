@@ -12,6 +12,7 @@
     collapsedFolders: new Set(),
     snippets: [],
     draftTimer: null,
+    editingSnippetId: null,
   });
 
   CS.recordError = (where, err) => {

@@ -1,3 +1,11 @@
+## v0.1.9
+
+- Right panel becomes the editor (New or Edit mode); left panel holds "Your snippets"
+- Textarea stretches to fill available vertical space
+- Main view changed to 2-column grid layout (35% left / 65% right)
+- `.cs-list` min-height removed (stretches to fill)
+- `.cs-folder-grid` narrowed for left column (auto-fill, minmax 120px)
+
 ## v0.1.8
 
 - `.cs-folder-items` and `.cs-drill-items` changed from flex column to CSS grid (`repeat(auto-fill, minmax(320px, 1fr))`) for multi-column card layout

@@ -33,10 +33,11 @@
     const cardEl = el("div", "cs-item");
     cardEl.setAttribute("role", "button");
     cardEl.setAttribute("tabindex", "0");
-    cardEl.title = "Click to copy";
+    cardEl.title = "Click to copy. Right-click for options.";
     cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
     cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
     cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+    
     cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
     cardEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -44,6 +45,15 @@
         CS.clipboard.copySnippet(snippet);
       }
     });
+
+    cardEl.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (CS.ui && CS.ui.contextMenu) {
+        CS.ui.contextMenu.show(snippet, e.clientX, e.clientY);
+      }
+    });
+
     return cardEl;
   }
 
@@ -164,6 +174,45 @@
     }
   }
 
+  function startEdit(snippet) {
+    const ui = CS.ui;
+    if (ui.titleInput) ui.titleInput.value = snippet.title || "";
+    if (ui.folderInput) ui.folderInput.value = snippet.folder || "";
+    if (ui.contentInput) ui.contentInput.value = snippet.content || "";
+    CS.state.editingSnippetId = snippet.id;
+
+    if (ui.saveBtn) ui.saveBtn.textContent = "Update";
+    if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = false;
+    if (ui.titleInput) ui.titleInput.focus();
+    CS.drafts.scheduleDraft();
+  }
+
+  function cancelEdit() {
+    const ui = CS.ui;
+    CS.state.editingSnippetId = null;
+    if (ui.titleInput) ui.titleInput.value = "";
+    if (ui.folderInput) ui.folderInput.value = "";
+    if (ui.contentInput) ui.contentInput.value = "";
+    if (ui.saveBtn) ui.saveBtn.textContent = "Save";
+    if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+    CS.drafts.clearDraft();
+    if (ui.titleInput) ui.titleInput.focus();
+  }
+
+  async function deleteSnippet(id) {
+    if (!confirm("Delete this snippet?")) return;
+    try {
+      const snippets = await CS.storage.getSnippets();
+      const filtered = snippets.filter((s) => s.id !== id);
+      await CS.storage.saveSnippets(filtered);
+      await load();
+      CS.toast.showToast("Snippet deleted");
+    } catch (err) {
+      CS.recordError("delete", err);
+      CS.toast.showToast("Delete failed", "error");
+    }
+  }
+
   async function handleSave() {
     const ui = CS.ui;
     const title = ui.titleInput ? ui.titleInput.value.trim() : "";
@@ -174,23 +223,46 @@
       CS.toast.showToast("Add a title or content", "error");
       return;
     }
+    
+    const isEditing = !!CS.state.editingSnippetId;
     if (ui.saveBtn) ui.saveBtn.disabled = true;
+
     try {
       const snippets = await CS.storage.getSnippets();
-      snippets.push({
-        id: crypto.randomUUID(),
-        title,
-        folder: folder || "",
-        content,
-        createdAt: Date.now(),
-      });
+      
+      if (isEditing) {
+        const idx = snippets.findIndex((s) => s.id === CS.state.editingSnippetId);
+        if (idx !== -1) {
+          snippets[idx] = {
+            ...snippets[idx],
+            title,
+            folder: folder || "",
+            content,
+            updatedAt: Date.now(),
+          };
+        }
+      } else {
+        snippets.push({
+          id: crypto.randomUUID(),
+          title,
+          folder: folder || "",
+          content,
+          createdAt: Date.now(),
+        });
+      }
+
       await CS.storage.saveSnippets(snippets);
+      
+      CS.state.editingSnippetId = null;
       if (ui.titleInput) ui.titleInput.value = "";
       if (ui.folderInput) ui.folderInput.value = "";
       if (ui.contentInput) ui.contentInput.value = "";
+      if (ui.saveBtn) ui.saveBtn.textContent = "Save";
+      if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+
       await CS.drafts.clearDraft();
       await load();
-      CS.toast.showToast("Saved");
+      CS.toast.showToast(isEditing ? "Updated" : "Saved");
     } catch (err) {
       CS.recordError("save", err);
       CS.toast.showToast("Save failed", "error");
@@ -199,5 +271,8 @@
     }
   }
 
-  CS.snippets = { groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView, renderSnippets, load, handleSave };
+  CS.snippets = {
+    groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
+    renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet
+  };
 })();

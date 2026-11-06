@@ -42,14 +42,31 @@
   header.appendChild(headerText);
   card.appendChild(header);
 
-  // ---- MAIN VIEW ----
+  // ---- MAIN VIEW (SIDE-BY-SIDE) ----
   const mainView = el("div", "cs-view");
   mainView.dataset.view = "main";
   CS.ui.mainView = mainView;
 
-  const addSection = el("div", "cs-section");
+  const mainLayout = el("div", "cs-main-layout");
+  
+  // LEFT PANEL (Your snippets)
+  const leftPanel = el("div", "cs-left-panel");
+  const listSection = el("div", "cs-section cs-section-list");
+  listSection.style.margin = "0";
+  listSection.appendChild(el("label", "cs-label", "Your snippets"));
+  const listEl = el("div", "cs-list");
+  listSection.appendChild(listEl);
+  leftPanel.appendChild(listSection);
+  CS.ui.listEl = listEl;
+  mainLayout.appendChild(leftPanel);
+
+  // RIGHT PANEL (New/Edit snippet)
+  const rightPanel = el("div", "cs-right-panel");
+  
   const inputHeader = el("div", "cs-input-header");
-  inputHeader.appendChild(el("label", "cs-label", "New snippet"));
+  const formLabel = el("label", "cs-label", "New snippet");
+  CS.ui.formLabel = formLabel;
+  inputHeader.appendChild(formLabel);
 
   const draftIndicator = el("span", "cs-draft-indicator");
   draftIndicator.dataset.state = "idle";
@@ -60,7 +77,7 @@
   draftIndicator.appendChild(el("span", "cs-draft-text", "Draft"));
   inputHeader.appendChild(draftIndicator);
   CS.ui.draftIndicator = draftIndicator;
-  addSection.appendChild(inputHeader);
+  rightPanel.appendChild(inputHeader);
 
   const fieldRow = el("div", "cs-field-row");
   const titleInput = el("input", "cs-input");
@@ -74,32 +91,41 @@
   fieldRow.appendChild(folderInput);
   const folderDatalist = document.createElement("datalist");
   folderDatalist.id = "cs-folder-list";
-  addSection.appendChild(fieldRow);
-  addSection.appendChild(folderDatalist);
+  rightPanel.appendChild(fieldRow);
+  rightPanel.appendChild(folderDatalist);
 
   const contentInput = el("textarea", "cs-textarea");
   contentInput.placeholder = "Paste your snippet here…";
-  addSection.appendChild(contentInput);
+  rightPanel.appendChild(contentInput);
 
+  const btnRow = el("div", "cs-btn-row");
   const saveBtn = el("button", "cs-btn", "Save");
   saveBtn.type = "button";
   saveBtn.addEventListener("click", () => CS.snippets.handleSave());
-  addSection.appendChild(saveBtn);
+  
+  const cancelEditBtn = el("button", "cs-btn cs-option-secondary", "Cancel");
+  cancelEditBtn.type = "button";
+  cancelEditBtn.hidden = true;
+  cancelEditBtn.addEventListener("click", () => CS.snippets.cancelEdit());
+
+  btnRow.appendChild(saveBtn);
+  btnRow.appendChild(cancelEditBtn);
+  rightPanel.appendChild(btnRow);
 
   CS.ui.titleInput = titleInput;
   CS.ui.folderInput = folderInput;
   CS.ui.folderDatalist = folderDatalist;
   CS.ui.contentInput = contentInput;
   CS.ui.saveBtn = saveBtn;
-  mainView.appendChild(addSection);
+  CS.ui.cancelEditBtn = cancelEditBtn;
+  mainLayout.appendChild(rightPanel);
 
-  const listSection = el("div", "cs-section cs-section-list");
-  listSection.appendChild(el("label", "cs-label", "Your snippets"));
-  const listEl = el("div", "cs-list");
-  listSection.appendChild(listEl);
-  CS.ui.listEl = listEl;
-  mainView.appendChild(listSection);
+  mainView.appendChild(mainLayout);
   card.appendChild(mainView);
+
+  listEl.addEventListener("scroll", () => {
+    if (CS.ui && CS.ui.contextMenu) CS.ui.contextMenu.hide();
+  }, { passive: true });
 
   // wire drafts
   titleInput.addEventListener("input", () => CS.drafts.scheduleDraft());
@@ -140,13 +166,54 @@
     btnDebug.textContent = opening ? "Debug ▴" : "Debug ▾";
   });
 
+  // ---- CONTEXT MENU ----
+  const contextMenu = el("div", "cs-context-menu");
+  contextMenu.hidden = true;
+  const editItem = el("button", "cs-context-item", "Edit");
+  editItem.type = "button";
+  const deleteItem = el("button", "cs-context-item cs-danger", "Delete");
+  deleteItem.type = "button";
+  contextMenu.appendChild(editItem);
+  contextMenu.appendChild(deleteItem);
+  shadow.appendChild(contextMenu);
+
+  const ctx = {
+    targetSnippet: null,
+    show(snippet, x, y) {
+      this.targetSnippet = snippet;
+      contextMenu.style.left = x + "px";
+      contextMenu.style.top = y + "px";
+      contextMenu.hidden = false;
+    },
+    hide() {
+      this.targetSnippet = null;
+      contextMenu.hidden = true;
+    }
+  };
+  CS.ui.contextMenu = ctx;
+
+  editItem.addEventListener("click", () => {
+    if (ctx.targetSnippet) CS.snippets.startEdit(ctx.targetSnippet);
+    ctx.hide();
+  });
+
+  deleteItem.addEventListener("click", async () => {
+    const s = ctx.targetSnippet;
+    ctx.hide();
+    if (s) await CS.snippets.deleteSnippet(s.id);
+  });
+
   // ---- VIEW TRANSITIONS ----
   function showMain() {
     CS.state.view = "main";
     mainView.hidden = false;
     optionsBuilt.view.hidden = true;
     footer.hidden = false;
-    titleInput.focus();
+    if (CS.state.editingSnippetId) {
+      contentInput.focus();
+    } else {
+      titleInput.focus();
+    }
   }
 
   function showOptions() {
@@ -169,6 +236,12 @@
 
   function onKey(e) {
     if (e.key === "Escape") {
+      if (ctx.targetSnippet) {
+        ctx.hide();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
       close();
@@ -183,6 +256,11 @@
 
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
+    if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();
+  });
+
+  backdrop.addEventListener("contextmenu", (e) => {
+    if (!contextMenu.contains(e.target)) ctx.hide();
   });
 
   // ---- BOOTSTRAP ----
