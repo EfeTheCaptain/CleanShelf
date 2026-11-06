@@ -1,3 +1,19 @@
+## v0.1.4
+
+- Replaced popup window with in-page overlay (shadow DOM, closed mode)
+- Overlay injected on demand via `chrome.scripting.executeScript` on user gesture
+- Backdrop `rgba(5,5,10,0.55)` + `backdrop-filter: blur(10px)` over live page
+- Card centered in tab viewport, max-width 1000px
+- Toggle: re-invoking toolbar/shortcut closes existing overlay
+- ESC (capture + stopPropagation) and backdrop-click close the overlay
+- `AbortController` cleans up keydown listener — no leak
+- Clipboard: `navigator.clipboard.writeText` with `execCommand` fallback
+- CSS injected via `CSSStyleSheet` + `adoptedStyleSheets` with `<style>` fallback
+- `activeTab` + `scripting` permissions replace host permissions (no `<all_urls>`)
+- Injection fails on chrome://, chrome-extension://, Web Store, PDFs (logged warning)
+- Deleted popup.html, popup.css, popup.js (no longer referenced)
+- 8-step checkup inside overlay debug panel
+
 ## v0.1.3
 
 - Removed `default_popup` from manifest; toolbar icon now opens a centered 960×720 chromeless window via `chrome.action.onClicked`
