@@ -5,11 +5,10 @@
   const { HOST_ID } = CS.constants;
   const { el, makeGearIcon, makeDraftIcons } = CS.dom;
 
-  // fresh state per session
   CS.state = CS.createState();
+  CS.state.searchQuery = "";
   CS.ui = {};
 
-  // host + shadow + styles
   const host = document.createElement("div");
   host.id = HOST_ID;
   host.style.cssText = "all:initial;position:fixed;inset:0;z-index:2147483647;display:block;";
@@ -26,7 +25,13 @@
   CS.ui.backdrop = backdrop;
   CS.ui.card = card;
 
-  // toast (fixed overlay)
+  // Prevent browser right-click on the card (except inputs)
+  card.addEventListener("contextmenu", (e) => {
+    if (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  });
+
   const toastEl = el("div", "cs-toast");
   toastEl.hidden = true;
   toastEl.setAttribute("role", "status");
@@ -34,7 +39,6 @@
   shadow.appendChild(toastEl);
   CS.ui.toast = toastEl;
 
-  // header
   const header = el("header", "cs-header");
   const headerText = el("div", "cs-header-text");
   headerText.appendChild(el("h1", "cs-title", "CleanShelf"));
@@ -42,14 +46,22 @@
   header.appendChild(headerText);
   card.appendChild(header);
 
-  // ---- MAIN VIEW (SIDE-BY-SIDE) ----
   const mainView = el("div", "cs-view");
   mainView.dataset.view = "main";
   CS.ui.mainView = mainView;
 
+  const searchRow = el("div", "cs-search-row");
+  const searchInput = el("input", "cs-input cs-search-input");
+  searchInput.placeholder = "Search snippets by title, content, or folder...";
+  searchInput.addEventListener("input", () => {
+    CS.state.searchQuery = searchInput.value.toLowerCase();
+    CS.snippets.renderSnippets();
+  });
+  searchRow.appendChild(searchInput);
+  mainView.appendChild(searchRow);
+
   const mainLayout = el("div", "cs-main-layout");
   
-  // LEFT PANEL (Your snippets)
   const leftPanel = el("div", "cs-left-panel");
   const listSection = el("div", "cs-section cs-section-list");
   listSection.style.margin = "0";
@@ -60,7 +72,6 @@
   CS.ui.listEl = listEl;
   mainLayout.appendChild(leftPanel);
 
-  // RIGHT PANEL (New/Edit snippet)
   const rightPanel = el("div", "cs-right-panel");
   
   const inputHeader = el("div", "cs-input-header");
@@ -127,22 +138,18 @@
     if (CS.ui && CS.ui.contextMenu) CS.ui.contextMenu.hide();
   }, { passive: true });
 
-  // wire drafts
   titleInput.addEventListener("input", () => CS.drafts.scheduleDraft());
   folderInput.addEventListener("input", () => CS.drafts.scheduleDraft());
   contentInput.addEventListener("input", () => CS.drafts.scheduleDraft());
 
-  // ---- OPTIONS VIEW ----
   const optionsBuilt = CS.options.buildOptionsView(() => showMain());
   CS.ui.options = optionsBuilt;
   card.appendChild(optionsBuilt.view);
 
-  // hint
   const hintText = el("p", "cs-hint");
-  hintText.innerHTML = "Tip: Right-click snippets or folders for more options.<br>Data stays in your browser. No tracking. No network calls.<br><strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.";
+  hintText.innerHTML = "Tip: Right-click snippets or folders for more options.<br>Data stays in your browser (up to ~10MB). No tracking. No network calls.<br><strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.";
   card.appendChild(hintText);
 
-  // ---- FOOTER ----
   const footer = el("div", "cs-footer");
   const btnDebug = el("button", "cs-debug-toggle", "Debug ▾");
   btnDebug.type = "button";
@@ -157,7 +164,6 @@
   CS.ui.btnDebug = btnDebug;
   CS.ui.btnGear = btnGear;
 
-  // ---- DEBUG PANEL ----
   const debugBuilt = CS.debug.buildDebugPanel();
   CS.ui.debug = debugBuilt;
   card.appendChild(debugBuilt.panel);
@@ -168,17 +174,14 @@
     btnDebug.textContent = opening ? "Debug ▴" : "Debug ▾";
   });
 
-  // ---- CONTEXT MENU ----
   const contextMenu = el("div", "cs-context-menu");
   contextMenu.hidden = true;
   
-  // Snippet menu items
   const editItem = el("button", "cs-context-item", "Edit");
   editItem.type = "button";
   const deleteSnippetItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteSnippetItem.type = "button";
   
-  // Folder menu items
   const renameFolderItem = el("button", "cs-context-item", "Rename");
   renameFolderItem.type = "button";
   const deleteFolderItem = el("button", "cs-context-item cs-danger", "Delete");
@@ -191,8 +194,8 @@
   shadow.appendChild(contextMenu);
 
   const ctx = {
-    targetType: null, // "snippet" | "folder"
-    targetData: null, // snippet object or folder name string
+    targetType: null,
+    targetData: null,
     show(type, data, x, y) {
       this.targetType = type;
       this.targetData = data;
@@ -243,7 +246,6 @@
     if (name) await CS.snippets.deleteFolder(name);
   });
 
-  // ---- VIEW TRANSITIONS ----
   function showMain() {
     CS.state.view = "main";
     mainView.hidden = false;
@@ -258,7 +260,7 @@
 
   function showOptions() {
     if (CS.state.editingSnippetId) {
-      CS.snippets.cancelEdit(); // Auto-cancel if navigating away
+      CS.snippets.cancelEdit();
     }
     CS.state.view = "options";
     mainView.hidden = true;
@@ -270,14 +272,10 @@
 
   btnGear.addEventListener("click", showOptions);
 
-  // ---- LIFECYCLE ----
   function close() {
     if (CS.snippets.hasEditChanges()) {
       const ok = confirm("You have unsaved changes to this snippet.\n\nClick OK to Update, or Cancel to Discard changes.");
       if (ok) {
-        CS.snippets.handleSave(); // Saves and closes later, or just let it stay open?
-        // Actually, if they click OK, we save. If they click Cancel, we discard and close.
-        // But handleSave is async. We should wait.
         CS.snippets.handleSave().then(() => {
           CS.drafts.flushDraft();
           if (typeof host.__csCleanup === "function") host.__csCleanup();
@@ -321,7 +319,6 @@
     if (!contextMenu.contains(e.target)) ctx.hide();
   });
 
-  // ---- BOOTSTRAP ----
   (async () => {
     try {
       CS.state.settings = await CS.storage.getSettings();

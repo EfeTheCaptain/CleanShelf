@@ -52,10 +52,9 @@
     radioGroups.theme = buildRadioGroup("Color scheme", "cs-theme", [
       { value: "dark", label: "Dark", onSelect: setTheme },
       { value: "light", label: "Light", onSelect: setTheme },
-      { value: "dark-sepia", label: "Dark Sepia", onSelect: setTheme },
-      { value: "sepia", label: "Light Sepia", onSelect: setTheme },
       { value: "dracula", label: "Dracula", onSelect: setTheme },
       { value: "nord", label: "Nord", onSelect: setTheme },
+      { value: "sepia", label: "Sepia", onSelect: setTheme },
     ]);
     body.appendChild(radioGroups.theme.group);
 
@@ -108,10 +107,9 @@
     if (radioGroups.theme) {
       radioGroups.theme.inputs.dark.checked = s.theme === "dark";
       radioGroups.theme.inputs.light.checked = s.theme === "light";
-      radioGroups.theme.inputs["dark-sepia"].checked = s.theme === "dark-sepia";
-      radioGroups.theme.inputs.sepia.checked = s.theme === "sepia";
       radioGroups.theme.inputs.dracula.checked = s.theme === "dracula";
       radioGroups.theme.inputs.nord.checked = s.theme === "nord";
+      radioGroups.theme.inputs.sepia.checked = s.theme === "sepia";
     }
     if (radioGroups.contrast) {
       radioGroups.contrast.inputs.normal.checked = s.contrast === "normal";
@@ -142,7 +140,7 @@
   }
 
   function setTheme(theme) {
-    const validThemes = ["dark", "light", "dark-sepia", "sepia", "dracula", "nord"];
+    const validThemes = ["dark", "light", "dracula", "nord", "sepia"];
     if (!validThemes.includes(theme)) return;
     if (CS.state.settings.theme === theme) return;
     CS.state.settings.theme = theme;
