@@ -24,6 +24,8 @@
 
   async function persistDraft() {
     CS.state.draftTimer = null;
+    if (CS.state.editingSnippetId) return; // Only draft new snippets
+
     const draft = currentDraft();
     if (isDraftEmpty(draft)) {
       try {
@@ -45,6 +47,7 @@
   }
 
   function scheduleDraft() {
+    if (CS.state.editingSnippetId) return; // Ignore typing in edit mode
     setDraftState("dirty");
     clearTimeout(CS.state.draftTimer);
     CS.state.draftTimer = setTimeout(persistDraft, CS.constants.DRAFT_DEBOUNCE_MS);
@@ -54,6 +57,8 @@
     if (CS.state.draftTimer == null) return;
     clearTimeout(CS.state.draftTimer);
     CS.state.draftTimer = null;
+    if (CS.state.editingSnippetId) return;
+
     const draft = currentDraft();
     if (isDraftEmpty(draft)) return;
     chrome.storage.local.set({ [CS.constants.DRAFT_KEY]: draft }).catch(() => {});
@@ -62,7 +67,7 @@
   async function loadDraft() {
     try {
       const draft = await CS.storage.getDraft();
-      if (!draft || isDraftEmpty(draft)) {
+      if (!draft || isDraftEmpty(draft) || CS.state.editingSnippetId) {
         setDraftState("idle");
         return;
       }

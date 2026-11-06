@@ -1,3 +1,9 @@
+## v0.1.11
+
+- `originalEditData` added to state (tracks original snippet data during edit)
+- Drafts prevented while editing (persistDraft, scheduleDraft, flushDraft, loadDraft all guard on editingSnippetId)
+- Draft indicator hidden during edit mode
+
 ## v0.1.10
 
 - Right panel becomes editor (New or Edit mode); left panel holds "Your snippets"

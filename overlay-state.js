@@ -13,6 +13,7 @@
     snippets: [],
     draftTimer: null,
     editingSnippetId: null,
+    originalEditData: null,
   });
 
   CS.recordError = (where, err) => {
