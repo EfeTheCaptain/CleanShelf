@@ -1,3 +1,9 @@
+## v0.1.21
+
+- Added Dracula, Nord, Sepia themes to CleanShelf (alongside Dark and Light)
+- Updated storage validation, options UI, syncOptionRadios, setTheme, and debug check for new theme
+- Updated font size scale (sm: 11px, lg: 18px)
+
 ## v0.1.20
 
 - Fixed Dracula theme: --cs-bg-chip and --cs-text-muted were both #6272a4 (invisible text), now #44475a and #f8f8f2

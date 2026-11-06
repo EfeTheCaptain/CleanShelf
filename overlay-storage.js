@@ -17,13 +17,13 @@
     try {
       const res = await chrome.storage.local.get(CS.constants.SETTINGS_KEY);
     const s = res[CS.constants.SETTINGS_KEY] || {};
-    const validThemes = ["dark", "light", "dracula", "nord", "sepia", "dark-sepia"];
-    return {
-      layout: s.layout === "list" ? "list" : "grid",
-      theme: validThemes.includes(s.theme) ? s.theme : "dark",
-      contrast: s.contrast === "high" ? "high" : "normal",
-      fontSize: s.fontSize === "sm" ? "sm" : s.fontSize === "lg" ? "lg" : "md",
-    };
+const validThemes = ["dark", "light", "dracula", "nord", "sepia"];
+      return {
+        layout: s.layout === "list" ? "list" : "grid",
+        theme: validThemes.includes(s.theme) ? s.theme : "dark",
+        contrast: s.contrast === "high" ? "high" : "normal",
+        fontSize: s.fontSize === "sm" ? "sm" : s.fontSize === "lg" ? "lg" : "md",
+      };
     } catch (_) {
       return { ...CS.constants.DEFAULT_SETTINGS };
     }
