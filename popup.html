@@ -9,36 +9,44 @@
 <body>
   <div class="popup-backdrop">
     <div class="popup-card">
-      <h1 class="popup-title">CleanShelf</h1>
-      <p class="popup-preview">Save, search, and copy your code snippets locally.</p>
+      <header class="popup-header">
+        <h1 class="popup-title">CleanShelf</h1>
+        <p class="popup-preview">Save, folder, and copy your code snippets locally.</p>
+      </header>
 
-      <div class="popup-section">
-        <label class="popup-label">Add a new snippet</label>
-        <input type="text" id="snippetTitle" class="popup-input" placeholder="Title" />
+      <section class="popup-section">
+        <label class="popup-label" for="snippetTitle">New snippet</label>
+        <div class="popup-field-row">
+          <input type="text" id="snippetTitle" class="popup-input" placeholder="Title" />
+          <input type="text" id="snippetFolder" class="popup-input popup-input-folder" placeholder="Folder" list="folderList" />
+          <datalist id="folderList"></datalist>
+        </div>
         <textarea id="snippetContent" class="popup-textarea" placeholder="Paste your snippet here…"></textarea>
-        <button id="btnSave" class="popup-btn">Save</button>
-      </div>
+        <button id="btnSave" class="popup-btn" type="button">Save</button>
+      </section>
 
-      <div class="popup-section">
+      <section class="popup-section popup-section-list">
         <label class="popup-label">Your snippets</label>
         <div id="snippetList" class="popup-list"></div>
-      </div>
+      </section>
 
       <p class="popup-hint">Data stays in your browser. No tracking. No network calls.</p>
 
-      <div class="popup-debug-toggle" id="btnDebug">Debug ▾</div>
-      <div class="popup-debug-panel" id="debugPanel" style="display:none;">
-        <div class="debug-row"><span class="debug-key">Extension ID:</span> <span class="debug-val" id="dbgExtId">—</span></div>
-        <div class="debug-row"><span class="debug-key">Popup URL:</span> <span class="debug-val" id="dbgUrl">—</span></div>
-        <div class="debug-row"><span class="debug-key">Chrome Version:</span> <span class="debug-val" id="dbgChrome">—</span></div>
-        <div class="debug-row"><span class="debug-key">Snippet Count:</span> <span class="debug-val" id="dbgCount">—</span></div>
-        <div class="debug-row"><span class="debug-key">Background:</span> <span class="debug-val">command-only (sleeps when idle)</span></div>
-        <div class="debug-row"><span class="debug-key">Last Error:</span> <span class="debug-val" id="dbgLastError">—</span></div>
-        <div class="debug-row"><span class="debug-key">Counters:</span> <span class="debug-val" id="dbgCounters">—</span></div>
-        <div class="debug-row"><span class="debug-key">Self-test:</span> <button id="dbgSelfTest" class="debug-btn" type="button">Run</button> <span class="debug-val" id="dbgSelfTestResult">—</span></div>
-        <div class="debug-row"><span class="debug-key">Storage Raw:</span> <pre class="debug-json" id="dbgStorage">—</pre></div>
+      <button class="popup-debug-toggle" id="btnDebug" type="button">Debug ▾</button>
+      <div class="popup-debug-panel" id="debugPanel" hidden>
+        <div class="debug-row">
+          <span class="debug-key">Last Error:</span>
+          <span class="debug-val" id="dbgLastError">none</span>
+        </div>
+        <div class="debug-row">
+          <span class="debug-key">Checkup:</span>
+          <button id="dbgRunChecks" class="debug-btn" type="button">Run steps</button>
+        </div>
+        <ul class="debug-steps" id="dbgSteps"></ul>
       </div>
     </div>
+
+    <div class="popup-toast" id="toast" hidden role="status" aria-live="polite"></div>
   </div>
 
   <script src="popup.js"></script>

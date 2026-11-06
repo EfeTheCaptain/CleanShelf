@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "CleanShelf",
-  "version": "0.1.1",
-  "description": "Save snippets locally with a blurred popup UI.",
-  "permissions": ["storage"],
+  "version": "0.1.2",
+  "description": "Save, folder, and copy snippets locally.",
+  "permissions": ["storage", "clipboardWrite"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "Open CleanShelf"
