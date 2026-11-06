@@ -1,3 +1,10 @@
+## v0.1.24
+
+- Added Drag & Drop snippets onto folder tiles/headers to move between folders
+- Added Undo Delete (3.5s toast with Undo button) for snippets and folders
+- Added "time ago" timestamp label on snippet cards
+- Added draggable visual feedback on snippets and drag-over highlight on folders
+
 ## v0.1.23
 
 - Updated toolbar icon to Bookshelf icon (icons/16.png, icons/48.png, icons/128.png)

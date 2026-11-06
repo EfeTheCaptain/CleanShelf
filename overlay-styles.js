@@ -990,6 +990,51 @@
 @keyframes cs-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cs-toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes cs-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+
+.cs-item { position: relative; }
+.cs-item[draggable="true"] { cursor: grab; }
+.cs-item.cs-dragging { opacity: 0.4; cursor: grabbing; }
+
+.cs-folder-tile.cs-drag-over,
+.cs-folder-header.cs-drag-over {
+  border-color: var(--cs-accent) !important;
+  background: var(--cs-bg-surface-hover) !important;
+  box-shadow: 0 0 0 2px var(--cs-accent);
+}
+
+.cs-item-time {
+  display: block;
+  margin-top: 6px;
+  font-size: var(--cs-fs-2xs);
+  color: var(--cs-text-faint);
+  text-align: right;
+}
+
+.cs-toast {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.cs-toast-action {
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: inherit;
+  font-family: inherit;
+  font-size: var(--cs-fs-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.cs-toast-action:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 `;
 
   function applyStyles(shadowRoot) {

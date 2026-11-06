@@ -3,6 +3,17 @@
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
 
+  function getFilteredSnippets() {
+    const q = (CS.state.searchQuery || "").trim().toLowerCase();
+    const all = CS.state.snippets || [];
+    if (!q) return all;
+    return all.filter(s => 
+      (s.title || "").toLowerCase().includes(q) || 
+      (s.content || "").toLowerCase().includes(q) || 
+      (s.folder || "").toLowerCase().includes(q)
+    );
+  }
+
   function groupByFolder(snippets) {
     const map = new Map();
     for (const s of snippets) {
@@ -54,14 +65,33 @@
     return currentTitle !== orig.title || currentFolder !== orig.folder || currentContent !== orig.content;
   }
 
+  function timeAgo(ts) {
+    if (!ts) return "";
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    return new Date(ts).toLocaleDateString();
+  }
+
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
     const cardEl = el("div", "cs-item");
     cardEl.setAttribute("role", "button");
     cardEl.setAttribute("tabindex", "0");
     cardEl.title = "Click to copy. Right-click for options.";
+    cardEl.draggable = true;
+
     cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
     cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+    
+    const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
+    if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
+
     cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
     
     cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
@@ -80,6 +110,16 @@
       }
     });
 
+    cardEl.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", snippet.id);
+      e.dataTransfer.effectAllowed = "move";
+      cardEl.classList.add("cs-dragging");
+    });
+
+    cardEl.addEventListener("dragend", () => {
+      cardEl.classList.remove("cs-dragging");
+    });
+
     return cardEl;
   }
 
@@ -90,6 +130,43 @@
       e.stopPropagation();
       if (CS.ui && CS.ui.contextMenu) {
         CS.ui.contextMenu.show("folder", folderName, e.clientX, e.clientY);
+      }
+    });
+  }
+
+  function bindFolderDragDrop(element, folderName) {
+    if (folderName === CS.constants.UNFILED) return;
+    element.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      element.classList.add("cs-drag-over");
+    });
+    element.addEventListener("dragleave", () => {
+      element.classList.remove("cs-drag-over");
+    });
+    element.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      element.classList.remove("cs-drag-over");
+      const snippetId = e.dataTransfer.getData("text/plain");
+      if (!snippetId) return;
+
+      try {
+        const snippets = await CS.storage.getSnippets();
+        const idx = snippets.findIndex(s => s.id === snippetId);
+        if (idx !== -1) {
+          const targetFolder = folderName === CS.constants.UNFILED ? "" : folderName;
+          if (snippets[idx].folder !== targetFolder) {
+            snippets[idx].folder = targetFolder;
+            snippets[idx].updatedAt = Date.now();
+            await CS.storage.saveSnippets(snippets);
+            await load();
+            CS.toast.showToast(`Moved to ${folderName}`);
+          }
+        }
+      } catch (err) {
+        CS.recordError("move", err);
+        CS.toast.showToast("Move failed", "error");
       }
     });
   }
@@ -160,17 +237,25 @@
   async function deleteFolder(folderName) {
     try {
       const snippets = await CS.storage.getSnippets();
-      const inFolder = snippets.filter((s) => s.folder === folderName);
+      const toDelete = snippets.filter((s) => s.folder === folderName);
       
-      if (inFolder.length > 0) {
-        const ok = confirm(`There are ${inFolder.length} snippets in "${folderName}". Are you sure you want to delete?`);
+      if (toDelete.length > 0) {
+        const ok = confirm(`There are ${toDelete.length} snippets in "${folderName}". Are you sure you want to delete?`);
         if (!ok) return;
       }
 
       const filtered = snippets.filter((s) => s.folder !== folderName);
       await CS.storage.saveSnippets(filtered);
       await load();
-      CS.toast.showToast("Folder deleted");
+      
+      CS.toast.showToast("Folder deleted", "success", "Undo", async () => {
+        const current = await CS.storage.getSnippets();
+        const restored = [...current, ...toDelete];
+        await CS.storage.saveSnippets(restored);
+        await load();
+        CS.toast.showToast("Restored");
+      });
+
     } catch (err) {
       CS.recordError("folder/delete", err);
       CS.toast.showToast("Delete failed", "error");
@@ -182,9 +267,9 @@
     const listEl = CS.ui.listEl;
     if (!listEl) return;
     listEl.innerHTML = "";
-    const snippets = CS.state.snippets || [];
+    const snippets = getFilteredSnippets();
     if (snippets.length === 0) {
-      listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
+      listEl.appendChild(el("p", "cs-empty", "No snippets found."));
       return;
     }
     const frag = document.createDocumentFragment();
@@ -200,7 +285,8 @@
       headerBtn.appendChild(nameSpan);
       headerBtn.appendChild(el("span", "cs-folder-count", String(group.items.length)));
       
-      bindFolderContextMenu(nameSpan, group.name);
+      bindFolderContextMenu(headerBtn, group.name);
+      bindFolderDragDrop(headerBtn, group.name);
 
       headerBtn.addEventListener("click", (e) => {
         if (e.target.tagName === "INPUT") return;
@@ -225,7 +311,7 @@
     const listEl = CS.ui.listEl;
     if (!listEl) return;
     listEl.innerHTML = "";
-    const snippets = CS.state.snippets || [];
+    const snippets = getFilteredSnippets();
     const groups = groupByFolder(snippets);
 
     if (CS.state.drilledFolder !== null) {
@@ -258,7 +344,7 @@
     }
 
     if (groups.length === 0) {
-      listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
+      listEl.appendChild(el("p", "cs-empty", "No snippets found."));
       return;
     }
 
@@ -271,7 +357,8 @@
       tile.appendChild(nameDiv);
       tile.appendChild(el("div", "cs-folder-tile-count", String(group.items.length)));
       
-      bindFolderContextMenu(nameDiv, group.name);
+      bindFolderContextMenu(tile, group.name);
+      bindFolderDragDrop(tile, group.name);
 
       tile.addEventListener("click", (e) => {
         if (e.target.tagName === "INPUT") return;
@@ -356,7 +443,6 @@
     const ui = CS.ui;
     const title = ui.titleInput ? ui.titleInput.value.trim() : "";
     
-    // If locked, force the drilled folder
     let folder = ui.folderInput ? ui.folderInput.value.trim() : "";
     if (CS.state.drilledFolder !== null) {
       folder = CS.state.drilledFolder;
@@ -422,16 +508,27 @@
   }
 
   async function deleteSnippet(id) {
-    if (!confirm("Delete this snippet?")) return;
     try {
+      const snippets = await CS.storage.getSnippets();
+      const snippetToDelete = snippets.find(s => s.id === id);
+      if (!snippetToDelete) return;
+
       if (CS.state.editingSnippetId === id) {
         cancelEdit();
       }
-      const snippets = await CS.storage.getSnippets();
+      
       const filtered = snippets.filter((s) => s.id !== id);
       await CS.storage.saveSnippets(filtered);
       await load();
-      CS.toast.showToast("Snippet deleted");
+      
+      CS.toast.showToast("Snippet deleted", "success", "Undo", async () => {
+        const current = await CS.storage.getSnippets();
+        current.push(snippetToDelete);
+        await CS.storage.saveSnippets(current);
+        await load();
+        CS.toast.showToast("Restored");
+      });
+      
     } catch (err) {
       CS.recordError("delete", err);
       CS.toast.showToast("Delete failed", "error");
