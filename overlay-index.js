@@ -169,38 +169,76 @@
   // ---- CONTEXT MENU ----
   const contextMenu = el("div", "cs-context-menu");
   contextMenu.hidden = true;
+  
+  // Snippet menu items
   const editItem = el("button", "cs-context-item", "Edit");
   editItem.type = "button";
-  const deleteItem = el("button", "cs-context-item cs-danger", "Delete");
-  deleteItem.type = "button";
+  const deleteSnippetItem = el("button", "cs-context-item cs-danger", "Delete");
+  deleteSnippetItem.type = "button";
+  
+  // Folder menu items
+  const renameFolderItem = el("button", "cs-context-item", "Rename");
+  renameFolderItem.type = "button";
+  const deleteFolderItem = el("button", "cs-context-item cs-danger", "Delete");
+  deleteFolderItem.type = "button";
+
   contextMenu.appendChild(editItem);
-  contextMenu.appendChild(deleteItem);
+  contextMenu.appendChild(deleteSnippetItem);
+  contextMenu.appendChild(renameFolderItem);
+  contextMenu.appendChild(deleteFolderItem);
   shadow.appendChild(contextMenu);
 
   const ctx = {
-    targetSnippet: null,
-    show(snippet, x, y) {
-      this.targetSnippet = snippet;
+    targetType: null, // "snippet" | "folder"
+    targetData: null, // snippet object or folder name string
+    show(type, data, x, y) {
+      this.targetType = type;
+      this.targetData = data;
+      
+      if (type === "snippet") {
+        editItem.hidden = false;
+        deleteSnippetItem.hidden = false;
+        renameFolderItem.hidden = true;
+        deleteFolderItem.hidden = true;
+      } else {
+        editItem.hidden = true;
+        deleteSnippetItem.hidden = true;
+        renameFolderItem.hidden = false;
+        deleteFolderItem.hidden = false;
+      }
+
       contextMenu.style.left = x + "px";
       contextMenu.style.top = y + "px";
       contextMenu.hidden = false;
     },
     hide() {
-      this.targetSnippet = null;
+      this.targetType = null;
+      this.targetData = null;
       contextMenu.hidden = true;
     }
   };
   CS.ui.contextMenu = ctx;
 
   editItem.addEventListener("click", () => {
-    if (ctx.targetSnippet) CS.snippets.startEdit(ctx.targetSnippet);
+    if (ctx.targetType === "snippet") CS.snippets.startEdit(ctx.targetData);
     ctx.hide();
   });
 
-  deleteItem.addEventListener("click", async () => {
-    const s = ctx.targetSnippet;
+  deleteSnippetItem.addEventListener("click", async () => {
+    const s = ctx.targetData;
     ctx.hide();
     if (s) await CS.snippets.deleteSnippet(s.id);
+  });
+
+  renameFolderItem.addEventListener("click", () => {
+    if (ctx.targetType === "folder") CS.snippets.startRenameFolder(ctx.targetData);
+    ctx.hide();
+  });
+
+  deleteFolderItem.addEventListener("click", async () => {
+    const name = ctx.targetData;
+    ctx.hide();
+    if (name) await CS.snippets.deleteFolder(name);
   });
 
   // ---- VIEW TRANSITIONS ----
@@ -217,6 +255,9 @@
   }
 
   function showOptions() {
+    if (CS.state.editingSnippetId) {
+      CS.snippets.cancelEdit(); // Auto-cancel if navigating away
+    }
     CS.state.view = "options";
     mainView.hidden = true;
     optionsBuilt.view.hidden = false;
@@ -229,6 +270,21 @@
 
   // ---- LIFECYCLE ----
   function close() {
+    if (CS.snippets.hasEditChanges()) {
+      const ok = confirm("You have unsaved changes to this snippet.\n\nClick OK to Update, or Cancel to Discard changes.");
+      if (ok) {
+        CS.snippets.handleSave(); // Saves and closes later, or just let it stay open?
+        // Actually, if they click OK, we save. If they click Cancel, we discard and close.
+        // But handleSave is async. We should wait.
+        CS.snippets.handleSave().then(() => {
+          CS.drafts.flushDraft();
+          if (typeof host.__csCleanup === "function") host.__csCleanup();
+          host.remove();
+        });
+        return;
+      }
+    }
+    
     CS.drafts.flushDraft();
     if (typeof host.__csCleanup === "function") host.__csCleanup();
     host.remove();
@@ -236,7 +292,7 @@
 
   function onKey(e) {
     if (e.key === "Escape") {
-      if (ctx.targetSnippet) {
+      if (ctx.targetType) {
         ctx.hide();
         e.preventDefault();
         e.stopPropagation();

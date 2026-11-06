@@ -28,6 +28,16 @@
     }
   }
 
+  function hasEditChanges() {
+    if (!CS.state.editingSnippetId || !CS.state.originalEditData) return false;
+    const ui = CS.ui;
+    const currentTitle = ui.titleInput ? ui.titleInput.value.trim() : "";
+    const currentFolder = ui.folderInput ? ui.folderInput.value.trim() : "";
+    const currentContent = ui.contentInput ? ui.contentInput.value.trim() : "";
+    const orig = CS.state.originalEditData;
+    return currentTitle !== orig.title || currentFolder !== orig.folder || currentContent !== orig.content;
+  }
+
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
     const cardEl = el("div", "cs-item");
@@ -50,11 +60,107 @@
       e.preventDefault();
       e.stopPropagation();
       if (CS.ui && CS.ui.contextMenu) {
-        CS.ui.contextMenu.show(snippet, e.clientX, e.clientY);
+        CS.ui.contextMenu.show("snippet", snippet, e.clientX, e.clientY);
       }
     });
 
     return cardEl;
+  }
+
+  function bindFolderContextMenu(element, folderName) {
+    if (folderName === CS.constants.UNFILED) return;
+    element.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (CS.ui && CS.ui.contextMenu) {
+        CS.ui.contextMenu.show("folder", folderName, e.clientX, e.clientY);
+      }
+    });
+  }
+
+  function startRenameFolder(oldName) {
+    // Find the DOM element containing this folder's name and swap it for an input
+    const listEl = CS.ui.listEl;
+    if (!listEl) return;
+    
+    const target = Array.from(listEl.querySelectorAll(".cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count)")).find(el => el.textContent === oldName);
+    if (!target) return;
+
+    const parent = target.parentElement;
+    const input = document.createElement("input");
+    input.className = "cs-input";
+    input.style.padding = "2px 4px";
+    input.style.fontSize = "inherit";
+    input.style.height = "auto";
+    input.value = oldName;
+    
+    parent.replaceChild(input, target);
+    input.focus();
+    input.select();
+
+    const finish = async (save) => {
+      input.removeEventListener("blur", onBlur);
+      input.removeEventListener("keydown", onKey);
+      if (save) {
+        const newName = input.value.trim();
+        if (newName && newName !== oldName) {
+          await renameFolder(oldName, newName);
+          return; // renderSnippets will be called by renameFolder
+        }
+      }
+      // Revert if cancelled or unchanged
+      parent.replaceChild(target, input);
+    };
+
+    const onBlur = () => finish(true);
+    const onKey = (e) => {
+      if (e.key === "Enter") { e.preventDefault(); finish(true); }
+      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+    };
+
+    input.addEventListener("blur", onBlur);
+    input.addEventListener("keydown", onKey);
+  }
+
+  async function renameFolder(oldName, newName) {
+    try {
+      const snippets = await CS.storage.getSnippets();
+      let changed = false;
+      for (const s of snippets) {
+        if (s.folder === oldName) {
+          s.folder = newName;
+          changed = true;
+        }
+      }
+      if (changed) {
+        await CS.storage.saveSnippets(snippets);
+        await load();
+        CS.toast.showToast("Folder renamed");
+      }
+    } catch (err) {
+      CS.recordError("folder/rename", err);
+      CS.toast.showToast("Rename failed", "error");
+    }
+  }
+
+  async function deleteFolder(folderName) {
+    try {
+      const snippets = await CS.storage.getSnippets();
+      const inFolder = snippets.filter((s) => s.folder === folderName);
+      
+      if (inFolder.length > 0) {
+        const ok = confirm(`There are ${inFolder.length} snippets in "${folderName}". Are you sure you want to delete?`);
+        if (!ok) return;
+      }
+
+      const filtered = snippets.filter((s) => s.folder !== folderName);
+      await CS.storage.saveSnippets(filtered);
+      await load();
+      CS.toast.showToast("Folder deleted");
+    } catch (err) {
+      CS.recordError("folder/delete", err);
+      CS.toast.showToast("Delete failed", "error");
+    }
   }
 
   function renderListView() {
@@ -76,9 +182,15 @@
       headerBtn.type = "button";
       headerBtn.appendChild(el("span", "cs-folder-caret",
         CS.state.collapsedFolders.has(group.name) ? "▸" : "▾"));
-      headerBtn.appendChild(el("span", null, group.name));
+      const nameSpan = el("span", null, group.name);
+      headerBtn.appendChild(nameSpan);
       headerBtn.appendChild(el("span", "cs-folder-count", String(group.items.length)));
-      headerBtn.addEventListener("click", () => {
+      
+      bindFolderContextMenu(nameSpan, group.name);
+
+      headerBtn.addEventListener("click", (e) => {
+        // Don't toggle if we are editing the text
+        if (e.target.tagName === "INPUT") return;
         if (CS.state.collapsedFolders.has(group.name)) CS.state.collapsedFolders.delete(group.name);
         else CS.state.collapsedFolders.add(group.name);
         renderSnippets();
@@ -138,9 +250,14 @@
       const tile = el("button", "cs-folder-tile");
       tile.type = "button";
       tile.appendChild(makeFolderIcon());
-      tile.appendChild(el("div", "cs-folder-tile-name", group.name));
+      const nameDiv = el("div", "cs-folder-tile-name", group.name);
+      tile.appendChild(nameDiv);
       tile.appendChild(el("div", "cs-folder-tile-count", String(group.items.length)));
-      tile.addEventListener("click", () => {
+      
+      bindFolderContextMenu(nameDiv, group.name);
+
+      tile.addEventListener("click", (e) => {
+        if (e.target.tagName === "INPUT") return;
         CS.state.drilledFolder = group.name;
         renderSnippets();
       });
@@ -179,42 +296,39 @@
     if (ui.titleInput) ui.titleInput.value = snippet.title || "";
     if (ui.folderInput) ui.folderInput.value = snippet.folder || "";
     if (ui.contentInput) ui.contentInput.value = snippet.content || "";
+    
     CS.state.editingSnippetId = snippet.id;
-
+    CS.state.originalEditData = {
+      title: snippet.title || "",
+      folder: snippet.folder || "",
+      content: snippet.content || ""
+    };
 
     if (ui.formLabel) ui.formLabel.textContent = "Edit snippet";
     if (ui.saveBtn) ui.saveBtn.textContent = "Update";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = false;
+    
+    // Clear new snippet draft state
+    CS.drafts.clearDraft();
+
     if (ui.contentInput) ui.contentInput.focus();
-    CS.drafts.scheduleDraft();
   }
 
   function cancelEdit() {
     const ui = CS.ui;
     CS.state.editingSnippetId = null;
+    CS.state.originalEditData = null;
+    
     if (ui.titleInput) ui.titleInput.value = "";
     if (ui.folderInput) ui.folderInput.value = "";
     if (ui.contentInput) ui.contentInput.value = "";
-
+    
     if (ui.formLabel) ui.formLabel.textContent = "New snippet";
     if (ui.saveBtn) ui.saveBtn.textContent = "Save";
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+    
     CS.drafts.clearDraft();
     if (ui.titleInput) ui.titleInput.focus();
-  }
-
-  async function deleteSnippet(id) {
-    if (!confirm("Delete this snippet?")) return;
-    try {
-      const snippets = await CS.storage.getSnippets();
-      const filtered = snippets.filter((s) => s.id !== id);
-      await CS.storage.saveSnippets(filtered);
-      await load();
-      CS.toast.showToast("Snippet deleted");
-    } catch (err) {
-      CS.recordError("delete", err);
-      CS.toast.showToast("Delete failed", "error");
-    }
   }
 
   async function handleSave() {
@@ -227,14 +341,13 @@
       CS.toast.showToast("Add a title or content", "error");
       return;
     }
-
+    
     const isEditing = !!CS.state.editingSnippetId;
     if (ui.saveBtn) ui.saveBtn.disabled = true;
 
-
     try {
       const snippets = await CS.storage.getSnippets();
-
+      
       if (isEditing) {
         const idx = snippets.findIndex((s) => s.id === CS.state.editingSnippetId);
         if (idx !== -1) {
@@ -256,18 +369,18 @@
         });
       }
 
-
       await CS.storage.saveSnippets(snippets);
-
+      
       CS.state.editingSnippetId = null;
+      CS.state.originalEditData = null;
+      
       if (ui.titleInput) ui.titleInput.value = "";
       if (ui.folderInput) ui.folderInput.value = "";
       if (ui.contentInput) ui.contentInput.value = "";
-
+      
       if (ui.formLabel) ui.formLabel.textContent = "New snippet";
       if (ui.saveBtn) ui.saveBtn.textContent = "Save";
       if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
-
 
       await CS.drafts.clearDraft();
       await load();
@@ -280,8 +393,23 @@
     }
   }
 
+  async function deleteSnippet(id) {
+    if (!confirm("Delete this snippet?")) return;
+    try {
+      const snippets = await CS.storage.getSnippets();
+      const filtered = snippets.filter((s) => s.id !== id);
+      await CS.storage.saveSnippets(filtered);
+      await load();
+      CS.toast.showToast("Snippet deleted");
+    } catch (err) {
+      CS.recordError("delete", err);
+      CS.toast.showToast("Delete failed", "error");
+    }
+  }
+
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
-    renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet
+    renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
+    startRenameFolder, deleteFolder
   };
 })();

@@ -1,3 +1,14 @@
+## v0.1.12
+
+- Context menu: right-click snippet → Edit/Delete; right-click folder → Rename/Delete
+- In-place folder renaming (inline input, Enter saves, Esc cancels)
+- Folder collision merging: renaming Folder A to existing Folder B merges snippets
+- Folder deletion with confirmation (only asks if folder has snippets)
+- Unsaved changes guard on close: confirm dialog "Update or Discard"
+- Auto-cancel edit when navigating to Options
+- `hasEditChanges()` detects unsaved edits in form
+- `originalEditData` tracked during edit for change detection
+
 ## v0.1.11
 
 - `originalEditData` added to state (tracks original snippet data during edit)
