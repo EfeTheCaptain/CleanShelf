@@ -16,11 +16,24 @@
 
   function groupByFolder(snippets) {
     const map = new Map();
+    
+    // 1. Pre-fill with explicit empty folders
+    if (CS.state.folders) {
+      for (const f of CS.state.folders) {
+        if (f && f !== CS.constants.UNFILED) {
+          map.set(f, []);
+        }
+      }
+    }
+
+    // 2. Add snippets to folders
     for (const s of snippets) {
       const key = (s && s.folder) ? s.folder : CS.constants.UNFILED;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(s);
     }
+    
+    // 3. Sort folders, push Unfiled to end
     const names = [...map.keys()].filter((k) => k !== CS.constants.UNFILED).sort();
     if (map.has(CS.constants.UNFILED)) names.push(CS.constants.UNFILED);
     return names.map((name) => ({ name, items: map.get(name) }));
@@ -29,10 +42,12 @@
   function renderFolderList(snippets) {
     const datalist = CS.ui && CS.ui.folderDatalist;
     if (!datalist) return;
-    const folders = new Set();
-    for (const s of snippets) if (s && s.folder) folders.add(s.folder);
     datalist.innerHTML = "";
-    for (const f of [...folders].sort()) {
+    
+    const folderSet = new Set(CS.state.folders || []);
+    for (const s of snippets) if (s && s.folder) folderSet.add(s.folder);
+    
+    for (const f of [...folderSet].sort()) {
       const opt = document.createElement("option");
       opt.value = f;
       datalist.appendChild(opt);
@@ -171,6 +186,19 @@
     });
   }
 
+  function createNewFolder() {
+    const name = prompt("New folder name:");
+    if (name && name.trim()) {
+      const newName = name.trim();
+      if (!CS.state.folders) CS.state.folders = new Set();
+      CS.state.folders.add(newName);
+      CS.storage.saveFolders([...CS.state.folders]).then(() => {
+        load();
+        CS.toast.showToast(`Created "${newName}"`);
+      });
+    }
+  }
+
   function startRenameFolder(oldName) {
     const listEl = CS.ui.listEl;
     if (!listEl) return;
@@ -225,9 +253,16 @@
       }
       if (changed) {
         await CS.storage.saveSnippets(snippets);
-        await load();
-        CS.toast.showToast("Folder renamed");
       }
+      
+      if (CS.state.folders) {
+        CS.state.folders.delete(oldName);
+        CS.state.folders.add(newName);
+        await CS.storage.saveFolders([...CS.state.folders]);
+      }
+      
+      await load();
+      CS.toast.showToast("Folder renamed");
     } catch (err) {
       CS.recordError("folder/rename", err);
       CS.toast.showToast("Rename failed", "error");
@@ -246,9 +281,19 @@
 
       const filtered = snippets.filter((s) => s.folder !== folderName);
       await CS.storage.saveSnippets(filtered);
+      
+      if (CS.state.folders) {
+        CS.state.folders.delete(folderName);
+        await CS.storage.saveFolders([...CS.state.folders]);
+      }
+      
       await load();
       
       CS.toast.showToast("Folder deleted", "success", "Undo", async () => {
+        if (CS.state.folders) {
+          CS.state.folders.add(folderName);
+          await CS.storage.saveFolders([...CS.state.folders]);
+        }
         const current = await CS.storage.getSnippets();
         const restored = [...current, ...toDelete];
         await CS.storage.saveSnippets(restored);
@@ -268,10 +313,12 @@
     if (!listEl) return;
     listEl.innerHTML = "";
     const snippets = getFilteredSnippets();
-    if (snippets.length === 0) {
+    
+    if (snippets.length === 0 && (!CS.state.folders || CS.state.folders.size === 0)) {
       listEl.appendChild(el("p", "cs-empty", "No snippets found."));
       return;
     }
+    
     const frag = document.createDocumentFragment();
     for (const group of groupByFolder(snippets)) {
       const wrap = el("section", "cs-folder");
@@ -339,6 +386,11 @@
       const items = el("div", "cs-drill-items");
       const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       for (const s of ordered) items.appendChild(buildSnippetCard(s));
+      
+      if (ordered.length === 0) {
+        items.appendChild(el("p", "cs-empty", "This folder is empty."));
+      }
+      
       listEl.appendChild(items);
       return;
     }
@@ -380,6 +432,21 @@
   async function load() {
     try {
       const snippets = await CS.storage.getSnippets();
+      const savedFolders = await CS.storage.getFolders();
+      
+      CS.state.folders = new Set(savedFolders);
+      
+      let foldersUpdated = false;
+      for (const s of snippets) {
+        if (s.folder && !CS.state.folders.has(s.folder)) {
+          CS.state.folders.add(s.folder);
+          foldersUpdated = true;
+        }
+      }
+      if (foldersUpdated) {
+        await CS.storage.saveFolders([...CS.state.folders]);
+      }
+
       CS.state.snippets = snippets;
       renderFolderList(snippets);
       updateFolderInputState();
@@ -484,6 +551,14 @@
 
       await CS.storage.saveSnippets(snippets);
       
+      if (folder) {
+        if (!CS.state.folders) CS.state.folders = new Set();
+        if (!CS.state.folders.has(folder)) {
+          CS.state.folders.add(folder);
+          await CS.storage.saveFolders([...CS.state.folders]);
+        }
+      }
+      
       CS.state.editingSnippetId = null;
       CS.state.originalEditData = null;
       
@@ -535,9 +610,29 @@
     }
   }
 
+  async function createNewFolder() {
+    const name = prompt("Enter folder name:");
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    try {
+      const folders = await CS.storage.getFolders();
+      if (folders.includes(trimmed)) {
+        CS.toast.showToast("Folder already exists", "error");
+        return;
+      }
+      folders.push(trimmed);
+      await CS.storage.saveFolders(folders);
+      await CS.snippets.load();
+      CS.toast.showToast(`Folder "${trimmed}" created`);
+    } catch (err) {
+      CS.recordError("folder/create", err);
+      CS.toast.showToast("Create folder failed", "error");
+    }
+  }
+
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
     renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder, updateFolderInputState
+    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder
   };
 })();

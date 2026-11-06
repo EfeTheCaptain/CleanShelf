@@ -12,6 +12,7 @@
     constants: {
       HOST_ID,
       STORAGE_KEY: "cleanshelf_snippets",
+      FOLDERS_KEY: "cleanshelf_folders",
       SETTINGS_KEY: "cleanshelf_settings",
       DRAFT_KEY: "cleanshelf_draft",
       UNFILED: "Unfiled",

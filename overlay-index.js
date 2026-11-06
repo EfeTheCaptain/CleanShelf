@@ -65,7 +65,18 @@
   const leftPanel = el("div", "cs-left-panel");
   const listSection = el("div", "cs-section cs-section-list");
   listSection.style.margin = "0";
-  listSection.appendChild(el("label", "cs-label", "Your snippets"));
+  
+  const leftHeader = el("div", "cs-input-header");
+  leftHeader.appendChild(el("label", "cs-label", "Your snippets"));
+  
+  const newFolderBtn = el("button", "cs-debug-toggle", "+ Folder");
+  newFolderBtn.type = "button";
+  newFolderBtn.style.padding = "2px 8px";
+  newFolderBtn.style.marginTop = "0";
+  newFolderBtn.addEventListener("click", () => CS.snippets.createNewFolder());
+  leftHeader.appendChild(newFolderBtn);
+  
+  listSection.appendChild(leftHeader);
   const listEl = el("div", "cs-list");
   listSection.appendChild(listEl);
   leftPanel.appendChild(listSection);

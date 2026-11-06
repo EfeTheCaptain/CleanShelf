@@ -50,5 +50,19 @@ const validThemes = ["dark", "light", "dracula", "nord", "sepia"];
     await chrome.storage.local.remove(CS.constants.DRAFT_KEY);
   }
 
-  CS.storage = { getSnippets, saveSnippets, getSettings, persistSettings, getDraft, setDraft, removeDraft };
+  async function getFolders() {
+    try {
+      const res = await chrome.storage.local.get(CS.constants.FOLDERS_KEY);
+      const list = res[CS.constants.FOLDERS_KEY];
+      return Array.isArray(list) ? list : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  async function saveFolders(folders) {
+    await chrome.storage.local.set({ [CS.constants.FOLDERS_KEY]: folders });
+  }
+
+  CS.storage = { getSnippets, saveSnippets, getSettings, persistSettings, getDraft, setDraft, removeDraft, getFolders, saveFolders };
 })();

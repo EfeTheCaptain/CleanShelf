@@ -1,3 +1,9 @@
+## v0.1.25
+
+- Added persistent folders tracked independently of snippets (empty folders remain visible)
+- Added "+ Folder" button to left panel to create empty folders explicitly
+- Folders persist across sessions via chrome.storage.local (cleanshelf_folders)
+
 ## v0.1.24
 
 - Added Drag & Drop snippets onto folder tiles/headers to move between folders
