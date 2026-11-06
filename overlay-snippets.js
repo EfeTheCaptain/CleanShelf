@@ -621,6 +621,20 @@
     if (ui.titleInput) ui.titleInput.focus();
   }
 
+  function getUniqueTitle(baseTitle, folder, snippets) {
+    const cleanBase = baseTitle.replace(/\s*\(\d+\)$/, "").trim() || "Untitled";
+    let candidate = cleanBase;
+    let counter = 2;
+
+
+    while (snippets.some(s => (s.title || "").toLowerCase() === candidate.toLowerCase() && (s.folder || "") === folder)) {
+      candidate = `${cleanBase} (${counter})`;
+      counter++;
+    }
+    return candidate;
+  }
+
+
   async function handleSave() {
     const ui = CS.ui;
     const title = ui.titleInput ? ui.titleInput.value.trim() : "";
@@ -629,6 +643,7 @@
     if (CS.state.drilledFolder !== null) {
       folder = CS.state.drilledFolder;
     }
+
 
     const content = ui.contentInput ? ui.contentInput.value.trim() : "";
     if (!title && !content) {
@@ -639,15 +654,64 @@
     const isEditing = !!CS.state.editingSnippetId;
     if (ui.saveBtn) ui.saveBtn.disabled = true;
 
+
     try {
-      const snippets = await CS.storage.getSnippets();
-      
+      let snippets = await CS.storage.getSnippets();
+      let finalTitle = title;
+
+
+      // Duplicate check
+      if (finalTitle) {
+        const existingSnippet = snippets.find(s =>
+          (s.title || "").toLowerCase() === finalTitle.toLowerCase() &&
+          (s.folder || "") === (folder || "") &&
+          s.id !== CS.state.editingSnippetId
+        );
+
+
+        if (existingSnippet) {
+          const replace = confirm(`A snippet titled "${finalTitle}" already exists in this folder.\n\nClick OK to REPLACE it.\nClick Cancel to ADD AS NEW.`);
+          
+          if (replace) {
+            // Overwrite target
+            existingSnippet.content = content;
+            existingSnippet.updatedAt = Date.now();
+            
+            // If we were editing a different snippet, remove the old one
+            if (isEditing) {
+              snippets = snippets.filter(s => s.id !== CS.state.editingSnippetId);
+            }
+            
+            await CS.storage.saveSnippets(snippets);
+            
+            // Reset UI and exit early
+            CS.state.editingSnippetId = null;
+            CS.state.originalEditData = null;
+            if (ui.titleInput) ui.titleInput.value = "";
+            if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
+            if (ui.contentInput) ui.contentInput.value = "";
+            if (ui.formLabel) ui.formLabel.textContent = "New snippet";
+            if (ui.saveBtn) ui.saveBtn.textContent = "Save";
+            if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+            updateFolderInputState();
+            await CS.drafts.clearDraft();
+            await load();
+            CS.toast.showToast("Replaced existing snippet");
+            return;
+          } else {
+            finalTitle = getUniqueTitle(finalTitle, folder || "", snippets);
+          }
+        }
+      }
+
+
+      // Proceed with normal save/update
       if (isEditing) {
         const idx = snippets.findIndex((s) => s.id === CS.state.editingSnippetId);
         if (idx !== -1) {
           snippets[idx] = {
             ...snippets[idx],
-            title,
+            title: finalTitle,
             folder: folder || "",
             content,
             updatedAt: Date.now(),
@@ -656,12 +720,13 @@
       } else {
         snippets.push({
           id: crypto.randomUUID(),
-          title,
+          title: finalTitle,
           folder: folder || "",
           content,
           createdAt: Date.now(),
         });
       }
+
 
       await CS.storage.saveSnippets(snippets);
       
@@ -683,6 +748,7 @@
       if (ui.formLabel) ui.formLabel.textContent = "New snippet";
       if (ui.saveBtn) ui.saveBtn.textContent = "Save";
       if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
+
 
       updateFolderInputState();
       await CS.drafts.clearDraft();
@@ -747,6 +813,6 @@
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
     renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder, updateLeftActionBtn
+    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder, updateLeftActionBtn, getUniqueTitle
   };
 })();

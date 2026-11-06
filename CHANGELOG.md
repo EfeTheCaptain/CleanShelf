@@ -1,3 +1,7 @@
+## v0.1.31
+
+- Added duplicate title detection on save: replace existing or auto-append (2), (3), etc.
+
 ## v0.1.30
 
 - Added "+ Snippet" button in drill view (when inside a folder)
