@@ -9,6 +9,8 @@ const folderList = $("folderList");
 const contentInput = $("snippetContent");
 const saveBtn = $("btnSave");
 const listEl = $("snippetList");
+const folderSidebar = $("folderSidebar");
+const folderSnippets = $("folderSnippets");
 const toastEl = $("toast");
 const btnDebug = $("btnDebug");
 const debugPanel = $("debugPanel");
@@ -20,6 +22,8 @@ const state = {
   lastError: null,
   lastErrorAt: null,
   collapsedFolders: new Set(),
+  activeTab: "snippets",
+  activeFolder: null,
   snippets: [],
 };
 
@@ -181,20 +185,74 @@ function renderList(snippets) {
   renderFolderList(snippets);
 }
 
+function renderFoldersTab() {
+  if (!folderSidebar || !folderSnippets) return;
+  const snippets = state.snippets || [];
+  const groups = groupByFolder(snippets);
+
+  folderSidebar.innerHTML = "";
+  folderSnippets.innerHTML = "";
+
+  if (groups.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "popup-folders-empty";
+    empty.textContent = "No folders yet. Add a snippet with a folder name.";
+    folderSnippets.appendChild(empty);
+    return;
+  }
+
+  const names = groups.map((g) => g.name);
+  if (!state.activeFolder || !names.includes(state.activeFolder)) {
+    state.activeFolder = names[0];
+  }
+
+  for (const group of groups) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "popup-folder-btn";
+    if (group.name === state.activeFolder) btn.classList.add("is-active");
+
+    const label = document.createElement("span");
+    label.textContent = group.name;
+
+    const count = document.createElement("span");
+    count.className = "popup-folder-btn-count";
+    count.textContent = String(group.items.length);
+
+    btn.appendChild(label);
+    btn.appendChild(count);
+
+    btn.addEventListener("click", () => {
+      state.activeFolder = group.name;
+      renderFoldersTab();
+    });
+
+    folderSidebar.appendChild(btn);
+  }
+
+  const active = groups.find((g) => g.name === state.activeFolder);
+  if (!active) return;
+  const ordered = active.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  for (const s of ordered) folderSnippets.appendChild(buildSnippetCard(s));
+}
+
 async function loadSnippets() {
   try {
     const snippets = await getSnippets();
     state.snippets = snippets;
     renderList(snippets);
+    if (state.activeTab === "folders") renderFoldersTab();
     return snippets;
   } catch (err) {
     recordError("load", err);
-    listEl.innerHTML = "";
-    const p = document.createElement("p");
-    p.className = "popup-empty";
-    p.style.color = "#ef4444";
-    p.textContent = "Could not load snippets. Open Debug.";
-    listEl.appendChild(p);
+    if (listEl) {
+      listEl.innerHTML = "";
+      const p = document.createElement("p");
+      p.className = "popup-empty";
+      p.style.color = "#ef4444";
+      p.textContent = "Could not load snippets. Open Debug.";
+      listEl.appendChild(p);
+    }
     return null;
   }
 }
@@ -234,6 +292,26 @@ async function handleSave() {
 }
 
 if (saveBtn) saveBtn.addEventListener("click", handleSave);
+
+// --- Tabs ---
+
+const tabButtons = Array.from(document.querySelectorAll(".popup-tab"));
+const tabPanels = Array.from(document.querySelectorAll(".popup-tab-panel"));
+
+function setActiveTab(name) {
+  state.activeTab = name;
+  for (const btn of tabButtons) {
+    btn.classList.toggle("is-active", btn.dataset.tab === name);
+  }
+  for (const panel of tabPanels) {
+    panel.hidden = panel.dataset.panel !== name;
+  }
+  if (name === "folders") renderFoldersTab();
+}
+
+for (const btn of tabButtons) {
+  btn.addEventListener("click", () => setActiveTab(btn.dataset.tab));
+}
 
 // --- Embedded step checkup ---
 
@@ -290,14 +368,24 @@ const checks = [
       if (!contentInput) missing.push("snippetContent");
       if (!saveBtn) missing.push("btnSave");
       if (!listEl) missing.push("snippetList");
+      if (!folderSidebar) missing.push("folderSidebar");
+      if (!folderSnippets) missing.push("folderSnippets");
       if (!toastEl) missing.push("toast");
       if (missing.length) throw new Error("missing: " + missing.join(", "));
     },
   },
   {
-    name: "render function",
+    name: "tabs wired",
+    fn: () => {
+      if (tabButtons.length !== 2) throw new Error(`expected 2 tabs, got ${tabButtons.length}`);
+      if (tabPanels.length !== 2) throw new Error(`expected 2 panels, got ${tabPanels.length}`);
+    },
+  },
+  {
+    name: "render functions",
     fn: () => {
       if (typeof renderList !== "function") throw new Error("renderList missing");
+      if (typeof renderFoldersTab !== "function") throw new Error("renderFoldersTab missing");
     },
   },
 ];
@@ -351,7 +439,10 @@ async function runChecks() {
   }
 
   if (dbgRunChecks) dbgRunChecks.disabled = false;
-  showToast(failed === 0 ? "All checks passed" : `${failed} check${failed === 1 ? "" : "s"} failed`, failed === 0 ? "success" : "error");
+  showToast(
+    failed === 0 ? "All checks passed" : `${failed} check${failed === 1 ? "" : "s"} failed`,
+    failed === 0 ? "success" : "error"
+  );
 }
 
 if (btnDebug && debugPanel) {

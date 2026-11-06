@@ -1,3 +1,14 @@
+## v0.1.3
+
+- Removed `default_popup` from manifest; toolbar icon now opens a centered 960×720 chromeless window via `chrome.action.onClicked`
+- Keyboard shortcut (`Ctrl/Cmd+Shift+K`) calls the same `openWindow()` handler
+- Reopening from toolbar focuses existing window instead of spawning duplicates
+- Snippets / Folders tab bar in popup (Snippets tab = add form + grouped list; Folders tab = sidebar + snippet cards)
+- Card fills window height (max-height: calc(100vh - 48px), max-width: 1100px)
+- Debug panel: removed Extension ID, Popup URL, Chrome Version, Snippet Count, Background rows; kept Last Error and Checkup
+- Checkup expanded to 8 steps (added "tabs wired" and "render functions")
+- Dark theme only
+
 ## v0.1.2
 
 - Dark theme UI (indigo accent, dark background)

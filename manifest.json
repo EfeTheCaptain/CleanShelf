@@ -1,11 +1,10 @@
 {
   "manifest_version": 3,
   "name": "CleanShelf",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Save, folder, and copy snippets locally.",
   "permissions": ["storage", "clipboardWrite"],
   "action": {
-    "default_popup": "popup.html",
     "default_title": "Open CleanShelf"
   },
   "commands": {
@@ -14,7 +13,7 @@
         "default": "Ctrl+Shift+K",
         "mac": "Command+Shift+K"
       },
-      "description": "Open CleanShelf popup"
+      "description": "Open CleanShelf"
     }
   },
   "background": {
