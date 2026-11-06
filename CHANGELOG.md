@@ -1,3 +1,7 @@
+## v0.1.23
+
+- Updated toolbar icon to Bookshelf icon (icons/16.png, icons/48.png, icons/128.png)
+
 ## v0.1.22
 
 - Updated default font sizes (Medium: 18px base) and Large size scale (24px base) in overlay-styles.js
