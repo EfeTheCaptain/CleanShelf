@@ -1,3 +1,9 @@
+## v0.1.16
+
+- Reverted card max-width to fixed 1280px (prevents absurd stretching on ultrawide monitors)
+- Card height changed from max-height to fixed height: calc(100vh - 48px) (forces full vertical fill)
+- Inside panels use flex: 1 1 auto to stretch to fill
+
 ## v0.1.15
 
 - Backdrop and card now fill the screen (max-width: calc(100vw - 48px), max-height: calc(100vh - 48px), padding 24px)

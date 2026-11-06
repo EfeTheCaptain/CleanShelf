@@ -122,8 +122,8 @@
 .cs-card {
   position: relative;
   width: 100%;
-  max-width: calc(100vw - 48px);
-  max-height: calc(100vh - 48px);
+  max-width: 1280px;
+  height: calc(100vh - 48px);
   padding: 24px;
   background: var(--cs-bg-card);
   border: 1px solid var(--cs-border);
