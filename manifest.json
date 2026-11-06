@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "CleanShelf",
+  "version": "0.1.1",
+  "description": "Save snippets locally with a blurred popup UI.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Open CleanShelf"
+  },
+  "commands": {
+    "open-search-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Open CleanShelf popup"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CleanShelf</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup-backdrop">
+    <div class="popup-card">
+      <h1 class="popup-title">CleanShelf</h1>
+      <p class="popup-preview">Save, search, and copy your code snippets locally.</p>
+
+      <div class="popup-section">
+        <label class="popup-label">Add a new snippet</label>
+        <input type="text" id="snippetTitle" class="popup-input" placeholder="Title" />
+        <textarea id="snippetContent" class="popup-textarea" placeholder="Paste your snippet here…"></textarea>
+        <button id="btnSave" class="popup-btn">Save</button>
+      </div>
+
+      <div class="popup-section">
+        <label class="popup-label">Your snippets</label>
+        <div id="snippetList" class="popup-list"></div>
+      </div>
+
+      <p class="popup-hint">Data stays in your browser. No tracking. No network calls.</p>
+
+      <div class="popup-debug-toggle" id="btnDebug">Debug ▾</div>
+      <div class="popup-debug-panel" id="debugPanel" style="display:none;">
+        <div class="debug-row"><span class="debug-key">Extension ID:</span> <span class="debug-val" id="dbgExtId">—</span></div>
+        <div class="debug-row"><span class="debug-key">Popup URL:</span> <span class="debug-val" id="dbgUrl">—</span></div>
+        <div class="debug-row"><span class="debug-key">Chrome Version:</span> <span class="debug-val" id="dbgChrome">—</span></div>
+        <div class="debug-row"><span class="debug-key">Snippet Count:</span> <span class="debug-val" id="dbgCount">—</span></div>
+        <div class="debug-row"><span class="debug-key">Background:</span> <span class="debug-val">command-only (sleeps when idle)</span></div>
+        <div class="debug-row"><span class="debug-key">Last Error:</span> <span class="debug-val" id="dbgLastError">—</span></div>
+        <div class="debug-row"><span class="debug-key">Counters:</span> <span class="debug-val" id="dbgCounters">—</span></div>
+        <div class="debug-row"><span class="debug-key">Self-test:</span> <button id="dbgSelfTest" class="debug-btn" type="button">Run</button> <span class="debug-val" id="dbgSelfTestResult">—</span></div>
+        <div class="debug-row"><span class="debug-key">Storage Raw:</span> <pre class="debug-json" id="dbgStorage">—</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
