@@ -17,7 +17,7 @@
     try {
       const res = await chrome.storage.local.get(CS.constants.SETTINGS_KEY);
     const s = res[CS.constants.SETTINGS_KEY] || {};
-    const validThemes = ["dark", "light", "dracula", "nord", "sepia"];
+    const validThemes = ["dark", "light", "dracula", "nord", "sepia", "dark-sepia"];
     return {
       layout: s.layout === "list" ? "list" : "grid",
       theme: validThemes.includes(s.theme) ? s.theme : "dark",

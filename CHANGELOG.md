@@ -1,3 +1,9 @@
+## v0.1.20
+
+- Fixed Dracula theme: --cs-bg-chip and --cs-text-muted were both #6272a4 (invisible text), now #44475a and #f8f8f2
+- Added Dark Sepia theme (warm dark browns with orange accents)
+- Updated storage validation, options UI, syncOptionRadios, setTheme, and debug check for new theme
+
 ## v0.1.19
 
 - Fixed setTheme guard in overlay-options.js (was hardcoded to only accept dark/light, now accepts all 5 themes)
