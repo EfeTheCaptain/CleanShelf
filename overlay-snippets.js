@@ -470,7 +470,76 @@
     listEl.appendChild(grid);
   }
 
+  function updateLeftActionBtn() {
+    const btn = CS.ui.leftActionBtn;
+    if (!btn) return;
+    
+    if (CS.state.drilledFolder !== null) {
+      btn.textContent = "+ Snippet";
+      btn.onclick = (e) => {
+        e.preventDefault();
+        startInlineSnippetPrompt();
+      };
+    } else {
+      btn.textContent = "+ Folder";
+      btn.onclick = (e) => {
+        e.preventDefault();
+        createNewFolder();
+      };
+    }
+  }
+
+
+  function startInlineSnippetPrompt() {
+    const btn = CS.ui.leftActionBtn;
+    if (!btn || !btn.parentElement) return;
+    
+    const parent = btn.parentElement;
+    const input = document.createElement("input");
+    input.className = "cs-input";
+    input.style.padding = "2px 8px";
+    input.style.fontSize = "var(--cs-fs-xs)";
+    input.style.width = "140px";
+    input.style.height = "auto";
+    input.placeholder = "Title...";
+    
+    parent.replaceChild(input, btn);
+    input.focus();
+    
+    const finish = (save) => {
+      input.removeEventListener("blur", onBlur);
+      input.removeEventListener("keydown", onKey);
+      
+      // Put the button back
+      if (input.parentElement) {
+        input.parentElement.replaceChild(btn, input);
+      }
+      
+      if (save) {
+        const title = input.value.trim();
+        if (title) {
+          cancelEdit(); // Resets the right panel to "New snippet" mode
+          if (CS.ui.titleInput) CS.ui.titleInput.value = title;
+          if (CS.ui.contentInput) CS.ui.contentInput.focus();
+          CS.drafts.scheduleDraft();
+        }
+      }
+      updateLeftActionBtn();
+    };
+    
+    const onBlur = () => finish(false);
+    const onKey = (e) => {
+      if (e.key === "Enter") { e.preventDefault(); finish(true); }
+      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+    };
+    
+    input.addEventListener("blur", onBlur);
+    input.addEventListener("keydown", onKey);
+  }
+
+
   function renderSnippets() {
+    updateLeftActionBtn();
     if (CS.state.settings.layout === "grid") renderGridView();
     else renderListView();
   }
@@ -678,6 +747,6 @@
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
     renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder
+    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder, updateLeftActionBtn
   };
 })();

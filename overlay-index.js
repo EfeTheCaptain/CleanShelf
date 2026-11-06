@@ -69,12 +69,12 @@
   const leftHeader = el("div", "cs-input-header");
   leftHeader.appendChild(el("label", "cs-label", "Your snippets"));
   
-  const newFolderBtn = el("button", "cs-debug-toggle", "+ Folder");
-  newFolderBtn.type = "button";
-  newFolderBtn.style.padding = "2px 8px";
-  newFolderBtn.style.marginTop = "0";
-  newFolderBtn.addEventListener("click", () => CS.snippets.createNewFolder());
-  leftHeader.appendChild(newFolderBtn);
+  const leftActionBtn = el("button", "cs-debug-toggle", "+ Folder");
+  leftActionBtn.type = "button";
+  leftActionBtn.style.padding = "2px 8px";
+  leftActionBtn.style.marginTop = "0";
+  CS.ui.leftActionBtn = leftActionBtn; // Store for dynamic updates
+  leftHeader.appendChild(leftActionBtn);
   
   listSection.appendChild(leftHeader);
   const listEl = el("div", "cs-list");

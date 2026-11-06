@@ -1,3 +1,8 @@
+## v0.1.30
+
+- Added "+ Snippet" button in drill view (when inside a folder)
+- Clicking it opens an inline title input; pressing Enter populates the Title field and focuses Content
+
 ## v0.1.29
 
 - Fixed folder rename: added .cs-drill-title selector so rename works in drill view
