@@ -1,3 +1,16 @@
+## v0.1.6
+
+- CSS variables: all theme-visible colors and font-size tokens are `--cs-*` custom properties on `:host`
+- Theme toggle: Dark / Light (light overrides card, panel, surface, elevated, border, text tokens; backdrop lightens to rgba(15,23,42,0.35))
+- Contrast toggle: Normal / High (strengthens text, borders, accent; combined light+high rule)
+- Font size toggle: Small / Medium / Large (adjusts --cs-fs-base, --cs-fs-sm, --cs-fs-xs, --cs-fs-2xs, --cs-fs-title, --cs-fs-card-title)
+- Draft system: debounced 400ms write to `cleanshelf_draft` in chrome.storage.local; restored on init; cleared on save; flushed synchronously on close via `flushDraft()`
+- Draft indicator: icon + "Draft" text next to "New snippet" label (idle/dirty/saved/error states via data-state)
+- Options extended: three new radio groups (Color scheme, Contrast, Font size) below Layout, above Data
+- Settings persisted under `cleanshelf_settings` with four fields (layout, theme, contrast, fontSize); getSettings normalizes all fields
+- Debug checks: settings readable validates all four fields; draft round-trip added; DOM refs includes draftIndicator
+- `all: initial` preserved on host (does not reset custom properties)
+
 ## v0.1.5
 
 - Two layout modes: grid (default, 3-column folder-tile grid with drill-in) and list (grouped-collapsible, unchanged)

@@ -4,8 +4,15 @@
   const HOST_ID = "__cleanshelf_host__";
   const STORAGE_KEY = "cleanshelf_snippets";
   const SETTINGS_KEY = "cleanshelf_settings";
+  const DRAFT_KEY = "cleanshelf_draft";
   const UNFILED = "Unfiled";
-  const DEFAULT_LAYOUT = "grid";
+  const DEFAULT_SETTINGS = {
+    layout: "grid",
+    theme: "dark",
+    contrast: "normal",
+    fontSize: "md",
+  };
+  const DRAFT_DEBOUNCE_MS = 400;
 
   const existing = document.getElementById(HOST_ID);
   if (existing) {
@@ -26,6 +33,104 @@
   const STYLES = `
 * { box-sizing: border-box; }
 
+:host {
+  --cs-backdrop: rgba(5, 5, 10, 0.55);
+  --cs-bg-card: #14141c;
+  --cs-bg-panel: #0f0f16;
+  --cs-bg-surface: #1b1b24;
+  --cs-bg-surface-hover: #1f1f2b;
+  --cs-bg-elevated: #17171f;
+  --cs-bg-elevated-hover: #1c1c27;
+  --cs-bg-chip: #2a2a3a;
+  --cs-border: #23232e;
+  --cs-border-strong: #2f2f3d;
+  --cs-border-hover: #3b3b52;
+  --cs-text: #e5e7eb;
+  --cs-text-strong: #f9fafb;
+  --cs-text-title: #f3f4f6;
+  --cs-text-muted: #94a3b8;
+  --cs-text-dim: #6b7280;
+  --cs-text-faint: #4b5563;
+  --cs-accent: #6366f1;
+  --cs-accent-strong: #4f46e5;
+  --cs-success: #10b981;
+  --cs-error: #ef4444;
+
+  --cs-fs-base: 13px;
+  --cs-fs-sm: 12px;
+  --cs-fs-xs: 11px;
+  --cs-fs-2xs: 10px;
+  --cs-fs-title: 22px;
+  --cs-fs-card-title: 12.5px;
+}
+
+:host([data-theme="light"]) {
+  --cs-backdrop: rgba(15, 23, 42, 0.35);
+  --cs-bg-card: #ffffff;
+  --cs-bg-panel: #f9fafb;
+  --cs-bg-surface: #f3f4f6;
+  --cs-bg-surface-hover: #e5e7eb;
+  --cs-bg-elevated: #f3f4f6;
+  --cs-bg-elevated-hover: #e5e7eb;
+  --cs-bg-chip: #e5e7eb;
+  --cs-border: #e5e7eb;
+  --cs-border-strong: #d1d5db;
+  --cs-border-hover: #9ca3af;
+  --cs-text: #111827;
+  --cs-text-strong: #030712;
+  --cs-text-title: #111827;
+  --cs-text-muted: #4b5563;
+  --cs-text-dim: #6b7280;
+  --cs-text-faint: #9ca3af;
+  --cs-accent: #4f46e5;
+  --cs-accent-strong: #4338ca;
+}
+
+:host([data-contrast="high"]) {
+  --cs-text: #ffffff;
+  --cs-text-strong: #ffffff;
+  --cs-text-title: #ffffff;
+  --cs-text-muted: #e5e7eb;
+  --cs-text-dim: #cbd5e1;
+  --cs-text-faint: #94a3b8;
+  --cs-border: #4b5563;
+  --cs-border-strong: #6b7280;
+  --cs-border-hover: #9ca3af;
+  --cs-accent: #818cf8;
+  --cs-accent-strong: #6366f1;
+}
+
+:host([data-theme="light"][data-contrast="high"]) {
+  --cs-text: #000000;
+  --cs-text-strong: #000000;
+  --cs-text-title: #000000;
+  --cs-text-muted: #111827;
+  --cs-text-dim: #374151;
+  --cs-text-faint: #6b7280;
+  --cs-border: #6b7280;
+  --cs-border-strong: #374151;
+  --cs-accent: #4338ca;
+  --cs-accent-strong: #3730a3;
+}
+
+:host([data-size="sm"]) {
+  --cs-fs-base: 12px;
+  --cs-fs-sm: 11px;
+  --cs-fs-xs: 10px;
+  --cs-fs-2xs: 9px;
+  --cs-fs-title: 20px;
+  --cs-fs-card-title: 11.5px;
+}
+
+:host([data-size="lg"]) {
+  --cs-fs-base: 14px;
+  --cs-fs-sm: 13px;
+  --cs-fs-xs: 12px;
+  --cs-fs-2xs: 11px;
+  --cs-fs-title: 24px;
+  --cs-fs-card-title: 13.5px;
+}
+
 .cs-backdrop {
   position: absolute;
   inset: 0;
@@ -33,11 +138,11 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(5, 5, 10, 0.55);
+  background: var(--cs-backdrop);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  color: #e5e7eb;
+  color: var(--cs-text);
   animation: cs-fade 0.15s ease-out;
 }
 
@@ -47,14 +152,15 @@
   max-width: 1280px;
   max-height: calc(100vh - 32px);
   padding: 24px;
-  background: #14141c;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-card);
+  border: 1px solid var(--cs-border);
   border-radius: 14px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: cs-rise 0.18s ease-out;
+  font-size: var(--cs-fs-base);
 }
 
 .cs-header {
@@ -70,13 +176,13 @@
 
 .cs-title {
   margin: 0 0 6px;
-  font-size: 22px;
+  font-size: var(--cs-fs-title);
   font-weight: 700;
-  color: #f9fafb;
+  color: var(--cs-text-strong);
   letter-spacing: 0.2px;
 }
 
-.cs-preview { margin: 0; font-size: 13px; color: #94a3b8; }
+.cs-preview { margin: 0; font-size: var(--cs-fs-base); color: var(--cs-text-muted); }
 
 .cs-view {
   flex: 1 1 auto;
@@ -97,15 +203,65 @@
   margin-bottom: 0;
 }
 
+.cs-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cs-input-header .cs-label { margin-bottom: 0; }
+
 .cs-label {
   display: block;
-  font-size: 11px;
+  font-size: var(--cs-fs-xs);
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  color: #6b7280;
+  color: var(--cs-text-dim);
   margin-bottom: 6px;
 }
+
+.cs-draft-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--cs-fs-2xs);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cs-text-dim);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.cs-draft-indicator[data-state="dirty"],
+.cs-draft-indicator[data-state="saved"],
+.cs-draft-indicator[data-state="error"] { opacity: 1; }
+
+.cs-draft-indicator[data-state="saved"] { color: var(--cs-success); }
+.cs-draft-indicator[data-state="dirty"] { color: var(--cs-text-muted); }
+.cs-draft-indicator[data-state="error"] { color: var(--cs-error); }
+
+.cs-draft-icon { width: 12px; height: 12px; flex-shrink: 0; }
+
+.cs-draft-icon-dot,
+.cs-draft-icon-check,
+.cs-draft-icon-error { display: none; }
+
+.cs-draft-indicator[data-state="dirty"] .cs-draft-icon-dot { display: inline-block; }
+.cs-draft-indicator[data-state="saved"] .cs-draft-icon-check { display: inline-block; }
+.cs-draft-indicator[data-state="error"] .cs-draft-icon-error { display: inline-block; }
+
+.cs-draft-indicator[data-state="dirty"] .cs-draft-icon-dot {
+  animation: cs-pulse 1s ease-in-out infinite;
+}
+
+.cs-draft-text { display: none; }
+.cs-draft-indicator[data-state="saved"] .cs-draft-text { display: inline; }
 
 .cs-field-row { display: flex; gap: 8px; margin-bottom: 8px; }
 
@@ -113,11 +269,11 @@
 .cs-textarea {
   width: 100%;
   padding: 10px 12px;
-  background: #1b1b24;
-  border: 1px solid #2a2a36;
+  background: var(--cs-bg-surface);
+  border: 1px solid var(--cs-border-strong);
   border-radius: 8px;
-  color: #e5e7eb;
-  font-size: 13px;
+  color: var(--cs-text);
+  font-size: var(--cs-fs-base);
   font-family: inherit;
   transition: border-color 0.12s ease, background 0.12s ease;
 }
@@ -125,13 +281,13 @@
 .cs-input-folder { max-width: 160px; }
 
 .cs-input::placeholder,
-.cs-textarea::placeholder { color: #4b5563; }
+.cs-textarea::placeholder { color: var(--cs-text-faint); }
 
 .cs-input:focus,
 .cs-textarea:focus {
   outline: none;
-  border-color: #6366f1;
-  background: #1f1f2b;
+  border-color: var(--cs-accent);
+  background: var(--cs-bg-surface-hover);
 }
 
 .cs-textarea {
@@ -143,11 +299,11 @@
 .cs-btn {
   margin-top: 8px;
   padding: 9px 16px;
-  background: linear-gradient(180deg, #6366f1, #4f46e5);
+  background: linear-gradient(180deg, var(--cs-accent), var(--cs-accent-strong));
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--cs-fs-base);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -162,12 +318,11 @@
   min-height: 200px;
   overflow-y: auto;
   padding: 6px;
-  background: #0f0f16;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-panel);
+  border: 1px solid var(--cs-border);
   border-radius: 8px;
 }
 
-/* --- list layout (folder-grouped collapsible) --- */
 .cs-folder { margin-bottom: 8px; }
 .cs-folder:last-child { margin-bottom: 0; }
 
@@ -177,11 +332,11 @@
   gap: 8px;
   width: 100%;
   padding: 6px 8px;
-  background: #17171f;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-elevated);
+  border: 1px solid var(--cs-border);
   border-radius: 6px;
-  color: #cbd5e1;
-  font-size: 11px;
+  color: var(--cs-text-muted);
+  font-size: var(--cs-fs-xs);
   font-weight: 600;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -191,16 +346,16 @@
   text-align: left;
 }
 
-.cs-folder-header:hover { background: #1c1c27; }
-.cs-folder-caret { width: 10px; color: #6b7280; }
+.cs-folder-header:hover { background: var(--cs-bg-elevated-hover); }
+.cs-folder-caret { width: 10px; color: var(--cs-text-dim); }
 
 .cs-folder-count {
   margin-left: auto;
   padding: 1px 8px;
-  background: #2a2a3a;
+  background: var(--cs-bg-chip);
   border-radius: 999px;
-  color: #94a3b8;
-  font-size: 10px;
+  color: var(--cs-text-muted);
+  font-size: var(--cs-fs-2xs);
 }
 
 .cs-folder-items {
@@ -212,7 +367,6 @@
 
 .cs-folder.collapsed .cs-folder-items { display: none; }
 
-/* --- grid layout (3-column folder tiles) --- */
 .cs-folder-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -227,23 +381,23 @@
   justify-content: center;
   gap: 8px;
   padding: 20px 12px;
-  background: #17171f;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-elevated);
+  border: 1px solid var(--cs-border);
   border-radius: 10px;
-  color: #cbd5e1;
+  color: var(--cs-text-muted);
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: var(--cs-fs-card-title);
   cursor: pointer;
   transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease;
   text-align: center;
   min-height: 118px;
 }
 
-.cs-folder-tile:hover { background: #1c1c27; border-color: #3b3b52; color: #f9fafb; }
+.cs-folder-tile:hover { background: var(--cs-bg-elevated-hover); border-color: var(--cs-border-hover); color: var(--cs-text-title); }
 .cs-folder-tile:active { transform: scale(0.99); }
-.cs-folder-tile:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+.cs-folder-tile:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 1px; }
 
-.cs-folder-icon { color: #6366f1; flex-shrink: 0; }
+.cs-folder-icon { color: var(--cs-accent); flex-shrink: 0; }
 
 .cs-folder-tile-name {
   font-weight: 600;
@@ -255,26 +409,25 @@
 
 .cs-folder-tile-count {
   padding: 1px 8px;
-  background: #2a2a3a;
+  background: var(--cs-bg-chip);
   border-radius: 999px;
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: var(--cs-fs-2xs);
+  color: var(--cs-text-muted);
 }
 
-/* --- drill-in (inside a folder in grid layout) --- */
 .cs-drill-header {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 4px 4px 10px;
   margin-bottom: 6px;
-  border-bottom: 1px solid #23232e;
+  border-bottom: 1px solid var(--cs-border);
 }
 
 .cs-drill-title {
-  font-size: 13px;
+  font-size: var(--cs-fs-base);
   font-weight: 700;
-  color: #f3f4f6;
+  color: var(--cs-text-title);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -283,24 +436,24 @@
 .cs-drill-count {
   margin-left: auto;
   padding: 1px 8px;
-  background: #2a2a3a;
+  background: var(--cs-bg-chip);
   border-radius: 999px;
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: var(--cs-fs-2xs);
+  color: var(--cs-text-muted);
 }
 
 .cs-back-btn {
   padding: 4px 10px;
-  background: #23232e;
-  color: #e5e7eb;
-  border: 1px solid #2f2f3d;
+  background: var(--cs-bg-chip);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border-strong);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--cs-fs-xs);
   font-family: inherit;
   cursor: pointer;
 }
 
-.cs-back-btn:hover { background: #2f2f3d; }
+.cs-back-btn:hover { background: var(--cs-border-strong); }
 
 .cs-drill-items {
   display: flex;
@@ -308,35 +461,34 @@
   gap: 6px;
 }
 
-/* --- snippet card --- */
 .cs-item {
   position: relative;
   padding: 10px 12px;
-  background: #14141c;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-card);
+  border: 1px solid var(--cs-border);
   border-radius: 8px;
-  font-size: 12.5px;
+  font-size: var(--cs-fs-card-title);
   cursor: pointer;
   transition: border-color 0.12s ease, background 0.12s ease, transform 0.05s ease;
 }
 
-.cs-item:hover { background: #191923; border-color: #3b3b52; }
+.cs-item:hover { background: var(--cs-bg-elevated); border-color: var(--cs-border-hover); }
 .cs-item:active { transform: scale(0.995); }
-.cs-item:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+.cs-item:focus-visible { outline: 2px solid var(--cs-accent); outline-offset: 1px; }
 
 .cs-item-title {
   margin: 0 0 4px;
   font-weight: 600;
-  color: #f3f4f6;
+  color: var(--cs-text-title);
 }
 
 .cs-item-content {
   margin: 0;
-  color: #9ca3af;
+  color: var(--cs-text-dim);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 12px;
+  font-size: var(--cs-fs-sm);
   max-height: 80px;
   overflow: hidden;
 }
@@ -346,11 +498,11 @@
   top: 8px;
   right: 8px;
   padding: 2px 8px;
-  background: #23232e;
-  border: 1px solid #2f2f3d;
+  background: var(--cs-bg-chip);
+  border: 1px solid var(--cs-border-strong);
   border-radius: 999px;
-  color: #94a3b8;
-  font-size: 10px;
+  color: var(--cs-text-muted);
+  font-size: var(--cs-fs-2xs);
   opacity: 0;
   transition: opacity 0.12s ease;
   pointer-events: none;
@@ -361,12 +513,11 @@
 .cs-empty {
   margin: 0;
   padding: 24px 8px;
-  color: #4b5563;
-  font-size: 12px;
+  color: var(--cs-text-faint);
+  font-size: var(--cs-fs-sm);
   text-align: center;
 }
 
-/* --- options view --- */
 .cs-options-view {
   flex: 1 1 auto;
   min-height: 0;
@@ -387,9 +538,9 @@
 
 .cs-options-title {
   margin: 0;
-  font-size: 16px;
+  font-size: calc(var(--cs-fs-title) - 6px);
   font-weight: 700;
-  color: #f9fafb;
+  color: var(--cs-text-strong);
 }
 
 .cs-options-body {
@@ -403,8 +554,8 @@
   flex-direction: column;
   gap: 8px;
   padding: 14px;
-  background: #0f0f16;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-panel);
+  border: 1px solid var(--cs-border);
   border-radius: 8px;
 }
 
@@ -413,16 +564,16 @@
   align-items: center;
   gap: 10px;
   padding: 8px 10px;
-  background: #14141c;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-card);
+  border: 1px solid var(--cs-border);
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  color: #e5e7eb;
+  font-size: var(--cs-fs-base);
+  color: var(--cs-text);
   transition: border-color 0.12s ease, background 0.12s ease;
 }
 
-.cs-option-radio:hover { background: #191923; border-color: #3b3b52; }
+.cs-option-radio:hover { background: var(--cs-bg-elevated); border-color: var(--cs-border-hover); }
 
 .cs-option-radio input[type="radio"] {
   appearance: none;
@@ -431,43 +582,40 @@
   height: 14px;
   margin: 0;
   border-radius: 999px;
-  border: 2px solid #4b5563;
+  border: 2px solid var(--cs-text-dim);
   background: transparent;
   position: relative;
   flex-shrink: 0;
   cursor: pointer;
 }
 
-.cs-option-radio input[type="radio"]:checked {
-  border-color: #6366f1;
-}
+.cs-option-radio input[type="radio"]:checked { border-color: var(--cs-accent); }
 
 .cs-option-radio input[type="radio"]:checked::after {
   content: "";
   position: absolute;
   inset: 2px;
   border-radius: 999px;
-  background: #6366f1;
+  background: var(--cs-accent);
 }
 
 .cs-option-action { margin-top: 0; }
 
 .cs-option-secondary {
-  background: #23232e;
-  color: #e5e7eb;
+  background: var(--cs-bg-chip);
+  color: var(--cs-text);
 }
 
-.cs-option-secondary:hover:not(:disabled) { background: #2f2f3d; filter: none; }
+.cs-option-secondary:hover:not(:disabled) { background: var(--cs-border-strong); filter: none; }
 
 .cs-options-hint {
   margin: 4px 0 0;
-  font-size: 11px;
-  color: #6b7280;
+  font-size: var(--cs-fs-xs);
+  color: var(--cs-text-dim);
 }
 
 .cs-hidden { display: none !important; }
 
-/* --- footer / gear --- */
 .cs-footer {
   display: flex;
   align-items: center;
@@ -481,25 +629,25 @@
 
 .cs-hint {
   margin: 10px 0 0;
-  font-size: 11px;
-  color: #4b5563;
+  font-size: var(--cs-fs-xs);
+  color: var(--cs-text-faint);
   text-align: center;
   flex-shrink: 0;
 }
 
 .cs-debug-toggle {
   padding: 7px 12px;
-  background: #17171f;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-elevated);
+  border: 1px solid var(--cs-border);
   border-radius: 6px;
-  font-size: 11px;
+  font-size: var(--cs-fs-xs);
   font-family: inherit;
-  color: #94a3b8;
+  color: var(--cs-text-muted);
   cursor: pointer;
   user-select: none;
 }
 
-.cs-debug-toggle:hover { background: #1c1c27; }
+.cs-debug-toggle:hover { background: var(--cs-bg-elevated-hover); }
 
 .cs-gear {
   width: 32px;
@@ -508,24 +656,24 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  background: #17171f;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-elevated);
+  border: 1px solid var(--cs-border);
   border-radius: 6px;
-  color: #94a3b8;
+  color: var(--cs-text-muted);
   cursor: pointer;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
-.cs-gear:hover { background: #1c1c27; color: #f3f4f6; }
+.cs-gear:hover { background: var(--cs-bg-elevated-hover); color: var(--cs-text-title); }
 
 .cs-debug-panel {
   margin-top: 8px;
   padding: 12px;
-  background: #0f0f16;
-  border: 1px solid #23232e;
+  background: var(--cs-bg-panel);
+  border: 1px solid var(--cs-border);
   border-radius: 8px;
-  font-size: 11px;
-  color: #cbd5e1;
+  font-size: var(--cs-fs-xs);
+  color: var(--cs-text-muted);
   flex-shrink: 0;
   max-height: 240px;
   overflow-y: auto;
@@ -538,28 +686,28 @@
 .cs-debug-key {
   font-weight: 600;
   width: 90px;
-  color: #94a3b8;
+  color: var(--cs-text-muted);
   flex-shrink: 0;
 }
 
 .cs-debug-val {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   word-break: break-all;
-  color: #e5e7eb;
+  color: var(--cs-text);
 }
 
 .cs-debug-btn {
   padding: 4px 10px;
-  background: #23232e;
-  color: #e5e7eb;
-  border: 1px solid #2f2f3d;
+  background: var(--cs-bg-chip);
+  color: var(--cs-text);
+  border: 1px solid var(--cs-border-strong);
   border-radius: 5px;
-  font-size: 11px;
+  font-size: var(--cs-fs-xs);
   font-family: inherit;
   cursor: pointer;
 }
 
-.cs-debug-btn:hover { background: #2f2f3d; }
+.cs-debug-btn:hover { background: var(--cs-border-strong); }
 .cs-debug-btn:disabled { opacity: 0.5; cursor: default; }
 
 .cs-debug-steps {
@@ -576,18 +724,18 @@
   gap: 8px;
   align-items: baseline;
   padding: 4px 6px;
-  background: #14141c;
+  background: var(--cs-bg-card);
   border-radius: 4px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--cs-fs-xs);
 }
 
 .cs-debug-step-status { flex-shrink: 0; width: 44px; font-weight: 700; }
-.cs-debug-step-pass .cs-debug-step-status { color: #10b981; }
-.cs-debug-step-fail .cs-debug-step-status { color: #ef4444; }
+.cs-debug-step-pass .cs-debug-step-status { color: var(--cs-success); }
+.cs-debug-step-fail .cs-debug-step-status { color: var(--cs-error); }
 .cs-debug-step-run  .cs-debug-step-status { color: #f59e0b; }
-.cs-debug-step-name { color: #cbd5e1; }
-.cs-debug-step-detail { color: #6b7280; margin-left: auto; text-align: right; }
+.cs-debug-step-name { color: var(--cs-text-muted); }
+.cs-debug-step-detail { color: var(--cs-text-dim); margin-left: auto; text-align: right; }
 
 .cs-toast {
   position: fixed;
@@ -595,9 +743,9 @@
   bottom: 32px;
   transform: translateX(-50%);
   padding: 8px 16px;
-  background: #10b981;
+  background: var(--cs-success);
   color: #062b1e;
-  font-size: 12px;
+  font-size: var(--cs-fs-sm);
   font-weight: 600;
   border-radius: 999px;
   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
@@ -607,7 +755,7 @@
 }
 
 .cs-toast[data-variant="error"] {
-  background: #ef4444;
+  background: var(--cs-error);
   color: #2b0606;
   box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
 }
@@ -617,6 +765,7 @@
 @keyframes cs-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes cs-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cs-toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes cs-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 `;
 
   try {
@@ -637,55 +786,87 @@
     return e;
   }
 
-  function makeFolderIcon() {
+  function svgEl(attrs, children) {
     const ns = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("width", "32");
-    svg.setAttribute("height", "32");
-    svg.setAttribute("fill", "none");
-    svg.setAttribute("stroke", "currentColor");
-    svg.setAttribute("stroke-width", "1.8");
-    svg.setAttribute("stroke-linecap", "round");
-    svg.setAttribute("stroke-linejoin", "round");
-    svg.setAttribute("class", "cs-folder-icon");
-    const path = document.createElementNS(ns, "path");
-    path.setAttribute("d", "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z");
-    svg.appendChild(path);
+    for (const k in attrs) svg.setAttribute(k, attrs[k]);
+    for (const c of children || []) svg.appendChild(c);
     return svg;
   }
 
+  function makeFolderIcon() {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z");
+    return svgEl({
+      viewBox: "0 0 24 24", width: "32", height: "32",
+      fill: "none", stroke: "currentColor",
+      "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round",
+      "class": "cs-folder-icon",
+    }, [path]);
+  }
+
   function makeGearIcon() {
-    const ns = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("width", "16");
-    svg.setAttribute("height", "16");
-    svg.setAttribute("fill", "none");
-    svg.setAttribute("stroke", "currentColor");
-    svg.setAttribute("stroke-width", "1.8");
-    svg.setAttribute("stroke-linecap", "round");
-    svg.setAttribute("stroke-linejoin", "round");
-    const circle = document.createElementNS(ns, "circle");
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.setAttribute("cx", "12");
     circle.setAttribute("cy", "12");
     circle.setAttribute("r", "3");
-    const path = document.createElementNS(ns, "path");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z");
-    svg.appendChild(circle);
-    svg.appendChild(path);
-    return svg;
+    return svgEl({
+      viewBox: "0 0 24 24", width: "16", height: "16",
+      fill: "none", stroke: "currentColor",
+      "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round",
+    }, [circle, path]);
+  }
+
+  function makeDraftIcons() {
+    const ns = "http://www.w3.org/2000/svg";
+    const dot = document.createElementNS(ns, "circle");
+    dot.setAttribute("cx", "6");
+    dot.setAttribute("cy", "6");
+    dot.setAttribute("r", "4");
+    dot.setAttribute("fill", "currentColor");
+    const dotIcon = svgEl({
+      viewBox: "0 0 12 12", width: "12", height: "12",
+      "class": "cs-draft-icon cs-draft-icon-dot",
+    }, [dot]);
+
+    const checkPath = document.createElementNS(ns, "path");
+    checkPath.setAttribute("d", "M2 6.5l2.5 2.5L10 3");
+    const checkIcon = svgEl({
+      viewBox: "0 0 12 12", width: "12", height: "12",
+      fill: "none", stroke: "currentColor",
+      "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round",
+      "class": "cs-draft-icon cs-draft-icon-check",
+    }, [checkPath]);
+
+    const errPath1 = document.createElementNS(ns, "path");
+    errPath1.setAttribute("d", "M6 2v4.5");
+    const errPath2 = document.createElementNS(ns, "circle");
+    errPath2.setAttribute("cx", "6");
+    errPath2.setAttribute("cy", "9");
+    errPath2.setAttribute("r", "0.9");
+    errPath2.setAttribute("fill", "currentColor");
+    const errIcon = svgEl({
+      viewBox: "0 0 12 12", width: "12", height: "12",
+      fill: "none", stroke: "currentColor",
+      "stroke-width": "1.8", "stroke-linecap": "round",
+      "class": "cs-draft-icon cs-draft-icon-error",
+    }, [errPath1, errPath2]);
+
+    return { dotIcon, checkIcon, errIcon };
   }
 
   // --- state ---
   const state = {
-    view: "main",          // "main" | "options"
-    layout: DEFAULT_LAYOUT,
+    view: "main",
+    settings: { ...DEFAULT_SETTINGS },
     drilledFolder: null,
     lastError: null,
     lastErrorAt: null,
     collapsedFolders: new Set(),
     snippets: [],
+    draftTimer: null,
   };
 
   // --- build UI ---
@@ -713,7 +894,20 @@
   mainView.dataset.view = "main";
 
   const addSection = el("div", "cs-section");
-  addSection.appendChild(el("label", "cs-label", "New snippet"));
+  const inputHeader = el("div", "cs-input-header");
+  inputHeader.appendChild(el("label", "cs-label", "New snippet"));
+
+  const draftIndicator = el("span", "cs-draft-indicator");
+  draftIndicator.dataset.state = "idle";
+  const { dotIcon, checkIcon, errIcon } = makeDraftIcons();
+  draftIndicator.appendChild(dotIcon);
+  draftIndicator.appendChild(checkIcon);
+  draftIndicator.appendChild(errIcon);
+  draftIndicator.appendChild(el("span", "cs-draft-text", "Draft"));
+  inputHeader.appendChild(draftIndicator);
+
+  addSection.appendChild(inputHeader);
+
   const fieldRow = el("div", "cs-field-row");
   const titleInput = el("input", "cs-input");
   titleInput.type = "text";
@@ -757,25 +951,65 @@
 
   const optionsBody = el("div", "cs-options-body");
 
-  const layoutGroup = el("div", "cs-options-group");
-  layoutGroup.appendChild(el("label", "cs-label", "Layout"));
-  const radioGrid = el("label", "cs-option-radio");
-  const inputGrid = document.createElement("input");
-  inputGrid.type = "radio";
-  inputGrid.name = "cs-layout";
-  inputGrid.value = "grid";
-  radioGrid.appendChild(inputGrid);
-  radioGrid.appendChild(el("span", null, "Folder grid (icons, 3 columns)"));
-  const radioList = el("label", "cs-option-radio");
-  const inputList = document.createElement("input");
-  inputList.type = "radio";
-  inputList.name = "cs-layout";
-  inputList.value = "list";
-  radioList.appendChild(inputList);
-  radioList.appendChild(el("span", null, "List (grouped by folder)"));
-  layoutGroup.appendChild(radioGrid);
-  layoutGroup.appendChild(radioList);
-  optionsBody.appendChild(layoutGroup);
+  function buildRadioGroup(title, name, options) {
+    const group = el("div", "cs-options-group");
+    group.appendChild(el("label", "cs-label", title));
+    const inputs = {};
+    for (const opt of options) {
+      const wrap = el("label", "cs-option-radio");
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = name;
+      input.value = opt.value;
+      input.addEventListener("change", () => {
+        if (input.checked) opt.onSelect(opt.value);
+      });
+      wrap.appendChild(input);
+      wrap.appendChild(el("span", null, opt.label));
+      group.appendChild(wrap);
+      inputs[opt.value] = input;
+    }
+    return { group, inputs };
+  }
+
+  function applySettingsToDom() {
+    host.dataset.theme = state.settings.theme;
+    host.dataset.contrast = state.settings.contrast;
+    host.dataset.size = state.settings.fontSize;
+  }
+
+  async function persistSettings() {
+    try {
+      await chrome.storage.local.set({ [SETTINGS_KEY]: { ...state.settings } });
+    } catch (err) {
+      recordError("settings/save", err);
+    }
+  }
+
+  const layoutGroup = buildRadioGroup("Layout", "cs-layout", [
+    { value: "grid", label: "Folder grid (icons, 3 columns)", onSelect: (v) => setLayout(v) },
+    { value: "list", label: "List (grouped by folder)", onSelect: (v) => setLayout(v) },
+  ]);
+  optionsBody.appendChild(layoutGroup.group);
+
+  const themeGroup = buildRadioGroup("Color scheme", "cs-theme", [
+    { value: "dark", label: "Dark", onSelect: (v) => setTheme(v) },
+    { value: "light", label: "Light", onSelect: (v) => setTheme(v) },
+  ]);
+  optionsBody.appendChild(themeGroup.group);
+
+  const contrastGroup = buildRadioGroup("Contrast", "cs-contrast", [
+    { value: "normal", label: "Normal", onSelect: (v) => setContrast(v) },
+    { value: "high", label: "High", onSelect: (v) => setContrast(v) },
+  ]);
+  optionsBody.appendChild(contrastGroup.group);
+
+  const fontSizeGroup = buildRadioGroup("Font size", "cs-fontsize", [
+    { value: "sm", label: "Small", onSelect: (v) => setFontSize(v) },
+    { value: "md", label: "Medium", onSelect: (v) => setFontSize(v) },
+    { value: "lg", label: "Large", onSelect: (v) => setFontSize(v) },
+  ]);
+  optionsBody.appendChild(fontSizeGroup.group);
 
   const dataGroup = el("div", "cs-options-group");
   dataGroup.appendChild(el("label", "cs-label", "Data"));
@@ -854,17 +1088,16 @@
   async function getSettings() {
     try {
       const res = await chrome.storage.local.get(SETTINGS_KEY);
-      const s = res[SETTINGS_KEY];
+      const s = res[SETTINGS_KEY] || {};
       return {
-        layout: (s && s.layout) === "list" ? "list" : DEFAULT_LAYOUT,
+        layout: s.layout === "list" ? "list" : "grid",
+        theme: s.theme === "light" ? "light" : "dark",
+        contrast: s.contrast === "high" ? "high" : "normal",
+        fontSize: s.fontSize === "sm" ? "sm" : s.fontSize === "lg" ? "lg" : "md",
       };
     } catch (_) {
-      return { layout: DEFAULT_LAYOUT };
+      return { ...DEFAULT_SETTINGS };
     }
-  }
-
-  async function saveSettings(settings) {
-    await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
   }
 
   function showToast(message, variant) {
@@ -903,6 +1136,94 @@
       showToast("Copy failed", "error");
     }
   }
+
+  // --- draft ---
+  function setDraftState(s) {
+    draftIndicator.dataset.state = s;
+  }
+
+  function currentDraft() {
+    return {
+      title: titleInput.value,
+      folder: folderInput.value,
+      content: contentInput.value,
+      updatedAt: Date.now(),
+    };
+  }
+
+  function isDraftEmpty(d) {
+    return !d.title && !d.folder && !d.content;
+  }
+
+  async function persistDraft() {
+    state.draftTimer = null;
+    const draft = currentDraft();
+    if (isDraftEmpty(draft)) {
+      try {
+        await chrome.storage.local.remove(DRAFT_KEY);
+        setDraftState("idle");
+      } catch (err) {
+        recordError("draft/clear", err);
+        setDraftState("error");
+      }
+      return;
+    }
+    try {
+      await chrome.storage.local.set({ [DRAFT_KEY]: draft });
+      setDraftState("saved");
+    } catch (err) {
+      recordError("draft/save", err);
+      setDraftState("error");
+    }
+  }
+
+  function scheduleDraft() {
+    setDraftState("dirty");
+    clearTimeout(state.draftTimer);
+    state.draftTimer = setTimeout(persistDraft, DRAFT_DEBOUNCE_MS);
+  }
+
+  function flushDraft() {
+    if (state.draftTimer == null) return;
+    clearTimeout(state.draftTimer);
+    state.draftTimer = null;
+    const draft = currentDraft();
+    if (isDraftEmpty(draft)) return;
+    chrome.storage.local.set({ [DRAFT_KEY]: draft }).catch(() => {});
+  }
+
+  async function loadDraft() {
+    try {
+      const res = await chrome.storage.local.get(DRAFT_KEY);
+      const draft = res[DRAFT_KEY];
+      if (!draft || isDraftEmpty(draft)) {
+        setDraftState("idle");
+        return;
+      }
+      titleInput.value = typeof draft.title === "string" ? draft.title : "";
+      folderInput.value = typeof draft.folder === "string" ? draft.folder : "";
+      contentInput.value = typeof draft.content === "string" ? draft.content : "";
+      setDraftState("saved");
+    } catch (err) {
+      recordError("draft/load", err);
+      setDraftState("error");
+    }
+  }
+
+  async function clearDraft() {
+    clearTimeout(state.draftTimer);
+    state.draftTimer = null;
+    try {
+      await chrome.storage.local.remove(DRAFT_KEY);
+      setDraftState("idle");
+    } catch (err) {
+      recordError("draft/clear", err);
+    }
+  }
+
+  titleInput.addEventListener("input", scheduleDraft);
+  folderInput.addEventListener("input", scheduleDraft);
+  contentInput.addEventListener("input", scheduleDraft);
 
   // --- rendering ---
   function groupByFolder(snippets) {
@@ -1034,7 +1355,7 @@
   }
 
   function renderSnippets() {
-    if (state.layout === "grid") renderGridView();
+    if (state.settings.layout === "grid") renderGridView();
     else renderListView();
   }
 
@@ -1050,7 +1371,7 @@
       recordError("load", err);
       listEl.innerHTML = "";
       const p = el("p", "cs-empty", "Could not load snippets. Open Debug.");
-      p.style.color = "#ef4444";
+      p.style.color = "var(--cs-error)";
       listEl.appendChild(p);
       return null;
     }
@@ -1079,6 +1400,7 @@
       titleInput.value = "";
       folderInput.value = "";
       contentInput.value = "";
+      await clearDraft();
       await loadSnippets();
       showToast("Saved");
     } catch (err) {
@@ -1104,35 +1426,58 @@
     mainView.hidden = true;
     optionsView.hidden = false;
     footer.hidden = true;
-    syncLayoutRadios();
+    syncOptionRadios();
     optionsBack.focus();
   }
 
   optionsBack.addEventListener("click", showMain);
   btnGear.addEventListener("click", showOptions);
 
-  // --- layout ---
-  function syncLayoutRadios() {
-    inputGrid.checked = state.layout === "grid";
-    inputList.checked = state.layout === "list";
+  // --- settings ---
+  function syncOptionRadios() {
+    layoutGroup.inputs.grid.checked = state.settings.layout === "grid";
+    layoutGroup.inputs.list.checked = state.settings.layout === "list";
+    themeGroup.inputs.dark.checked = state.settings.theme === "dark";
+    themeGroup.inputs.light.checked = state.settings.theme === "light";
+    contrastGroup.inputs.normal.checked = state.settings.contrast === "normal";
+    contrastGroup.inputs.high.checked = state.settings.contrast === "high";
+    fontSizeGroup.inputs.sm.checked = state.settings.fontSize === "sm";
+    fontSizeGroup.inputs.md.checked = state.settings.fontSize === "md";
+    fontSizeGroup.inputs.lg.checked = state.settings.fontSize === "lg";
   }
 
-  async function setLayout(layout) {
+  function setLayout(layout) {
     if (layout !== "grid" && layout !== "list") return;
-    if (state.layout === layout) return;
-    state.layout = layout;
+    if (state.settings.layout === layout) return;
+    state.settings.layout = layout;
     state.drilledFolder = null;
-    syncLayoutRadios();
-    try {
-      await saveSettings({ layout });
-    } catch (err) {
-      recordError("settings/save", err);
-    }
     renderSnippets();
+    persistSettings();
   }
 
-  inputGrid.addEventListener("change", () => setLayout("grid"));
-  inputList.addEventListener("change", () => setLayout("list"));
+  function setTheme(theme) {
+    if (theme !== "dark" && theme !== "light") return;
+    if (state.settings.theme === theme) return;
+    state.settings.theme = theme;
+    applySettingsToDom();
+    persistSettings();
+  }
+
+  function setContrast(contrast) {
+    if (contrast !== "normal" && contrast !== "high") return;
+    if (state.settings.contrast === contrast) return;
+    state.settings.contrast = contrast;
+    applySettingsToDom();
+    persistSettings();
+  }
+
+  function setFontSize(size) {
+    if (size !== "sm" && size !== "md" && size !== "lg") return;
+    if (state.settings.fontSize === size) return;
+    state.settings.fontSize = size;
+    applySettingsToDom();
+    persistSettings();
+  }
 
   // --- export / import ---
   function exportSnippets() {
@@ -1232,10 +1577,22 @@
       name: "settings readable",
       fn: async () => {
         const s = await getSettings();
-        if (s.layout !== "grid" && s.layout !== "list") {
-          throw new Error("invalid layout: " + String(s.layout));
-        }
-        return s.layout;
+        if (!["grid", "list"].includes(s.layout)) throw new Error("layout: " + s.layout);
+        if (!["dark", "light"].includes(s.theme)) throw new Error("theme: " + s.theme);
+        if (!["normal", "high"].includes(s.contrast)) throw new Error("contrast: " + s.contrast);
+        if (!["sm", "md", "lg"].includes(s.fontSize)) throw new Error("fontSize: " + s.fontSize);
+        return `${s.layout}/${s.theme}/${s.contrast}/${s.fontSize}`;
+      },
+    },
+    {
+      name: "draft round-trip",
+      fn: async () => {
+        const k = "__cleanshelf_draft_check__";
+        const v = { title: "t", folder: "f", content: "c", updatedAt: 1 };
+        await chrome.storage.local.set({ [k]: v });
+        const out = await chrome.storage.local.get(k);
+        await chrome.storage.local.remove(k);
+        if (!out[k] || out[k].title !== "t") throw new Error("draft round-trip failed");
       },
     },
     {
@@ -1267,6 +1624,7 @@
         if (!optionsView) missing.push("optionsView");
         if (!fileInput) missing.push("fileInput");
         if (!btnGear) missing.push("gear");
+        if (!draftIndicator) missing.push("draftIndicator");
         if (!toast) missing.push("toast");
         if (missing.length) throw new Error("missing: " + missing.join(", "));
       },
@@ -1278,6 +1636,7 @@
         if (typeof renderGridView !== "function") throw new Error("renderGridView missing");
         if (typeof renderListView !== "function") throw new Error("renderListView missing");
         if (typeof exportSnippets !== "function") throw new Error("exportSnippets missing");
+        if (typeof persistDraft !== "function") throw new Error("persistDraft missing");
       },
     },
   ];
@@ -1340,6 +1699,7 @@
 
   // --- lifecycle ---
   function close() {
+    flushDraft();
     host.__csCleanup();
     host.remove();
   }
@@ -1366,11 +1726,13 @@
   (async () => {
     try {
       const settings = await getSettings();
-      state.layout = settings.layout;
+      state.settings = settings;
     } catch (err) {
       recordError("settings/load", err);
     }
-    syncLayoutRadios();
+    applySettingsToDom();
+    syncOptionRadios();
+    await loadDraft();
     await loadSnippets();
     titleInput.focus();
   })();
