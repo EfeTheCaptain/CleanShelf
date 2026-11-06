@@ -387,7 +387,18 @@
       const countSpan = el("span", "cs-drill-count", String(group.items.length));
       drillHeader.appendChild(countSpan);
       
-      // NEW: Context menu toggle button
+      // Toggle Compact View
+      const compactBtn = el("button", "cs-back-btn", CS.state.compactView ? "Expand" : "Compact");
+      compactBtn.type = "button";
+      compactBtn.style.marginLeft = "8px";
+      compactBtn.style.fontSize = "var(--cs-fs-xs)";
+      compactBtn.addEventListener("click", () => {
+        CS.state.compactView = !CS.state.compactView;
+        renderSnippets();
+      });
+      drillHeader.appendChild(compactBtn);
+      
+      // Context menu toggle button
       const ctxBtn = el("button", "cs-back-btn cs-ctx-btn", "...");
       ctxBtn.type = "button";
       ctxBtn.addEventListener("click", (e) => {
@@ -406,6 +417,7 @@
       listEl.appendChild(drillHeader);
 
       const items = el("div", "cs-drill-items");
+      if (CS.state.compactView) items.classList.add("cs-compact");
       const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       for (const s of ordered) items.appendChild(buildSnippetCard(s));
       

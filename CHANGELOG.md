@@ -1,3 +1,9 @@
+## v0.1.28
+
+- Added compactView state toggle (Compact / Expand button on drill header)
+- Compact view hides content and timestamp, reduces item padding
+- Compact CSS class applied to drill-items when active
+
 ## v0.1.27
 
 - Added "..." context menu button on drill header (opens folder context menu)

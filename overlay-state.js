@@ -11,9 +11,11 @@
     lastErrorAt: null,
     collapsedFolders: new Set(),
     snippets: [],
+    folders: new Set(),
     draftTimer: null,
     editingSnippetId: null,
     originalEditData: null,
+    compactView: false,
   });
 
   CS.recordError = (where, err) => {

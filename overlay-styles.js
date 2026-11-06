@@ -1041,6 +1041,16 @@
   font-weight: bold;
 }
 
+.cs-drill-items.cs-compact .cs-item-content,
+.cs-drill-items.cs-compact .cs-item-time {
+  display: none;
+}
+
+.cs-drill-items.cs-compact .cs-item {
+  padding: 8px 12px;
+  min-height: auto;
+}
+
 `;
 
   function applyStyles(shadowRoot) {
