@@ -140,7 +140,8 @@
   }
 
   function setTheme(theme) {
-    if (theme !== "dark" && theme !== "light") return;
+    const validThemes = ["dark", "light", "dracula", "nord", "sepia"];
+    if (!validThemes.includes(theme)) return;
     if (CS.state.settings.theme === theme) return;
     CS.state.settings.theme = theme;
     applySettingsToDom();

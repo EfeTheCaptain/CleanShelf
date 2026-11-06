@@ -1,3 +1,8 @@
+## v0.1.19
+
+- Fixed setTheme guard in overlay-options.js (was hardcoded to only accept dark/light, now accepts all 5 themes)
+- Debug check already validated all 5 themes
+
 ## v0.1.18
 
 - Added 3 new themes: Dracula, Nord, Sepia (alongside Dark and Light)
