@@ -36,7 +36,7 @@
       fn: async () => {
         const s = await CS.storage.getSettings();
         if (!["grid", "list"].includes(s.layout)) throw new Error("layout: " + s.layout);
-        if (!["dark", "light"].includes(s.theme)) throw new Error("theme: " + s.theme);
+        if (!["dark", "light", "dracula", "nord", "sepia"].includes(s.theme)) throw new Error("theme: " + s.theme);
         if (!["normal", "high"].includes(s.contrast)) throw new Error("contrast: " + s.contrast);
         if (!["sm", "md", "lg"].includes(s.fontSize)) throw new Error("fontSize: " + s.fontSize);
         return `${s.layout}/${s.theme}/${s.contrast}/${s.fontSize}`;

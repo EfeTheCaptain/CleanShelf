@@ -52,6 +52,9 @@
     radioGroups.theme = buildRadioGroup("Color scheme", "cs-theme", [
       { value: "dark", label: "Dark", onSelect: setTheme },
       { value: "light", label: "Light", onSelect: setTheme },
+      { value: "dracula", label: "Dracula", onSelect: setTheme },
+      { value: "nord", label: "Nord", onSelect: setTheme },
+      { value: "sepia", label: "Sepia", onSelect: setTheme },
     ]);
     body.appendChild(radioGroups.theme.group);
 
@@ -104,6 +107,9 @@
     if (radioGroups.theme) {
       radioGroups.theme.inputs.dark.checked = s.theme === "dark";
       radioGroups.theme.inputs.light.checked = s.theme === "light";
+      if (radioGroups.theme.inputs.dracula) radioGroups.theme.inputs.dracula.checked = s.theme === "dracula";
+      if (radioGroups.theme.inputs.nord) radioGroups.theme.inputs.nord.checked = s.theme === "nord";
+      if (radioGroups.theme.inputs.sepia) radioGroups.theme.inputs.sepia.checked = s.theme === "sepia";
     }
     if (radioGroups.contrast) {
       radioGroups.contrast.inputs.normal.checked = s.contrast === "normal";

@@ -1,3 +1,12 @@
+## v0.1.18
+
+- Added 3 new themes: Dracula, Nord, Sepia (alongside Dark and Light)
+- Theme variables for each with distinct color palettes
+- Updated getSettings to validate all 5 themes
+- Updated options UI with radio buttons for all 5 themes
+- Updated debug check to validate new theme values
+- Updated font size scale (sm: 11px, lg: 18px)
+
 ## v0.1.17
 
 - Card height changed to calc(100vh - 100px) for 50px top/bottom margin

@@ -59,6 +59,72 @@
   --cs-accent-strong: #4338ca;
 }
 
+:host([data-theme="dracula"]) {
+  --cs-backdrop: rgba(40, 42, 54, 0.85);
+  --cs-bg-card: #282a36;
+  --cs-bg-panel: #21222c;
+  --cs-bg-surface: #44475a;
+  --cs-bg-surface-hover: #6272a4;
+  --cs-bg-elevated: #44475a;
+  --cs-bg-elevated-hover: #6272a4;
+  --cs-bg-chip: #6272a4;
+  --cs-border: #44475a;
+  --cs-border-strong: #6272a4;
+  --cs-border-hover: #bd93f9;
+  --cs-text: #f8f8f2;
+  --cs-text-strong: #ffffff;
+  --cs-text-title: #f8f8f2;
+  --cs-text-muted: #6272a4;
+  --cs-text-dim: #9ea4c1;
+  --cs-text-faint: #6272a4;
+  --cs-accent: #bd93f9;
+  --cs-accent-strong: #ff79c6;
+}
+
+:host([data-theme="nord"]) {
+  --cs-backdrop: rgba(46, 52, 64, 0.85);
+  --cs-bg-card: #2e3440;
+  --cs-bg-panel: #242933;
+  --cs-bg-surface: #3b4252;
+  --cs-bg-surface-hover: #434c5e;
+  --cs-bg-elevated: #3b4252;
+  --cs-bg-elevated-hover: #434c5e;
+  --cs-bg-chip: #4c566a;
+  --cs-border: #3b4252;
+  --cs-border-strong: #4c566a;
+  --cs-border-hover: #88c0d0;
+  --cs-text: #eceff4;
+  --cs-text-strong: #ffffff;
+  --cs-text-title: #eceff4;
+  --cs-text-muted: #d8dee9;
+  --cs-text-dim: #81a1c1;
+  --cs-text-faint: #4c566a;
+  --cs-accent: #88c0d0;
+  --cs-accent-strong: #8fbcbb;
+}
+
+:host([data-theme="sepia"]) {
+  --cs-backdrop: rgba(244, 236, 216, 0.5);
+  --cs-bg-card: #fdf6e3;
+  --cs-bg-panel: #eee8d5;
+  --cs-bg-surface: #f4ecd8;
+  --cs-bg-surface-hover: #e6dfca;
+  --cs-bg-elevated: #eee8d5;
+  --cs-bg-elevated-hover: #e6dfca;
+  --cs-bg-chip: #d5ccb6;
+  --cs-border: #d5ccb6;
+  --cs-border-strong: #c0b69e;
+  --cs-border-hover: #b58900;
+  --cs-text: #5b4636;
+  --cs-text-strong: #2c231b;
+  --cs-text-title: #2c231b;
+  --cs-text-muted: #8a7661;
+  --cs-text-dim: #6b5745;
+  --cs-text-faint: #a69583;
+  --cs-accent: #b58900;
+  --cs-accent-strong: #cb4b16;
+}
+
 :host([data-contrast="high"]) {
   --cs-text: #ffffff;
   --cs-text-strong: #ffffff;
@@ -87,21 +153,21 @@
 }
 
 :host([data-size="sm"]) {
-  --cs-fs-base: 12px;
-  --cs-fs-sm: 11px;
-  --cs-fs-xs: 10px;
-  --cs-fs-2xs: 9px;
-  --cs-fs-title: 20px;
-  --cs-fs-card-title: 11.5px;
+  --cs-fs-base: 11px;
+  --cs-fs-sm: 10px;
+  --cs-fs-xs: 9px;
+  --cs-fs-2xs: 8px;
+  --cs-fs-title: 18px;
+  --cs-fs-card-title: 11px;
 }
 
 :host([data-size="lg"]) {
-  --cs-fs-base: 14px;
-  --cs-fs-sm: 13px;
-  --cs-fs-xs: 12px;
-  --cs-fs-2xs: 11px;
-  --cs-fs-title: 24px;
-  --cs-fs-card-title: 13.5px;
+  --cs-fs-base: 18px;
+  --cs-fs-sm: 16px;
+  --cs-fs-xs: 14px;
+  --cs-fs-2xs: 12px;
+  --cs-fs-title: 32px;
+  --cs-fs-card-title: 18px;
 }
 
 .cs-backdrop {
