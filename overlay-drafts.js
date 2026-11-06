@@ -1,0 +1,91 @@
+(() => {
+  "use strict";
+  const CS = globalThis.CleanShelf;
+  if (!CS || CS.aborted) return;
+
+  function setDraftState(s) {
+    const el = CS.ui && CS.ui.draftIndicator;
+    if (el) el.dataset.state = s;
+  }
+
+  function currentDraft() {
+    const ui = CS.ui || {};
+    return {
+      title: ui.titleInput ? ui.titleInput.value : "",
+      folder: ui.folderInput ? ui.folderInput.value : "",
+      content: ui.contentInput ? ui.contentInput.value : "",
+      updatedAt: Date.now(),
+    };
+  }
+
+  function isDraftEmpty(d) {
+    return !d.title && !d.folder && !d.content;
+  }
+
+  async function persistDraft() {
+    CS.state.draftTimer = null;
+    const draft = currentDraft();
+    if (isDraftEmpty(draft)) {
+      try {
+        await CS.storage.removeDraft();
+        setDraftState("idle");
+      } catch (err) {
+        CS.recordError("draft/clear", err);
+        setDraftState("error");
+      }
+      return;
+    }
+    try {
+      await CS.storage.setDraft(draft);
+      setDraftState("saved");
+    } catch (err) {
+      CS.recordError("draft/save", err);
+      setDraftState("error");
+    }
+  }
+
+  function scheduleDraft() {
+    setDraftState("dirty");
+    clearTimeout(CS.state.draftTimer);
+    CS.state.draftTimer = setTimeout(persistDraft, CS.constants.DRAFT_DEBOUNCE_MS);
+  }
+
+  function flushDraft() {
+    if (CS.state.draftTimer == null) return;
+    clearTimeout(CS.state.draftTimer);
+    CS.state.draftTimer = null;
+    const draft = currentDraft();
+    if (isDraftEmpty(draft)) return;
+    chrome.storage.local.set({ [CS.constants.DRAFT_KEY]: draft }).catch(() => {});
+  }
+
+  async function loadDraft() {
+    try {
+      const draft = await CS.storage.getDraft();
+      if (!draft || isDraftEmpty(draft)) {
+        setDraftState("idle");
+        return;
+      }
+      if (CS.ui.titleInput) CS.ui.titleInput.value = typeof draft.title === "string" ? draft.title : "";
+      if (CS.ui.folderInput) CS.ui.folderInput.value = typeof draft.folder === "string" ? draft.folder : "";
+      if (CS.ui.contentInput) CS.ui.contentInput.value = typeof draft.content === "string" ? draft.content : "";
+      setDraftState("saved");
+    } catch (err) {
+      CS.recordError("draft/load", err);
+      setDraftState("error");
+    }
+  }
+
+  async function clearDraft() {
+    clearTimeout(CS.state.draftTimer);
+    CS.state.draftTimer = null;
+    try {
+      await CS.storage.removeDraft();
+      setDraftState("idle");
+    } catch (err) {
+      CS.recordError("draft/clear", err);
+    }
+  }
+
+  CS.drafts = { setDraftState, currentDraft, isDraftEmpty, persistDraft, scheduleDraft, flushDraft, loadDraft, clearDraft };
+})();

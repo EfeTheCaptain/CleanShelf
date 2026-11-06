@@ -1,3 +1,19 @@
+const OVERLAY_FILES = [
+  "overlay-constants.js",
+  "overlay-dom.js",
+  "overlay-styles.js",
+  "overlay-state.js",
+  "overlay-storage.js",
+  "overlay-toast.js",
+  "overlay-clipboard.js",
+  "overlay-drafts.js",
+  "overlay-snippets.js",
+  "overlay-options.js",
+  "overlay-debug.js",
+  "overlay-export-import.js",
+  "overlay-index.js",
+];
+
 async function toggleOverlay(tab) {
   if (!tab || tab.id == null) {
     const [active] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -7,7 +23,7 @@ async function toggleOverlay(tab) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      files: ["overlay.js"],
+      files: OVERLAY_FILES,
     });
   } catch (err) {
     console.warn("CleanShelf: cannot inject into this page", err);

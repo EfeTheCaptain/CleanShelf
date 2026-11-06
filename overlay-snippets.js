@@ -1,0 +1,203 @@
+(() => {
+  "use strict";
+  const CS = globalThis.CleanShelf;
+  if (!CS || CS.aborted) return;
+
+  function groupByFolder(snippets) {
+    const map = new Map();
+    for (const s of snippets) {
+      const key = (s && s.folder) ? s.folder : CS.constants.UNFILED;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(s);
+    }
+    const names = [...map.keys()].filter((k) => k !== CS.constants.UNFILED).sort();
+    if (map.has(CS.constants.UNFILED)) names.push(CS.constants.UNFILED);
+    return names.map((name) => ({ name, items: map.get(name) }));
+  }
+
+  function renderFolderList(snippets) {
+    const datalist = CS.ui && CS.ui.folderDatalist;
+    if (!datalist) return;
+    const folders = new Set();
+    for (const s of snippets) if (s && s.folder) folders.add(s.folder);
+    datalist.innerHTML = "";
+    for (const f of [...folders].sort()) {
+      const opt = document.createElement("option");
+      opt.value = f;
+      datalist.appendChild(opt);
+    }
+  }
+
+  function buildSnippetCard(snippet) {
+    const { el } = CS.dom;
+    const cardEl = el("div", "cs-item");
+    cardEl.setAttribute("role", "button");
+    cardEl.setAttribute("tabindex", "0");
+    cardEl.title = "Click to copy";
+    cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
+    cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+    cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+    cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
+    cardEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        CS.clipboard.copySnippet(snippet);
+      }
+    });
+    return cardEl;
+  }
+
+  function renderListView() {
+    const { el } = CS.dom;
+    const listEl = CS.ui.listEl;
+    if (!listEl) return;
+    listEl.innerHTML = "";
+    const snippets = CS.state.snippets || [];
+    if (snippets.length === 0) {
+      listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    for (const group of groupByFolder(snippets)) {
+      const wrap = el("section", "cs-folder");
+      if (CS.state.collapsedFolders.has(group.name)) wrap.classList.add("collapsed");
+
+      const headerBtn = el("button", "cs-folder-header");
+      headerBtn.type = "button";
+      headerBtn.appendChild(el("span", "cs-folder-caret",
+        CS.state.collapsedFolders.has(group.name) ? "▸" : "▾"));
+      headerBtn.appendChild(el("span", null, group.name));
+      headerBtn.appendChild(el("span", "cs-folder-count", String(group.items.length)));
+      headerBtn.addEventListener("click", () => {
+        if (CS.state.collapsedFolders.has(group.name)) CS.state.collapsedFolders.delete(group.name);
+        else CS.state.collapsedFolders.add(group.name);
+        renderSnippets();
+      });
+
+      const items = el("div", "cs-folder-items");
+      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      for (const s of ordered) items.appendChild(buildSnippetCard(s));
+
+      wrap.appendChild(headerBtn);
+      wrap.appendChild(items);
+      frag.appendChild(wrap);
+    }
+    listEl.appendChild(frag);
+  }
+
+  function renderGridView() {
+    const { el, makeFolderIcon } = CS.dom;
+    const listEl = CS.ui.listEl;
+    if (!listEl) return;
+    listEl.innerHTML = "";
+    const snippets = CS.state.snippets || [];
+    const groups = groupByFolder(snippets);
+
+    if (CS.state.drilledFolder !== null) {
+      const group = groups.find((g) => g.name === CS.state.drilledFolder);
+      if (!group) {
+        CS.state.drilledFolder = null;
+        return renderGridView();
+      }
+      const drillHeader = el("div", "cs-drill-header");
+      const backBtn = el("button", "cs-back-btn", "← Back");
+      backBtn.type = "button";
+      backBtn.addEventListener("click", () => {
+        CS.state.drilledFolder = null;
+        renderSnippets();
+      });
+      drillHeader.appendChild(backBtn);
+      drillHeader.appendChild(el("span", "cs-drill-title", group.name));
+      drillHeader.appendChild(el("span", "cs-drill-count", String(group.items.length)));
+      listEl.appendChild(drillHeader);
+
+      const items = el("div", "cs-drill-items");
+      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      for (const s of ordered) items.appendChild(buildSnippetCard(s));
+      listEl.appendChild(items);
+      return;
+    }
+
+    if (groups.length === 0) {
+      listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
+      return;
+    }
+
+    const grid = el("div", "cs-folder-grid");
+    for (const group of groups) {
+      const tile = el("button", "cs-folder-tile");
+      tile.type = "button";
+      tile.appendChild(makeFolderIcon());
+      tile.appendChild(el("div", "cs-folder-tile-name", group.name));
+      tile.appendChild(el("div", "cs-folder-tile-count", String(group.items.length)));
+      tile.addEventListener("click", () => {
+        CS.state.drilledFolder = group.name;
+        renderSnippets();
+      });
+      grid.appendChild(tile);
+    }
+    listEl.appendChild(grid);
+  }
+
+  function renderSnippets() {
+    if (CS.state.settings.layout === "grid") renderGridView();
+    else renderListView();
+  }
+
+  async function load() {
+    try {
+      const snippets = await CS.storage.getSnippets();
+      CS.state.snippets = snippets;
+      renderFolderList(snippets);
+      renderSnippets();
+      return snippets;
+    } catch (err) {
+      CS.recordError("load", err);
+      const listEl = CS.ui.listEl;
+      if (listEl) {
+        listEl.innerHTML = "";
+        const p = CS.dom.el("p", "cs-empty", "Could not load snippets. Open Debug.");
+        p.style.color = "var(--cs-error)";
+        listEl.appendChild(p);
+      }
+      return null;
+    }
+  }
+
+  async function handleSave() {
+    const ui = CS.ui;
+    const title = ui.titleInput ? ui.titleInput.value.trim() : "";
+    const folder = ui.folderInput ? ui.folderInput.value.trim() : "";
+    const content = ui.contentInput ? ui.contentInput.value.trim() : "";
+    if (!title && !content) {
+      CS.recordError("save", new Error("Both title and content are empty"));
+      CS.toast.showToast("Add a title or content", "error");
+      return;
+    }
+    if (ui.saveBtn) ui.saveBtn.disabled = true;
+    try {
+      const snippets = await CS.storage.getSnippets();
+      snippets.push({
+        id: crypto.randomUUID(),
+        title,
+        folder: folder || "",
+        content,
+        createdAt: Date.now(),
+      });
+      await CS.storage.saveSnippets(snippets);
+      if (ui.titleInput) ui.titleInput.value = "";
+      if (ui.folderInput) ui.folderInput.value = "";
+      if (ui.contentInput) ui.contentInput.value = "";
+      await CS.drafts.clearDraft();
+      await load();
+      CS.toast.showToast("Saved");
+    } catch (err) {
+      CS.recordError("save", err);
+      CS.toast.showToast("Save failed", "error");
+    } finally {
+      if (ui.saveBtn) ui.saveBtn.disabled = false;
+    }
+  }
+
+  CS.snippets = { groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView, renderSnippets, load, handleSave };
+})();
