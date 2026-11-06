@@ -203,8 +203,9 @@
     const listEl = CS.ui.listEl;
     if (!listEl) return;
     
-    const target = Array.from(listEl.querySelectorAll(".cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count)")).find(el => el.textContent === oldName);
+    const target = Array.from(listEl.querySelectorAll(".cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count), .cs-drill-title")).find(el => el.textContent === oldName);
     if (!target) return;
+
 
     const parent = target.parentElement;
     const input = document.createElement("input");
@@ -212,11 +213,13 @@
     input.style.padding = "2px 4px";
     input.style.fontSize = "inherit";
     input.style.height = "auto";
+    input.style.width = "100%";
     input.value = oldName;
     
     parent.replaceChild(input, target);
     input.focus();
     input.select();
+
 
     const finish = async (save) => {
       input.removeEventListener("blur", onBlur);
@@ -231,15 +234,18 @@
       parent.replaceChild(target, input);
     };
 
+
     const onBlur = () => finish(true);
     const onKey = (e) => {
       if (e.key === "Enter") { e.preventDefault(); finish(true); }
       if (e.key === "Escape") { e.preventDefault(); finish(false); }
     };
 
+
     input.addEventListener("blur", onBlur);
     input.addEventListener("keydown", onKey);
   }
+
 
   async function renameFolder(oldName, newName) {
     try {
@@ -259,6 +265,12 @@
         CS.state.folders.delete(oldName);
         CS.state.folders.add(newName);
         await CS.storage.saveFolders([...CS.state.folders]);
+      }
+
+
+      // If we are currently inside the folder being renamed, keep us inside it
+      if (CS.state.drilledFolder === oldName) {
+        CS.state.drilledFolder = newName;
       }
       
       await load();

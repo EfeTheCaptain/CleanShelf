@@ -1,3 +1,8 @@
+## v0.1.29
+
+- Fixed folder rename: added .cs-drill-title selector so rename works in drill view
+- Fixed folder rename: drilledFolder updated when renaming current folder
+
 ## v0.1.28
 
 - Added compactView state toggle (Compact / Expand button on drill header)
