@@ -29,12 +29,12 @@
   --cs-success: #10b981;
   --cs-error: #ef4444;
 
-  --cs-fs-base: 14px;
-  --cs-fs-sm: 12px;
-  --cs-fs-xs: 11px;
-  --cs-fs-2xs: 10px;
-  --cs-fs-title: 24px;
-  --cs-fs-card-title: 13.5px;
+  --cs-fs-base: 18px;
+  --cs-fs-sm: 16px;
+  --cs-fs-xs: 14px;
+  --cs-fs-2xs: 12px;
+  --cs-fs-title: 32px;
+  --cs-fs-card-title: 18px;
 }
 
 :host([data-theme="light"]) {
@@ -228,12 +228,12 @@
 }
 
 :host([data-size="lg"]) {
-  --cs-fs-base: 18px;
-  --cs-fs-sm: 16px;
-  --cs-fs-xs: 14px;
-  --cs-fs-2xs: 12px;
-  --cs-fs-title: 32px;
-  --cs-fs-card-title: 18px;
+  --cs-fs-base: 24px;
+  --cs-fs-sm: 20px;
+  --cs-fs-xs: 18px;
+  --cs-fs-2xs: 16px;
+  --cs-fs-title: 42px;
+  --cs-fs-card-title: 24px;
 }
 
 :host([data-theme="dark-sepia"]) {

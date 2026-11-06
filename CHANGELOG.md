@@ -1,3 +1,7 @@
+## v0.1.22
+
+- Updated default font sizes (Medium: 18px base) and Large size scale (24px base) in overlay-styles.js
+
 ## v0.1.21
 
 - Added Dracula, Nord, Sepia themes to CleanShelf (alongside Dark and Light)
