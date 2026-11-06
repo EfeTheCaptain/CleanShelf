@@ -658,11 +658,16 @@
 .cs-footer[hidden] { display: none; }
 
 .cs-hint {
-  margin: 10px 0 0;
+  margin: 16px 0 0;
   font-size: var(--cs-fs-xs);
   color: var(--cs-text-faint);
   text-align: center;
   flex-shrink: 0;
+  line-height: 1.5;
+}
+
+.cs-hint strong {
+  color: var(--cs-text-dim);
 }
 
 .cs-debug-toggle {

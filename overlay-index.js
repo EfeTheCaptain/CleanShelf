@@ -138,7 +138,9 @@
   card.appendChild(optionsBuilt.view);
 
   // hint
-  card.appendChild(el("p", "cs-hint", "Data stays in your browser. No tracking. No network calls."));
+  const hintText = el("p", "cs-hint");
+  hintText.innerHTML = "Tip: Right-click snippets or folders for more options.<br>Data stays in your browser. No tracking. No network calls.<br><strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.";
+  card.appendChild(hintText);
 
   // ---- FOOTER ----
   const footer = el("div", "cs-footer");

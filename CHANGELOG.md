@@ -1,3 +1,9 @@
+## v0.1.13
+
+- Updated footnote: three-line hint with tip, privacy notice, and backup warning
+- Backup warning bolded and colored brighter (--cs-text-dim)
+- Margin increased to 16px for breathing room
+
 ## v0.1.12
 
 - Context menu: right-click snippet → Edit/Delete; right-click folder → Rename/Delete
