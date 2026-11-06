@@ -517,7 +517,6 @@
 
     const content = ui.contentInput ? ui.contentInput.value.trim() : "";
     if (!title && !content) {
-      CS.recordError("save", new Error("Both title and content are empty"));
       CS.toast.showToast("Add a title or content", "error");
       return;
     }

@@ -1,3 +1,7 @@
+## v0.1.26
+
+- Removed unnecessary recordError call on empty save (keeps Debug panel clean)
+
 ## v0.1.25
 
 - Added persistent folders tracked independently of snippets (empty folders remain visible)
