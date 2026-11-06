@@ -1,3 +1,9 @@
+## v0.1.27
+
+- Added "..." context menu button on drill header (opens folder context menu)
+- Added right-click support on drill header to open folder menu directly
+- Fixed drill header button alignment CSS
+
 ## v0.1.26
 
 - Removed unnecessary recordError call on empty save (keeps Debug panel clean)

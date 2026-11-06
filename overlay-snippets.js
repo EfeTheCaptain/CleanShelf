@@ -370,6 +370,7 @@
         return renderGridView();
       }
       const drillHeader = el("div", "cs-drill-header");
+      
       const backBtn = el("button", "cs-back-btn", "← Back");
       backBtn.type = "button";
       backBtn.addEventListener("click", () => {
@@ -379,8 +380,29 @@
         renderSnippets();
       });
       drillHeader.appendChild(backBtn);
-      drillHeader.appendChild(el("span", "cs-drill-title", group.name));
-      drillHeader.appendChild(el("span", "cs-drill-count", String(group.items.length)));
+      
+      const titleSpan = el("span", "cs-drill-title", group.name);
+      drillHeader.appendChild(titleSpan);
+      
+      const countSpan = el("span", "cs-drill-count", String(group.items.length));
+      drillHeader.appendChild(countSpan);
+      
+      // NEW: Context menu toggle button
+      const ctxBtn = el("button", "cs-back-btn cs-ctx-btn", "...");
+      ctxBtn.type = "button";
+      ctxBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const rect = ctxBtn.getBoundingClientRect();
+        if (CS.ui && CS.ui.contextMenu) {
+          CS.ui.contextMenu.show("folder", group.name, rect.left, rect.bottom + 4);
+        }
+      });
+      drillHeader.appendChild(ctxBtn);
+      
+      // NEW: Allow right-clicking anywhere on the header
+      bindFolderContextMenu(drillHeader, group.name);
+
+
       listEl.appendChild(drillHeader);
 
       const items = el("div", "cs-drill-items");

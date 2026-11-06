@@ -1035,6 +1035,12 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+.cs-drill-header .cs-back-btn.cs-ctx-btn {
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-weight: bold;
+}
+
 `;
 
   function applyStyles(shadowRoot) {
