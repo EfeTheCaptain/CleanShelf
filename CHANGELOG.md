@@ -1,3 +1,8 @@
+## v0.1.8
+
+- `.cs-folder-items` and `.cs-drill-items` changed from flex column to CSS grid (`repeat(auto-fill, minmax(320px, 1fr))`) for multi-column card layout
+- `align-content: start` packs cards at top of container
+
 ## v0.1.7
 
 - CSS variables: all theme-visible colors and font-size tokens are `--cs-*` custom properties on `:host`

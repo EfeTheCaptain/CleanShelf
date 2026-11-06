@@ -332,10 +332,11 @@
 }
 
 .cs-folder-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 8px;
+  padding-top: 8px;
+  align-content: start;
 }
 
 .cs-folder.collapsed .cs-folder-items { display: none; }
@@ -429,9 +430,10 @@
 .cs-back-btn:hover { background: var(--cs-border-strong); }
 
 .cs-drill-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 8px;
+  align-content: start;
 }
 
 .cs-item {
