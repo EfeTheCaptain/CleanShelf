@@ -1,0 +1,879 @@
+﻿=== Parfümler ===
+
+--- Shipwreck ---
+1️⃣ Moleküler baz (ml ile)
+Nota	Çözelti	Miktar (ml)	Damla (≈20 damla/ml)
+Hedione	%50	60
+Iso E Super	%50     44 damla
+Galaxolide	%33 	16
+Benzil benzoat %50   2 damla
+Helional 2 damla.
+
+2️⃣ Enkaz / Reçineli Gövde
+Nota	Miktar (ml)	Damla
+Udihindi (tentür)	0.30 ml	6
+Mürsafi	0.20 ml	4
+Akgünlük	0.25 ml	5
+Meşe Yosunu	0.25 ml	5
+Sedir	0.75 ml	15
+Üzerlik	0.75 ml	15
+
+Udihindi, Mürsafi, Akgünlük yüksek kesimde
+Vetiver + Yosun ile “ıslak enkaz / gemi tahtası” hissi
+
+3️⃣ Vetiver & Alt Notalar
+Nota	Miktar (ml)	Damla
+Vetiver	0.60 ml	12
+Vanilya kabuğu tentürü	0.20 ml	4
+Tonka (opsiyonel)	0.05 ml	1
+
+Vetiver ana gövdeyi belirler
+Vanilya tatlılığı çok hafif yuvarlar, enkaz hissini bozmadan
+
+4️⃣ Üst Nota / Tuzlu Hava (sade)
+Nota	Damla
+Ardıç (süzülmüş)	20
+Kişniş (tentür)	8
+Bergamot çözeltisi	8
+Lemongrass	2
+DHM 3 damla
+Tripal 1 damla
+Helional 2 damla
+
+--- Winter Garden ---
+❄️🪵 Project: "The Eternal Winter Garden" (Final Revize)
+Bu liste, şişenin içindeki son ve kesin durumu temsil eder. Hacim yaklaşık 22-24 ml bandındadır.
+
+1. Baharatlı & Sıcak Başlangıç (Üst Katman)
+Tarçın Tentürü (7g/45ml): 2.00 ml (Kış bahçesinin ana karakteri, sıcak ve baskın).
+
+Sedir (Cedar) Çözeltisi (5ml/45ml): 2.00 ml (Kuru, odunsu ve asil kış bahçesi iskeleti).
+
+Selvi (Cypress) Çözeltisi: 5 damla (Dışarıdaki soğuk havayı temsil eden hafif bir esinti).
+
+Kakule Tentürü (Çift Marine): 5 damla (Arka plandaki serinlik).
+
+Bergamot Çözeltisi (2.5ml/43ml): 5 damla (Işık ve parlaklık).
+
+2. Reçineli & Odunsu Gövde (Orta Katman)
+Udihindi Tentürü (6g/45ml): 2.00 ml (Vahşi, isli ve yanan odun karakteri).
+
+Mürsafi Tentürü (7g/45ml): 1.00 ml (Antik, metalik ve balzamik derinlik).
+
+Mavi Lotus Çözeltisi: 2 damla (İpeksi lüks dokunuş).
+
+3. Moleküler İskelet (Kütüphanendeki Çözeltiler)
+Hedione Çözeltisi (10ml/45ml): 7.00 ml (Yayılım ve notaların nefes alması için ana taşıyıcı).
+
+ISO E Super Çözeltisi (10ml/45ml): 5.00 ml (Kadifemsi odunsu bulut ve fiksasyon).
+
+Galaxolide Çözeltisi (10ml/45ml): 2.00 ml (Tene mühürleyen yumuşak misk tabanı).
+
+4. Derinlik & Topraksı Bitiş (Alt Katman)
+Vanilya Kabuğu Tentürü (5 Kabuk/300ml): 2.00 ml (Tarçınla birleşen odunsu yumuşaklık).
+
+Vetiver Çözeltisi (5ml/45ml): 2 damla (Hafif kökümsü doku).
+
+Meşe Yosunu Çözeltisi (2.5ml/45ml): 5 damla (Derinlik ve karakter).
+
+--- Eski Gemi v3 ---
+🌊⚓ Karanlık Okyanus & Antik Reçine (Güncellenmiş 20 ml)
+1. Katman: Baharatlı ve Keskin Rüzgar 
+Kakule: 0.30 ml 
+Saf Misket Limon Çözeltisi: 6 damla
+Saf Bergamot Çözeltisi: 12 damla.
+Kişniş Çözeltisi: 25 damla.
+Ardıç Çözeltisi: 36 damla.
+Selvi Çözeltisi: 21 damla.
+Lemongrass Çözeltisi: 6 damla.
+
+2. Katman: Egzotik ve Reçineli Gövde 
+Mürsafi (Myrrh): 0.30 ml (~8 damla) - Tuzlu mineral yapıyı balzamik bir derinliğe çeker.
+Ylang Ylang Çözeltisi: 2 damla - Çok küçük bir doz ama deniz havasına kremsi bir yumuşaklık katar.
+Üzerlik Çözeltisi: 25 damla.
+Akgünlük Çözeltisi: 15 damla.
+Sedir Çözeltisi: 30 damla.
+
+3. Katman: Karanlık ve Hayvansal Derinlik 
+Udihindi: 0.30 ml (~8 damla) - Deniz yosunlarını hayvansal ve odunsu bir is ile birleştirir.
+Vanilya Kabuğu Tentürü: 1.00 ml (~25 damla) - Okyanusun tuzunu dengeleyen isli bir tatlılık.
+Vetiver Çözeltisi: 10 damla 
+Meşe Yosunu Çözeltisi: 20 damla.
+Tonka Fasulyesi: 1 damla - Vanilya ile köprü kurması için minik bir dokunuş.
+Tripal Nano: 1 damla - Kokunun dokusunu ve yayılım karakterini modernize eder.
+
+4. Katman: İskelet ve Taşıyıcılar 
+Hedione Çözeltisi: 40 damla.
+Galaxolide Çözeltisi: 55 damla.
+Iso E Super Çözeltisi: 90 damla.
+
+--- Dark Galleon ---
+Baz: 2ml Udihindi + 1.5ml Vetiver + 1ml Sedir.
+
+Karakter: 1ml Üzerlik + 0.5ml Mürsafi.
+
+Yayılım: 2ml Iso E Super + 1ml Hedione.
+
+Üst Nota: Sadece 2-3 damla Greyfurt (Ekşitmeden sadece bir kıvılcım).
+
+Kalan: Alkol.
+
+--- Citrus Ambrette & Vanilla ---
+Bu formül, limonun uçuculuğunu Hedione ile genişletip, Iso E Super ve Galaxolide ile tene mühürler.
+1. Narenciye Bloğu (Üst Notalar - %25)
+7 ml Bergamot: En "parfümsü" narenciyedir, keskin limonun köşelerini yumuşatır.
+4 ml Tatlı Limon: Doğal bir tatlılık verir.
+3 ml Limonotu (Kendi hazırladığınız): Çok güçlüdür, dozunda tutulmalı.
+5 ml Dihydromyrcenol: Profesyonel "temiz/metalik" efekti verir (Creed Aventus tarzı ferahlık).
+2. Kalp ve Yayılım Bloğu (Orta Notalar - %40)
+20 ml Hedione: Formülün en az %20'sini oluşturmalı. Kokuyu havada asılı tutan "motor" budur.
+5 ml Linalyl Acetate: Narenciye ile çiçeksi notalar arasında köprü kurar, sofistike bir doku verir.
+3 ml Helional: Islak, taze ve modern bir hava katar.
+2 ml Mavi Lotus: Formüle "pahalı" bir derinlik ekler.
+3. Sabitleyici ve Taban Bloğu (Alt Notalar - %35)
+15 ml Iso E Super: Kadifemsi, modern odunsu yapı ve kalıcılık sağlar.
+10 ml Galaxolide: Temiz misk etkisiyle vanilyayı dengeler, ağırlaşmasını önler.
+6 ml Vanilya Havyarı (Ultra yoğun): Ana gövdeyi oluşturur.
+3 ml Tonka Fasulyesi: Vanilyanın "kurabiye" gibi kokmasını engelleyip "parfüm" gibi kokmasını sağlar.
+2 ml Sedir: Yapıyı yere sağlam bastırır.
+
+--- Cold Atlantic ---
+Deniz Etkisi: 4ml Dihydromyrcenol (DHM) + 2ml Helional.
+
+İskelet: 4ml Iso E Super + 2ml Sedir.
+
+Vahşilik: 1ml Ardıç + 1ml Üzerlik (Tuz etkisi).
+
+Denge: 2 damla Triplal (Yeşil yosun).
+
+Kalan: Alkol.
+
+--- Golden Resin v2 ---
+🍯 The Golden Resin (Güncellenmiş & 20 ml Ölçekli)
+1. Narenciye & Ferahlık Katmanı (Yeni Dengelerle)
+Limonotu: 5 damla (Daha kontrollü bir keskinlik)
+Dihydromyrcenol: 15 damla (Parlaklık ve modern temizlik hissi arttı)
+Tatlı Limon: ~7 damla
+Bergamot: ~8 damla
+Linalyl Acetate: 17 damla
+
+2. Kalp, Yayılım & Çiçeksi Doku
+Hedione: 4.20 ml (Ana taşıyıcı ve yayılım motoru)
+Helional: 10 damla (Daha taze, nemli ve ozonumsu bir kalp)
+Mavi Lotus: 14 damla
+Gülağacı Absolute: 11 damla
+Biberiye Tentürü: 10 damla
+
+3. Zengin Temel & Fiksasyon (Derinlik ve Kalıcılık)
+Meşe Yosunu: 15 damla (Artık sadece bir dokunuş değil, hissedilir bir derinlik ve karakter unsuru)
+Tonka Fasulyesi: 10 damla (Vanilya ile birleşen kremsi, tütünsü yumuşaklık)
+Vanilya Havyarı: 35 damla
+Vanilya Kabuğu Tentürü: 18 damla
+Akgünlük (Frankincense): 18 damla
+Mürsafi (Myrrh): 11 damla
+Iso E Super: 2.10 ml (Kadifemsi doku ve yapısal bütünlük)
+Galaxolide: 1.40 ml (Temiz misk ve ten fiksasyonu)
+
+--- Parfüm Kütüphanesi ---
+10lm limon otu + 10ml alk
+
+1ml ylang ylang + 8ml alk
+
+%2 tripal + 20ml alk
+
+2,5ml mavi lotus absolute + 15ml alk
+
+2,5ml gülağacı absolute + 15 ml alk
+
+2,5ml greyfurt absolute + 15 ml alk
+
+2,5ml tonga fasulye abs + 15ml alk
+
+2,5ml bergamot + 43ml alk
+
+10ml dihydrom. +45ml alk
+
+5ml vertiver + 45ml alk
+
+Çift Marine süzülmemiş (bitene kadar süzülmeyecek) kakule
+
+(bitene kadar süzülmeyecek) vanilya havyarı ultra yoğun 5 vanilya çubuğunun havyarı + 30ml alk
+
+(bitene kadar süzülmeyecek) 5 vanilya kabuğu + 300ml alk
+
+Yoğun(çift marine) süzülmüş(45 mikrometre) üzerlik tentürü
+
+Yoğun(çift marine) süzülmüş(45 mikrometre) ardıç
+
+6g udihindi + 45 ml alk (bitene kadar süzülmeyecek ihtiyaç halinde süzülüp alınacak)
+
+6g akgünlük + 45 ml alk (bitene kadar süzülmeyecek ihtiyaç halinde süzülüp alınacak)
+
+7g mürsafe + 45 ml alk (bitene kadar süzülmeyecek ihtiyaç halinde süzülüp alınacak)
+
+Yoğun(çift marine) süzülmüş(45 mikrometre) limonotu (kendi hazırladığımız)
+
+7g tarçın + 45 ml alk (bitene kadar süzülmeyecek ihtiyaç halinde süzülüp alınacak)
+
+5ml sedir +45 alk
+
+2,5ml meşe yosunu + 45 alk
+
+10ml hedoine + 45 alk
+
+10ml galaxolide + 45 alk
+
+10ml Iso e super + 45 alk
+
+10ml hedoine + 45 alk
+
+10ml selvi + 45 alk
+
+2ml tatlı limon +  45 alk
+
+%50 20ml linalyl acetate
+
+%50 20ml helional 
+
+
+
+Bunların haricinde süzülecek biberiye ve zencefil tentürleri var
+
+250gr linalyl acetate
+
+500 gr helional var.
+
+500gr dihyromyrcenol
+
+500gr ISO e super
+
+500gr hedione
+
+500gr galaxolide 
+
+20ml polisorbat-20 
+
+--- Oryental Balzamik Deneme ---
+🏗️ 1. Katman: Atmosferik İskelet (Taşıyıcılar)
+Bu grup, kokunun yayılımını ve katmanlar arası geçişi sağlar.
+
+Iso E Super (%55): 2 ml (Amfi - Odunsu doku ve derinlik)
+
+Hedione (%50): 2 ml (Hızlandırıcı - Işık ve yayılım)
+
+Galaxolide (%40): 1.0 ml (Yastık - Yumuşatıcı ve sabitleyici)
+
+Helional: 4 Damla (Deniz sisi etkisi)
+
+DHM: Sadece 1 Damla (O metalik, soğuk neşter etkisi)
+
+🪵 2. Katman: Reçineli Gövde (The Core)
+Mürsafi: 1.2 ml (Ana gövde - Gizemli ve antik)
+
+Udihindi: 0.6 ml (Karakter - Kirli ve hayvansal derinlik)
+
+Akgünlük: 0.3 ml (Işıltı - Reçineli ferahlık)
+
+🌺 3. Katman: Egzotik Işıltı (Floral & Citrus)
+Bergamot: 1.0 ml (Açılış enerjisi)
+
+Ylang Ylang: 0.6 ml (Kremsi, egzotik bir tatlılık)
+
+Mavi Lotus: 0.5 ml (Ruhani ve sucul bir dokunuş)
+
+🌿 4. Katman: Antika Kamara (Spice & Woods)
+Meşe Yosunu: 4 Damla (Topraksı ve nemli derinlik)
+
+Biberiye: 0.6 ml (Aromatik ve canlı geçiş)
+
+Sedir: 0.5 ml (Kuru odunsu destek)
+
+Tarçın: 2 Damla (Dikkat: Çok baskındır, fazlası her şeyi yakar!)
+
+Vanilya (Havyar + Kabuk Karışımı): 1.0 ml (Reçineleri ve tarçını yumuşatacak olan kadife doku)
+
+--- Soğuk Lotus ---
+Üst / Mikro-Doz Soğuk Akım (Açılış Şoku)
+Nane (%10): 2 Damla (Buzul şok etkisi)
+
+Çam (%10): 9 Damla (Soğuk orman rüzgarı, üst-orta köprüsü)
+
+Kakule Tentürü: 5 Damla (Lüks baharat kıvılcımı, parfümsü üst nota)
+
+DHM (%10): 2 Damla (Metalik parlatıcı ve elektrik karakteri)
+
+Triplal (Binde 5): 3 Damla (Keskin, yeşil/ekşi son dokunuş)
+
+2. Orta / Metalik & Ozonik Gövde (Karakter ve Hacim)
+Iso E Super: 22 Damla (Hacim, titreşim ve modern kemik yapı)
+
+Helional (%50): 10 Damla (Islak asfalt, metalik nem ve elektrik hissi)
+
+Hedione (%50): 22 Damla (Şeffaf yayılım ve ozonik ışık efekti)
+
+Linalyl Acetate: 5 Damla (Yeşil, ferah ve baskın parfümsü karakter)
+
+Mavi Lotus Tentürü: 4 Damla (Sucul/şeffaf zarafet, metalik sertliği "lüks"e bağlayan tutkal)
+
+Galaxolide (%40): 5 Damla (Temiz, sentetik ve bağlayıcı doku)
+
+3. Alt / Zemin ve Sabitleme (Maskülen Derinlik)
+Sedir: 12 Damla (Kuru, odunsu ve güven veren alt nota)
+
+Ardıç (Juniper): 5 Damla (Orman/reçine tonunu orta notaya bağlayan destek)
+
+Greyfurt Tentürü: 2 Damla (Hafif acı metalik narenciye dengesi)
+
+Meşe Yosunu: 1 Damla (Mineral dokunuş, baskın olmayan sabitleyici)
+
+Tarçın Tentürü: 1 Damla
+
+--- Library ---
+tincture of lemongrass
+
+tincture of ylang-ylang
+
+tincture of 0.005% tripal 
+
+tincture of blue lotus
+
+tincture of rosewood
+
+tincture of grapefruit
+
+tincture of tonga bean
+
+tincture of bergamot
+
+tincture of %20 dihydromolene
+
+tincture of vertiver
+
+tincture of vanilla peels and pods separate 
+
+tincture of Peganum harmala
+
+tincture of juniper
+
+tincture of  oudhi wood chips
+
+tincture of  frankincense
+
+tincture of  myrrh
+
+tincture of juniper tar (10%)
+
+tincture of cinnamon 
+
+tincture of cedar
+
+tincture of oakmoss
+
+tincture of %40 hedoine
+
+tincture of  %40 galaxolide
+
+tincture of %50 Iso e super
+
+tincture of %40 hedoine
+
+tincture of  cypress
+
+tincture of sweet lemon
+
+tincture of 50% linalyl acetate
+
+tincture of 50% helional
+
+--- Creamy floral vanilla accord with airy diffusion ---
+🔹 Vanilla Core (rebalanced to match reduced tonka)
+Vanilla pods tincture → 3.0 ml (slightly reduced to match lower tonka sweetness support)
+Vanilla peels tincture → 0.38 ml
+Tonka bean tincture → 0.4 ml (fixed)
+🔹 Modern Diffusion (unchanged backbone, slightly tightened for balance)
+Hedione → 3.6 ml
+Galaxolide → 3.2 ml
+Iso E Super → 2.8 ml
+🔹 Creamy Floral Layer (adjusted to your fixed blue lotus)
+Ylang-ylang tincture → 0.09 ml (slightly reduced to avoid floral dominance)
+Blue lotus tincture → 0.25 ml (fixed)
+Linalyl acetate (50%) → 1.15 ml
+🔹 Fresh Lift (re-anchored to your fixed bergamot)
+Bergamot tincture → 1.0 ml (fixed)
+Sweet lemon tincture → 0.06 ml
+🔹 Warm Spiced Add-on (new structure element)
+Cinnamon tincture → 0.5 ml (fixed addition)
+🔹 Depth (slightly reduced so spice doesn’t become muddy)
+Vetiver tincture → 0.18 ml
+Oakmoss tincture → 0.18 ml
+Frankincense tincture → 0.35 ml
+
+--- Vanilya v16 ---
+Bileşen	Miktar
+Vanilla Pods Tincture	2.8 ml
+Vanilla Peels Tincture	0.35 ml
+Tonka Bean Tincture	0.12 ml
+Iso E Super (%50)	7.5 ml
+Hedione (%40)	3.8 ml
+Galaxolide (%40)	3.0 ml
+Helional (%50)	0.6 ml
+Frankincense Tincture	0.2 ml
+
+=== Comments ===
+
+--- Evangelists apocalypse ---
+It's all about Evangelists trying to provoke God to accelerate apocalypse by supporting Zionism. Supporting genocide for a hope for another genocide which is Jesus' second coming and whose fault is it ? You guessed it, as always, Islam's ofc.
+
+=== PC ===
+
+--- PC Specs ---
+Ryzen 5 5600, 
+
+GOODRAM 32GB (2x16GB) DDR4 3600MHz CL18 1.35V, 
+
+ASRock AMD Radeon RX 9060 XT Challenger 16GB. 
+
+Crucial P3 Plus Ct1000p3pssd8 1tb 5000-3600 Mb/s Nvme M.2. 
+
+ST2000DM008-2FR102 HDD
+
+Tuf Gaming B450m-Pro gaming Motherboard.
+
+FSP VITA GM 850W PSU
+
+
+
+4x ACFAN00125A Arctic P14 PWM PST 14cm fans
+
+2x 12cm Enermax AIO Fans
+
+2x 12cm Generic 12cm Fans
+
+VG27AQ3A 2K at 144-180Hz (main)
+
+HP E242 60Hz Monitor(secondary)
+
+--- Past Linux Experience ---
+I've used Linux extensively for six months, and I've learned a lot. Maybe more than many average users who stick with a DE and only use their machine for basic stuff. I set up Solus for my main machine; it wasn't too bad. I also set up AntiX Core on a 32-bit 2010 notebook (n550 CPU 1GHz; 2GB DDR3 RAM). Many things were not readily available, and since it was 32-bit, I had to do many things manually. It was a huge challenge for someone like me who hasn't seen a terminal in his life. I also had to stick with absolute minimalism. (I've also tried many other distros: Mint, MX, Debian, Puppy, SliTaz, Bodhi, Tinycore, Xubuntu, Lubuntu, Void, Alpine, Debian, Archx32, PopOS, EndeavourOS, Ubuntu, Kubuntu.) But in the end, I was able to watch 1080p videos at 60fps, with a fully populated dwm setup. My internet connection was handled with a couple of lines of bash. I used to log in with startx... Done a lot in a short time, really. This enlightened me so much. I've realized you don't really need much hardware to do your basic stuff like surfing the internet through your browser, watching videos, and doing light office work...
+
+I tried many things on that little machine. Most of them didn't work. BTW, the Linux community is horrendous when it comes to helping newcomers. Thank God for AI. Arch Wiki is trash, BTW. Most things are not explained, and they almost never worked for my case.
+Now I still think of moving back to Linux. I tried moving back to Linux just two weeks ago. It didn't end well. This time I tried Wayland with Sway but got stuck unable to change my keyboard layout even though I selected mine during the installation. Wayland needs to be configured AGAIN, I guess—classic linux BS. Then I got turned off. I've also realized the amount of work to be done just to be able to settle. It would take weeks.
+
+First, I'm against systemd. If there is systemd, I'm sticking with Windows. There is no Linux distro that can beat Tiny10 for efficiency and convenience. Systemd is betraying Linux's own philosophy. Also, I've tasted runit's efficiency before. But configuring everything... installing and configuring the shell, aliases... ooofff! Then preparing scripts for the Waybar. It would take weeks. No, I'm not ready for that. And I don't have that free time anymore. PLUS, the games will need configuration too. Ohh, don't get me started with gaming configurations! Do I have to configure FreeSync/VRR manually too? It can wait a bit longer, I guess.
+
+TL;DR: Linux can be incredibly efficient, but only after weeks of manual configuration (shell, Waybar, gaming). LINUX IS NOT AS EFFICIENT AS WINDOWS/TINY10 WHEN ACCOUNTING FOR TIME AND CONVENIENCE. 😤
+
+--- Linux Problems ---
+Good luck removing apps without either breaking the package manager or others apps with shared dependencies.
+
+Don't forget to add --your-mom flag otherwise it doesn't work among infinite possibilities of flags. Good luck remembering them.
+
+GTK + Qt split theme management
+
+Good luck changing your keyboard system-wise without any issues.
+
+Stupid Grub...
+
+take control of system files so that you can actually configure.
+
+updates breaks your minimalist system.
+
+Almost every tutorial writer suffers from the "curse of knowledge." They assume that because they spent years memorizing git rebase -i HEAD~3 && sed -i 's/foo/bar/g' $(find /etc -name '*.conf'), everyone else wants to suffer through the raw syntax too. They treat the command line like a mandatory hazing ritual.
+
+The Linux ecosystem has a bizarre, almost Stockholm-syndrome relationship with its users. It is the only operating system where spending two hours fighting a configuration file just to make a start menu open makes you feel like an absolute genius when it finally works.
+
+basic window styling turn into a stubborn battle against hardcoded barriers
+
+"It just works and it's lightweight!"	
+It is lightweight, but it only works because you manually built the plumbing with hand tools.
+
+"You have total control!"	
+You have so much control that if you don't explicitly tell the window manager what a mouse cursor is, it completely forgets how to draw one.
+
+"Ditch the bloated corporate telemetry!"	
+Swap it for fighting upstream package maintainers who split your icon themes across hidden dependencies.
+
+
+the real Linux experience. A "simple 5-minute task" turning into a full-blown architectural wrestling match with the filesystem and permissions loop is practically a rite of passage
+
+There’s also a real cultural issue where parts of the ecosystem romanticize friction:
+
+compiling things manually becomes “learning”
+debugging broken dependencies becomes “understanding your system”
+spending two hours editing configs becomes “freedom”
+
+Meanwhile the average user is thinking:
+
+I only wanted dark mode.
+
+--- Modem ---
+ASUS H110M-K
+i3-6100
+Crucial ddr4 8gb Ram
+1Gbit Ethernet card
+120gb sata ssd
+uBit 2.5G base-t pci Ethernet card
+
+--- PC-Short ---
+Ryzen 5 5600, 
+32GB DDR4 3600MHz 
+ASRock AMD Radeon RX 9060 XT Challenger 16GB.
+
+=== Supplement ===
+
+--- Haftalık ---
+Sarsılmaz Çekirdek (Hergün & Altyapı)
+Omega 3: Her gün (Devam). Beyin zarı esnekliği ve enflamasyon kontrolü için temel yakıt.
+
+2. Kritik Denge Ayarı: D3 + K2
+
+3. Haftalık Dağılım (Rotasyon Planı)
+Haftayı iki ana operasyon moduna bölüyoruz:
+
+Mod A: Zihinsel Keskinlik ve Onarım
+Rhodiola: Güne başlarken (Duygusal direnç ve kortizol kontrolü).
+Aslan Yelesi (Lion's Mane): Sinir yollarının onarımı.
+ALCAR: Hücresel enerji üretimi (Bitmişlik hissini kırmak için denemelisin).
+Kreatin: Haftada 5 gün kuralına göre bu gruba dahil et.
+
+Mod B: Fiziksel Onarım ve Dolaşım
+Gotu Kola: Damar sağlığı ve doku onarımı (Aslan Yelesi'nden ayırdık).
+Kreatin: Haftalık dozunu tamamlamak için bugün de al.
+
+4. Durumsal Müdahale 
+Enflamasyon Hissi (Ağrı, Zehir Hissi): Akgünlük + Mürsafi + Udi Hindi / Çörekotu Yağı.
+Milk Thistle (Deve Dikeni)
+
+Gergin Akşamlar: Magnezyum Glisinat. (Gevşeme ve sinir sistemi tahliyesi).
+Flashback / Panik Atak: L-Theanine. (Acil zihinsel fren).
+
+=== Games ===
+
+--- Epic Games List ---
+ Oddsparks: An Automation Adventure
+ Hogwarts Legacy
+ Isonzo
+ Dead Island 2
+ World War Z Aftermath
+ Garden Story
+ F1® Manager 2024
+ HUMANKIND™ Standard Edition
+ Turmoil
+ Hell Let Loose
+ 
+ Ghostrunner
+ Thief
+ Islets
+ Call of the Wild: The Angler™
+ Deus Ex - Mankind Divided
+ Sail Forth
+ Surviving the Aftermath
+ EARTHLOCK
+ Turnip Boy Commits Tax Evasion
+ Q.U.B.E. ULTIMATE BUNDLE
+ 
+ Blazing Sails
+ Soulstice
+ Model Builder: Complete Edition
+ Cave Story+
+ Homeworld: Deserts of Kharak
+ Loop Hero
+ Severed Steel
+ Homeworld Remastered Collection
+ The Elder Scrolls Online
+ Train Valley 2
+ 
+ Guacamelee! Super Turbo Championship Edition
+ Guacamelee! 2
+ PAYDAY 2
+ Midnight Ghost Hunt
+ Fallout: New Vegas - Ultimate Edition
+ DEATH STRANDING
+ Beyond Blue
+ Second Extinction™
+ MORDHAU
+ Dying Light Enhanced Edition
+ 
+ shapez
+ Chess Ultra
+ Warhammer 40,000: Gladius - Relics of War
+ Call of the Sea
+ Rise of Industry
+ Warpips
+ Dishonored®: Death of the Outsider™
+ Hell is Others
+ Epistory - Typing Chronicles
+ Kerbal Space Program
+ 
+ Eximius: Seize the Frontline
+ Dishonored - Definitive Edition
+ Mortal Shell
+ Darkwood
+ Rising Hell
+ Slain: Back From Hell
+ Gloomhaven
+ ARK: Survival Evolved
+ The Captain
+ Spirit of the North
+ 
+ DOOM 64
+ Cook, Serve, Delicious! 3?!
+ Unrailed!
+ Lawn Mowing Simulator
+ Tannenberg
+ Supraland
+ Wolfenstein: The New Order
+ Borderlands 3
+ Terraforming Mars
+ Just Die Already
+ 
+ XCOM® 2
+ Insurmountable
+ The Vanishing of Ethan Carter
+ Rogue Legacy
+ Total War: WARHAMMER
+ DEMON'S TILT
+ Brothers - A Tale of Two Sons
+ Windbound
+ Relicta
+ Gods Will Fall
+ 
+ Tomb Raider GAME OF THE YEAR EDITION
+ Shadow of the Tomb Raider: Definitive Edition
+ Rise of the Tomb Raider: 20 Year Celebration
+ Salt and Sanctuary
+ Moving Out
+ Mages of Mystralia
+ Prey
+ Pathfinder: Kingmaker - Bloody Mess DLC
+ Pathfinder Kingmaker - Arcane Unleashed
+ Pathfinder: Kingmaker - Enhanced Plus Edition
+ 
+ Godfall Challenger Edition
+ Prison Architect
+ Dead by Daylight
+ while True: learn()
+ theHunter: Call of the Wild™
+ Antstream - Epic Welcome Pack
+ Guild of Dungeoneering
+ Never Alone (Kisima Ingitchuna)
+ KID A MNESIA EXHIBITION
+ Aven Colony
+ 
+ DARQ: Complete Edition
+ Among the Sleep - Enhanced Edition
+ PC Building Simulator
+ Europa Universalis IV: Evangelical Majors Unit Pack
+ Europa Universalis IV: Catholic Majors Unit Pack
+ Europa Universalis IV: Songs of Yuletide
+ Europa Universalis IV
+ Sheltered
+ Nioh: The Complete Edition
+ Yoku's Island Express
+ 
+ Automachef
+ Saints Row®: The Third™  Remastered
+ Yooka-Laylee
+ Rebel Galaxy
+ Minit
+ A Plague Tale: Innocence
+ Mothergunship
+ Train Sim World® 2
+ Verdun
+ Offworld Trading Company
+ 
+ Obduction
+ Ironcast
+ Bridge Constructor: The Walking Dead
+ The Spectrum Retreat
+ Sonic Mania
+ Horizon Chase Turbo
+ Overcooked! 2
+ Hell is other demons
+ Control
+ Frostpunk
+ 
+ Among Us
+ Pine
+ Idle Champions of the Forgotten Realms
+ Hand of Fate 2
+ Alien: Isolation
+ Ken Follett's The Pillars of the Earth
+ The First Tree
+ Tales of the Neon Sea
+ The Fall
+ Surviving Mars
+ 
+ Wargame: Red Dragon
+ Sunless Sea
+ RAGE 2
+ Absolute Drift
+ For The King
+ Metro Last Light Redux
+ Dandara: Trials of Fear Edition
+ Galactic Civilizations III
+ STAR WARS™ Battlefront™ II: Celebration Edition
+ Crying Suns
+ 
+ Jurassic World Evolution
+ Torchlight II
+ Stranded Deep
+ My Time At Portia
+ Tropico 5
+ Metro 2033 Redux
+ Defense Grid: The Awakening
+ The Long Dark
+ Cities: Skylines
+ Pillars of Eternity - Definitive Edition
+ 
+ Tyranny - Gold Edition
+ Warframe
+ MudRunner
+ Stick It To The Man!
+ Football Manager 2020
+ Watch Dogs 2
+ Rocket League®
+ Killing Floor 2
+ The Escapists 2
+ Grand Theft Auto V: Premium Edition
+
+=== Issues of Linux ===
+
+=== Personal ===
+
+--- Adrs ---
+İnönü Mahallesi, Yaşardoğu Caddesi, Erzurum Sitesi, No:40, D:1
+34295 İstanbul/Küçükçekmece
+Türkiye
+
+=== Takip Dizi Film ===
+
+--- 2026 ---
+The Lord of the Rings: The Rings of Power
+
+Rogue One: A Star Wars Story
+
+The Mandalorian
+
+Disney Star Wars Sinema ve Dizi Serisi
+
+Andor
+
+Shogun
+
+Duen
+
+House of the Dragon
+
+Ahsoka
+
+The Book of Boba Fett
+
+Obi-Wan Kenobi
+
+The Acolyte
+
+John Wick
+
+One Piece (Netflix)
+
+The Last of Us
+
+The Witcher
+
+=== Linux Issues 2 ===
+
+=== AI Prompts ===
+
+--- Music Prompts ---
+
+
+--- Coding Pre-prompt ---
+ROLE
+Senior engineer, systems architect, technical writer. Output is production software. Correctness, security, maintainability, efficiency — in that order. No drafts, no warm-up.
+
+PRECEDENCE
+When rules collide, resolve in this order:
+1. Correctness  2. Security  3. Preserved behavior  4. Fidelity to the request  5. Brevity  6. Completeness
+Never trade a higher item for a lower one.
+
+SCOPE
+Depth scales to task. One-line question, one-line answer. Full treatment — complete files, failure modes, complexity, integration — only for builds, refactors, reviews, architecture decisions. Rules apply at every length.
+
+1. LEAD
+Answer immediately. Result first, reasoning after. No preamble, no restatement, no closing summary.
+
+2. DELIVERABLES
+Full file when a file is requested. Otherwise the complete enclosing function plus the exact insertion point. No placeholders, no "...", no "rest unchanged". Omit code the change does not touch. State the change surface before writing it.
+
+3. TRUTH
+Verify anything that may have changed. Primary sources only: docs, specs, source, release notes.
+Label every load-bearing claim: [verified] [assumed] [unverified].
+Name deprecations, experimental status, superseded APIs.
+Cannot verify: state what is unknown and the exact check that resolves it.
+Never invent APIs, flags, paths, config keys, versions, citations, or numbers.
+Never assume a repo layout you have not seen. Ask, or mark it an assumption.
+
+4. ENGINEERING
+Validate untrusted input at boundaries. Secure defaults. Explicit error handling. Minimize dependencies, permissions, surface.
+No leaks, races, silent failures, undefined behavior.
+No abstraction or dependency without a stated reason. No premature optimization.
+Preserve existing behavior unless told to change it.
+Report complexity, resource cost, and failure blast radius when non-obvious.
+Flag destructive or irreversible operations above the code, not after it.
+Secrets: never inline real values, name the variable and the source.
+
+5. WRITING
+ASD-STE100: short sentences, active voice, one idea per sentence, consistent naming, explicit cause and effect. Precise terms, no oversimplification. No filler adjectives.
+
+6. ASSUMPTIONS
+No consequential assumption stays silent. One line, stated.
+Ambiguity that changes the implementation: ask one precise question, stop. Otherwise take the most reasonable reading and proceed.
+Never ask what the conversation or the files already answer.
+
+7. DISAGREEMENT
+If the requested approach is flawed, one line before implementing it. Implement the request unless the flaw is fatal; if fatal, implement the fix and note the delta.
+Opinion requested: clear position, ranked alternatives, the decisive tradeoff.
+
+8. CODE
+Idiomatic to the language and the existing style. No gratuitous rewrite.
+Include imports, dependencies, config, integration points.
+Commands executable, execution context stated.
+Separate [tested] from [expected]. Never claim it compiles or passes unless it was run.
+
+9. EFFICIENCY
+Solve the stated problem. Smallest solution meeting every requirement.
+No repeated context. No warning that does not apply here. No offer to continue or expand.
+
+10. PRE-SEND AUDIT — fix, then send
+- Placeholder, ellipsis, or "unchanged"?
+- Version, API, path, or name unverified?
+- Edge and failure paths handled?
+- Existing behavior preserved?
+- Destructive step flagged?
+- Claims labeled?
+- Answered at the right depth, or padded?
+
+PROHIBITED
+Certainly / Great question / I hope this helps / In today's fast-paced world / standalone "It depends" / emoji / restating the request / unsolicited summary / unsolicited follow-up / disclaimer that does not change a decision / confidence without basis.
+
+FINAL
+A small verified answer beats a large speculative one.
+
+--- Coding AI pre-prompt-light ---
+Senior engineer. Output production-grade software.
+
+Answer first. No preamble, no closing summary.
+No placeholders, no "...", no "rest unchanged". Provide complete modified functions with insertion points, or full files when requested.
+Verify anything that may have changed. Label relevant claims [verified], [assumed], or [unverified]. Never invent APIs, paths, versions, or numbers.
+Make the smallest correct change. Preserve existing behavior.
+Flag destructive or irreversible steps before code.
+Never claim code was tested, compiled, or verified unless actually done.
+If ambiguity changes the implementation, ask one question and stop.
+Short sentences. Active voice.
+
+BANNED: Certainly / Great question / I hope this helps / standalone "It depends" / emoji / unsolicited offers to continue.
+
+--- Coding ---
+
+

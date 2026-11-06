@@ -3,7 +3,9 @@
 
   const HOST_ID = "__cleanshelf_host__";
   const STORAGE_KEY = "cleanshelf_snippets";
+  const SETTINGS_KEY = "cleanshelf_settings";
   const UNFILED = "Unfiled";
+  const DEFAULT_LAYOUT = "grid";
 
   const existing = document.getElementById(HOST_ID);
   if (existing) {
@@ -30,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 16px;
   background: rgba(5, 5, 10, 0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -42,8 +44,8 @@
 .cs-card {
   position: relative;
   width: 100%;
-  max-width: 1000px;
-  max-height: calc(100vh - 48px);
+  max-width: 1280px;
+  max-height: calc(100vh - 32px);
   padding: 24px;
   background: #14141c;
   border: 1px solid #23232e;
@@ -76,32 +78,14 @@
 
 .cs-preview { margin: 0; font-size: 13px; color: #94a3b8; }
 
-.cs-tabs { display: flex; gap: 4px; flex-shrink: 0; }
-
-.cs-tab {
-  padding: 6px 14px;
-  background: transparent;
-  border: 1px solid #23232e;
-  color: #94a3b8;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: inherit;
-  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
-}
-
-.cs-tab.is-active { background: #23232e; color: #f9fafb; border-color: #3b3b52; }
-.cs-tab:hover:not(.is-active) { background: #1a1a24; }
-
-.cs-panel {
+.cs-view {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-.cs-panel[hidden] { display: none; }
+.cs-view[hidden] { display: none; }
 
 .cs-section { margin-bottom: 14px; }
 
@@ -183,6 +167,7 @@
   border-radius: 8px;
 }
 
+/* --- list layout (folder-grouped collapsible) --- */
 .cs-folder { margin-bottom: 8px; }
 .cs-folder:last-child { margin-bottom: 0; }
 
@@ -227,6 +212,103 @@
 
 .cs-folder.collapsed .cs-folder-items { display: none; }
 
+/* --- grid layout (3-column folder tiles) --- */
+.cs-folder-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 2px;
+}
+
+.cs-folder-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 12px;
+  background: #17171f;
+  border: 1px solid #23232e;
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.05s ease;
+  text-align: center;
+  min-height: 118px;
+}
+
+.cs-folder-tile:hover { background: #1c1c27; border-color: #3b3b52; color: #f9fafb; }
+.cs-folder-tile:active { transform: scale(0.99); }
+.cs-folder-tile:focus-visible { outline: 2px solid #6366f1; outline-offset: 1px; }
+
+.cs-folder-icon { color: #6366f1; flex-shrink: 0; }
+
+.cs-folder-tile-name {
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cs-folder-tile-count {
+  padding: 1px 8px;
+  background: #2a2a3a;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+/* --- drill-in (inside a folder in grid layout) --- */
+.cs-drill-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 4px 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid #23232e;
+}
+
+.cs-drill-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f3f4f6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cs-drill-count {
+  margin-left: auto;
+  padding: 1px 8px;
+  background: #2a2a3a;
+  border-radius: 999px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.cs-back-btn {
+  padding: 4px 10px;
+  background: #23232e;
+  color: #e5e7eb;
+  border: 1px solid #2f2f3d;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.cs-back-btn:hover { background: #2f2f3d; }
+
+.cs-drill-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* --- snippet card --- */
 .cs-item {
   position: relative;
   padding: 10px 12px;
@@ -284,77 +366,118 @@
   text-align: center;
 }
 
-.cs-folders-layout {
+/* --- options view --- */
+.cs-options-view {
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 12px;
-}
-
-.cs-folders-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   overflow-y: auto;
-  padding: 6px;
+}
+
+.cs-options-view[hidden] { display: none; }
+
+.cs-options-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.cs-options-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.cs-options-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cs-options-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
   background: #0f0f16;
   border: 1px solid #23232e;
   border-radius: 8px;
 }
 
-.cs-folder-btn {
+.cs-option-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #14141c;
+  border: 1px solid #23232e;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e5e7eb;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.cs-option-radio:hover { background: #191923; border-color: #3b3b52; }
+
+.cs-option-radio input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 999px;
+  border: 2px solid #4b5563;
+  background: transparent;
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.cs-option-radio input[type="radio"]:checked {
+  border-color: #6366f1;
+}
+
+.cs-option-radio input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: 999px;
+  background: #6366f1;
+}
+
+.cs-option-action { margin-top: 0; }
+
+.cs-option-secondary {
+  background: #23232e;
+  color: #e5e7eb;
+}
+
+.cs-option-secondary:hover:not(:disabled) { background: #2f2f3d; filter: none; }
+
+.cs-options-hint {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.cs-hidden { display: none !important; }
+
+/* --- footer / gear --- */
+.cs-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 10px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: #cbd5e1;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-family: inherit;
-  text-align: left;
-  transition: background 0.12s ease, border-color 0.12s ease;
-}
-
-.cs-folder-btn:hover { background: #17171f; }
-
-.cs-folder-btn.is-active {
-  background: #23232e;
-  border-color: #3b3b52;
-  color: #f9fafb;
-}
-
-.cs-folder-btn-count {
-  padding: 1px 8px;
-  background: #2a2a3a;
-  border-radius: 999px;
-  font-size: 10px;
-  color: #94a3b8;
+  margin-top: 12px;
   flex-shrink: 0;
 }
 
-.cs-folders-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  padding: 6px;
-  background: #0f0f16;
-  border: 1px solid #23232e;
-  border-radius: 8px;
-}
-
-.cs-folders-empty {
-  margin: 0;
-  padding: 24px;
-  color: #4b5563;
-  font-size: 12px;
-  text-align: center;
-}
+.cs-footer[hidden] { display: none; }
 
 .cs-hint {
   margin: 10px 0 0;
@@ -365,7 +488,6 @@
 }
 
 .cs-debug-toggle {
-  margin-top: 12px;
   padding: 7px 12px;
   background: #17171f;
   border: 1px solid #23232e;
@@ -374,12 +496,27 @@
   font-family: inherit;
   color: #94a3b8;
   cursor: pointer;
-  align-self: flex-start;
   user-select: none;
-  flex-shrink: 0;
 }
 
 .cs-debug-toggle:hover { background: #1c1c27; }
+
+.cs-gear {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #17171f;
+  border: 1px solid #23232e;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cs-gear:hover { background: #1c1c27; color: #f3f4f6; }
 
 .cs-debug-panel {
   margin-top: 8px;
@@ -500,23 +637,56 @@
     return e;
   }
 
-  function buildSnippetCard(snippet) {
-    const card = el("div", "cs-item");
-    card.setAttribute("role", "button");
-    card.setAttribute("tabindex", "0");
-    card.title = "Click to copy";
-    card.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
-    card.appendChild(el("p", "cs-item-content", snippet.content || ""));
-    card.appendChild(el("span", "cs-item-copy", "Copy"));
-    card.addEventListener("click", () => copySnippet(snippet));
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        copySnippet(snippet);
-      }
-    });
-    return card;
+  function makeFolderIcon() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "32");
+    svg.setAttribute("height", "32");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.8");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("class", "cs-folder-icon");
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z");
+    svg.appendChild(path);
+    return svg;
   }
+
+  function makeGearIcon() {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("width", "16");
+    svg.setAttribute("height", "16");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "1.8");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    const circle = document.createElementNS(ns, "circle");
+    circle.setAttribute("cx", "12");
+    circle.setAttribute("cy", "12");
+    circle.setAttribute("r", "3");
+    const path = document.createElementNS(ns, "path");
+    path.setAttribute("d", "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z");
+    svg.appendChild(circle);
+    svg.appendChild(path);
+    return svg;
+  }
+
+  // --- state ---
+  const state = {
+    view: "main",          // "main" | "options"
+    layout: DEFAULT_LAYOUT,
+    drilledFolder: null,
+    lastError: null,
+    lastErrorAt: null,
+    collapsedFolders: new Set(),
+    snippets: [],
+  };
 
   // --- build UI ---
   const backdrop = el("div", "cs-backdrop");
@@ -535,76 +705,113 @@
   const headerText = el("div", "cs-header-text");
   headerText.appendChild(el("h1", "cs-title", "CleanShelf"));
   headerText.appendChild(el("p", "cs-preview", "Save, folder, and copy your code snippets locally."));
-  const tabsNav = el("nav", "cs-tabs");
-  tabsNav.setAttribute("role", "tablist");
-  const tabSnippets = el("button", "cs-tab is-active", "Snippets");
-  tabSnippets.type = "button";
-  tabSnippets.dataset.tab = "snippets";
-  const tabFolders = el("button", "cs-tab", "Folders");
-  tabFolders.type = "button";
-  tabFolders.dataset.tab = "folders";
-  tabsNav.appendChild(tabSnippets);
-  tabsNav.appendChild(tabFolders);
   header.appendChild(headerText);
-  header.appendChild(tabsNav);
   card.appendChild(header);
 
-  // snippets panel
-  const snippetsPanel = el("section", "cs-panel");
-  snippetsPanel.dataset.panel = "snippets";
+  // --- MAIN VIEW ---
+  const mainView = el("div", "cs-view");
+  mainView.dataset.view = "main";
 
   const addSection = el("div", "cs-section");
-  const addLabel = el("label", "cs-label", "New snippet");
+  addSection.appendChild(el("label", "cs-label", "New snippet"));
+  const fieldRow = el("div", "cs-field-row");
   const titleInput = el("input", "cs-input");
   titleInput.type = "text";
   titleInput.placeholder = "Title";
   const folderInput = el("input", "cs-input cs-input-folder");
   folderInput.type = "text";
   folderInput.placeholder = "Folder";
-  const folderDatalist = document.createElement("datalist");
-  folderDatalist.id = "cs-folder-list";
   folderInput.setAttribute("list", "cs-folder-list");
-  const fieldRow = el("div", "cs-field-row");
   fieldRow.appendChild(titleInput);
   fieldRow.appendChild(folderInput);
+  const folderDatalist = document.createElement("datalist");
+  folderDatalist.id = "cs-folder-list";
+  addSection.appendChild(fieldRow);
   const contentInput = el("textarea", "cs-textarea");
   contentInput.placeholder = "Paste your snippet here…";
+  addSection.appendChild(contentInput);
   const saveBtn = el("button", "cs-btn", "Save");
   saveBtn.type = "button";
-  addSection.appendChild(addLabel);
-  addSection.appendChild(fieldRow);
-  addSection.appendChild(contentInput);
   addSection.appendChild(saveBtn);
-  snippetsPanel.appendChild(addSection);
+  mainView.appendChild(addSection);
+  mainView.appendChild(folderDatalist);
 
   const listSection = el("div", "cs-section cs-section-list");
   listSection.appendChild(el("label", "cs-label", "Your snippets"));
   const listEl = el("div", "cs-list");
   listSection.appendChild(listEl);
-  snippetsPanel.appendChild(listSection);
-  card.appendChild(snippetsPanel);
-  card.appendChild(folderDatalist);
+  mainView.appendChild(listSection);
+  card.appendChild(mainView);
 
-  // folders panel
-  const foldersPanel = el("section", "cs-panel");
-  foldersPanel.dataset.panel = "folders";
-  foldersPanel.hidden = true;
-  const foldersLayout = el("div", "cs-folders-layout");
-  const folderSidebar = el("aside", "cs-folders-sidebar");
-  const folderSnippets = el("div", "cs-folders-main");
-  foldersLayout.appendChild(folderSidebar);
-  foldersLayout.appendChild(folderSnippets);
-  foldersPanel.appendChild(foldersLayout);
-  card.appendChild(foldersPanel);
+  // --- OPTIONS VIEW ---
+  const optionsView = el("div", "cs-options-view");
+  optionsView.dataset.view = "options";
+  optionsView.hidden = true;
+
+  const optionsHeader = el("div", "cs-options-header");
+  const optionsBack = el("button", "cs-back-btn", "← Back");
+  optionsBack.type = "button";
+  optionsHeader.appendChild(optionsBack);
+  optionsHeader.appendChild(el("h2", "cs-options-title", "Options"));
+  optionsView.appendChild(optionsHeader);
+
+  const optionsBody = el("div", "cs-options-body");
+
+  const layoutGroup = el("div", "cs-options-group");
+  layoutGroup.appendChild(el("label", "cs-label", "Layout"));
+  const radioGrid = el("label", "cs-option-radio");
+  const inputGrid = document.createElement("input");
+  inputGrid.type = "radio";
+  inputGrid.name = "cs-layout";
+  inputGrid.value = "grid";
+  radioGrid.appendChild(inputGrid);
+  radioGrid.appendChild(el("span", null, "Folder grid (icons, 3 columns)"));
+  const radioList = el("label", "cs-option-radio");
+  const inputList = document.createElement("input");
+  inputList.type = "radio";
+  inputList.name = "cs-layout";
+  inputList.value = "list";
+  radioList.appendChild(inputList);
+  radioList.appendChild(el("span", null, "List (grouped by folder)"));
+  layoutGroup.appendChild(radioGrid);
+  layoutGroup.appendChild(radioList);
+  optionsBody.appendChild(layoutGroup);
+
+  const dataGroup = el("div", "cs-options-group");
+  dataGroup.appendChild(el("label", "cs-label", "Data"));
+  const exportBtn = el("button", "cs-btn cs-option-action", "Export JSON");
+  exportBtn.type = "button";
+  const importBtn = el("button", "cs-btn cs-option-action cs-option-secondary", "Import JSON");
+  importBtn.type = "button";
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".json,application/json";
+  fileInput.className = "cs-hidden";
+  dataGroup.appendChild(exportBtn);
+  dataGroup.appendChild(importBtn);
+  dataGroup.appendChild(fileInput);
+  dataGroup.appendChild(el("p", "cs-options-hint", "Export downloads all snippets. Import replaces all snippets."));
+  optionsBody.appendChild(dataGroup);
+
+  optionsView.appendChild(optionsBody);
+  card.appendChild(optionsView);
 
   // hint
   card.appendChild(el("p", "cs-hint", "Data stays in your browser. No tracking. No network calls."));
 
-  // debug
+  // footer (debug + gear)
+  const footer = el("div", "cs-footer");
   const btnDebug = el("button", "cs-debug-toggle", "Debug ▾");
   btnDebug.type = "button";
-  card.appendChild(btnDebug);
+  const btnGear = el("button", "cs-gear");
+  btnGear.type = "button";
+  btnGear.setAttribute("aria-label", "Options");
+  btnGear.appendChild(makeGearIcon());
+  footer.appendChild(btnDebug);
+  footer.appendChild(btnGear);
+  card.appendChild(footer);
 
+  // debug panel
   const debugPanel = el("div", "cs-debug-panel");
   debugPanel.hidden = true;
 
@@ -625,16 +832,7 @@
   debugPanel.appendChild(dbgSteps);
   card.appendChild(debugPanel);
 
-  // --- state ---
-  const state = {
-    lastError: null,
-    lastErrorAt: null,
-    collapsedFolders: new Set(),
-    activeTab: "snippets",
-    activeFolder: null,
-    snippets: [],
-  };
-
+  // --- storage helpers ---
   function recordError(where, err) {
     const msg = err && err.message ? err.message : String(err);
     state.lastError = `${where}: ${msg}`;
@@ -651,6 +849,22 @@
 
   async function saveSnippets(list) {
     await chrome.storage.local.set({ [STORAGE_KEY]: list });
+  }
+
+  async function getSettings() {
+    try {
+      const res = await chrome.storage.local.get(SETTINGS_KEY);
+      const s = res[SETTINGS_KEY];
+      return {
+        layout: (s && s.layout) === "list" ? "list" : DEFAULT_LAYOUT,
+      };
+    } catch (_) {
+      return { layout: DEFAULT_LAYOUT };
+    }
+  }
+
+  async function saveSettings(settings) {
+    await chrome.storage.local.set({ [SETTINGS_KEY]: settings });
   }
 
   function showToast(message, variant) {
@@ -690,17 +904,7 @@
     }
   }
 
-  function renderFolderList(snippets) {
-    const folders = new Set();
-    for (const s of snippets) if (s && s.folder) folders.add(s.folder);
-    folderDatalist.innerHTML = "";
-    for (const f of [...folders].sort()) {
-      const opt = document.createElement("option");
-      opt.value = f;
-      folderDatalist.appendChild(opt);
-    }
-  }
-
+  // --- rendering ---
   function groupByFolder(snippets) {
     const map = new Map();
     for (const s of snippets) {
@@ -713,86 +917,134 @@
     return names.map((name) => ({ name, items: map.get(name) }));
   }
 
-  function buildFolder(group) {
-    const wrap = el("section", "cs-folder");
-    if (state.collapsedFolders.has(group.name)) wrap.classList.add("collapsed");
-
-    const header2 = el("button", "cs-folder-header");
-    header2.type = "button";
-    header2.appendChild(el("span", "cs-folder-caret",
-      state.collapsedFolders.has(group.name) ? "▸" : "▾"));
-    header2.appendChild(el("span", null, group.name));
-    header2.appendChild(el("span", "cs-folder-count", String(group.items.length)));
-    header2.addEventListener("click", () => {
-      if (state.collapsedFolders.has(group.name)) state.collapsedFolders.delete(group.name);
-      else state.collapsedFolders.add(group.name);
-      renderList(state.snippets);
-    });
-
-    const items = el("div", "cs-folder-items");
-    const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    for (const s of ordered) items.appendChild(buildSnippetCard(s));
-
-    wrap.appendChild(header2);
-    wrap.appendChild(items);
-    return wrap;
+  function renderFolderList(snippets) {
+    const folders = new Set();
+    for (const s of snippets) if (s && s.folder) folders.add(s.folder);
+    folderDatalist.innerHTML = "";
+    for (const f of [...folders].sort()) {
+      const opt = document.createElement("option");
+      opt.value = f;
+      folderDatalist.appendChild(opt);
+    }
   }
 
-  function renderList(snippets) {
+  function buildSnippetCard(snippet) {
+    const cardEl = el("div", "cs-item");
+    cardEl.setAttribute("role", "button");
+    cardEl.setAttribute("tabindex", "0");
+    cardEl.title = "Click to copy";
+    cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
+    cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+    cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+    cardEl.addEventListener("click", () => copySnippet(snippet));
+    cardEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        copySnippet(snippet);
+      }
+    });
+    return cardEl;
+  }
+
+  function renderListView() {
     listEl.innerHTML = "";
-    if (!snippets || snippets.length === 0) {
+    const snippets = state.snippets || [];
+    if (snippets.length === 0) {
       listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
       return;
     }
     const frag = document.createDocumentFragment();
-    for (const group of groupByFolder(snippets)) frag.appendChild(buildFolder(group));
+    for (const group of groupByFolder(snippets)) {
+      const wrap = el("section", "cs-folder");
+      if (state.collapsedFolders.has(group.name)) wrap.classList.add("collapsed");
+
+      const headerBtn = el("button", "cs-folder-header");
+      headerBtn.type = "button";
+      headerBtn.appendChild(el("span", "cs-folder-caret",
+        state.collapsedFolders.has(group.name) ? "▸" : "▾"));
+      headerBtn.appendChild(el("span", null, group.name));
+      headerBtn.appendChild(el("span", "cs-folder-count", String(group.items.length)));
+      headerBtn.addEventListener("click", () => {
+        if (state.collapsedFolders.has(group.name)) state.collapsedFolders.delete(group.name);
+        else state.collapsedFolders.add(group.name);
+        renderSnippets();
+      });
+
+      const items = el("div", "cs-folder-items");
+      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      for (const s of ordered) items.appendChild(buildSnippetCard(s));
+
+      wrap.appendChild(headerBtn);
+      wrap.appendChild(items);
+      frag.appendChild(wrap);
+    }
     listEl.appendChild(frag);
-    renderFolderList(snippets);
   }
 
-  function renderFoldersTab() {
+  function renderGridView() {
+    listEl.innerHTML = "";
     const snippets = state.snippets || [];
     const groups = groupByFolder(snippets);
 
-    folderSidebar.innerHTML = "";
-    folderSnippets.innerHTML = "";
+    if (state.drilledFolder !== null) {
+      const group = groups.find((g) => g.name === state.drilledFolder);
+      if (!group) {
+        state.drilledFolder = null;
+        return renderGridView();
+      }
 
-    if (groups.length === 0) {
-      folderSnippets.appendChild(el("p", "cs-folders-empty",
-        "No folders yet. Add a snippet with a folder name."));
+      const drillHeader = el("div", "cs-drill-header");
+      const backBtn = el("button", "cs-back-btn", "← Back");
+      backBtn.type = "button";
+      backBtn.addEventListener("click", () => {
+        state.drilledFolder = null;
+        renderSnippets();
+      });
+      drillHeader.appendChild(backBtn);
+      drillHeader.appendChild(el("span", "cs-drill-title", group.name));
+      drillHeader.appendChild(el("span", "cs-drill-count", String(group.items.length)));
+      listEl.appendChild(drillHeader);
+
+      const items = el("div", "cs-drill-items");
+      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      for (const s of ordered) items.appendChild(buildSnippetCard(s));
+      listEl.appendChild(items);
       return;
     }
 
-    const names = groups.map((g) => g.name);
-    if (!state.activeFolder || !names.includes(state.activeFolder)) {
-      state.activeFolder = names[0];
+    if (groups.length === 0) {
+      listEl.appendChild(el("p", "cs-empty", "No snippets yet."));
+      return;
     }
 
+    const grid = el("div", "cs-folder-grid");
     for (const group of groups) {
-      const btn = el("button", "cs-folder-btn");
-      btn.type = "button";
-      if (group.name === state.activeFolder) btn.classList.add("is-active");
-      btn.appendChild(el("span", null, group.name));
-      btn.appendChild(el("span", "cs-folder-btn-count", String(group.items.length)));
-      btn.addEventListener("click", () => {
-        state.activeFolder = group.name;
-        renderFoldersTab();
+      const tile = el("button", "cs-folder-tile");
+      tile.type = "button";
+      tile.appendChild(makeFolderIcon());
+      tile.appendChild(el("div", "cs-folder-tile-name", group.name));
+      tile.appendChild(el("div", "cs-folder-tile-count", String(group.items.length)));
+      tile.addEventListener("click", () => {
+        state.drilledFolder = group.name;
+        renderSnippets();
       });
-      folderSidebar.appendChild(btn);
+      grid.appendChild(tile);
     }
-
-    const active = groups.find((g) => g.name === state.activeFolder);
-    if (!active) return;
-    const ordered = active.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-    for (const s of ordered) folderSnippets.appendChild(buildSnippetCard(s));
+    listEl.appendChild(grid);
   }
 
+  function renderSnippets() {
+    if (state.layout === "grid") renderGridView();
+    else renderListView();
+  }
+
+  // --- data ops ---
   async function loadSnippets() {
     try {
       const snippets = await getSnippets();
       state.snippets = snippets;
-      renderList(snippets);
-      if (state.activeTab === "folders") renderFoldersTab();
+      renderFolderList(snippets);
+      renderSnippets();
       return snippets;
     } catch (err) {
       recordError("load", err);
@@ -838,22 +1090,116 @@
   }
   saveBtn.addEventListener("click", handleSave);
 
-  // --- tabs ---
-  const tabButtons = [tabSnippets, tabFolders];
-  const tabPanels = [snippetsPanel, foldersPanel];
-
-  function setActiveTab(name) {
-    state.activeTab = name;
-    for (const b of tabButtons) b.classList.toggle("is-active", b.dataset.tab === name);
-    for (const p of tabPanels) p.hidden = p.dataset.panel !== name;
-    if (name === "folders") renderFoldersTab();
+  // --- view transitions ---
+  function showMain() {
+    state.view = "main";
+    mainView.hidden = false;
+    optionsView.hidden = true;
+    footer.hidden = false;
+    titleInput.focus();
   }
 
-  for (const b of tabButtons) {
-    b.addEventListener("click", () => setActiveTab(b.dataset.tab));
+  function showOptions() {
+    state.view = "options";
+    mainView.hidden = true;
+    optionsView.hidden = false;
+    footer.hidden = true;
+    syncLayoutRadios();
+    optionsBack.focus();
   }
 
-  // --- debug checks ---
+  optionsBack.addEventListener("click", showMain);
+  btnGear.addEventListener("click", showOptions);
+
+  // --- layout ---
+  function syncLayoutRadios() {
+    inputGrid.checked = state.layout === "grid";
+    inputList.checked = state.layout === "list";
+  }
+
+  async function setLayout(layout) {
+    if (layout !== "grid" && layout !== "list") return;
+    if (state.layout === layout) return;
+    state.layout = layout;
+    state.drilledFolder = null;
+    syncLayoutRadios();
+    try {
+      await saveSettings({ layout });
+    } catch (err) {
+      recordError("settings/save", err);
+    }
+    renderSnippets();
+  }
+
+  inputGrid.addEventListener("change", () => setLayout("grid"));
+  inputList.addEventListener("change", () => setLayout("list"));
+
+  // --- export / import ---
+  function exportSnippets() {
+    try {
+      const data = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        snippets: state.snippets || [],
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `cleanshelf-${Date.now()}.json`;
+      a.style.display = "none";
+      host.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast(`Exported ${(state.snippets || []).length} snippets`);
+    } catch (err) {
+      recordError("export", err);
+      showToast("Export failed", "error");
+    }
+  }
+  exportBtn.addEventListener("click", exportSnippets);
+
+  importBtn.addEventListener("click", () => fileInput.click());
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = "";
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        if (!data || !Array.isArray(data.snippets)) {
+          throw new Error("invalid file: missing snippets array");
+        }
+        const normalized = data.snippets.map((s) => ({
+          id: (s && typeof s.id === "string" && s.id) ? s.id : crypto.randomUUID(),
+          title: (s && typeof s.title === "string") ? s.title : "",
+          folder: (s && typeof s.folder === "string") ? s.folder : "",
+          content: (s && typeof s.content === "string") ? s.content : "",
+          createdAt: (s && typeof s.createdAt === "number") ? s.createdAt : Date.now(),
+        }));
+        const current = (state.snippets || []).length;
+        const ok = confirm(`Replace ${current} snippet${current === 1 ? "" : "s"} with ${normalized.length} from file?`);
+        if (!ok) return;
+        await saveSnippets(normalized);
+        state.drilledFolder = null;
+        await loadSnippets();
+        showToast(`Imported ${normalized.length} snippets`);
+      } catch (err) {
+        recordError("import", err);
+        showToast("Import failed", "error");
+      }
+    };
+    reader.onerror = (err) => {
+      recordError("import/read", err);
+      showToast("Import read failed", "error");
+    };
+    reader.readAsText(file);
+  });
+
+  // --- debug ---
   const checks = [
     {
       name: "storage.local API",
@@ -883,6 +1229,16 @@
       },
     },
     {
+      name: "settings readable",
+      fn: async () => {
+        const s = await getSettings();
+        if (s.layout !== "grid" && s.layout !== "list") {
+          throw new Error("invalid layout: " + String(s.layout));
+        }
+        return s.layout;
+      },
+    },
+    {
       name: "clipboard API",
       fn: () => {
         if (!navigator.clipboard || !navigator.clipboard.writeText) {
@@ -907,24 +1263,21 @@
         if (!contentInput) missing.push("content");
         if (!saveBtn) missing.push("save");
         if (!listEl) missing.push("list");
-        if (!folderSidebar) missing.push("folder-sidebar");
-        if (!folderSnippets) missing.push("folder-main");
+        if (!mainView) missing.push("mainView");
+        if (!optionsView) missing.push("optionsView");
+        if (!fileInput) missing.push("fileInput");
+        if (!btnGear) missing.push("gear");
         if (!toast) missing.push("toast");
         if (missing.length) throw new Error("missing: " + missing.join(", "));
       },
     },
     {
-      name: "tabs wired",
+      name: "view functions",
       fn: () => {
-        if (tabButtons.length !== 2) throw new Error(`expected 2 tabs, got ${tabButtons.length}`);
-        if (tabPanels.length !== 2) throw new Error(`expected 2 panels, got ${tabPanels.length}`);
-      },
-    },
-    {
-      name: "render functions",
-      fn: () => {
-        if (typeof renderList !== "function") throw new Error("renderList missing");
-        if (typeof renderFoldersTab !== "function") throw new Error("renderFoldersTab missing");
+        if (typeof renderSnippets !== "function") throw new Error("renderSnippets missing");
+        if (typeof renderGridView !== "function") throw new Error("renderGridView missing");
+        if (typeof renderListView !== "function") throw new Error("renderListView missing");
+        if (typeof exportSnippets !== "function") throw new Error("exportSnippets missing");
       },
     },
   ];
@@ -1009,7 +1362,16 @@
     if (e.target === backdrop) close();
   });
 
-  // --- initial render ---
-  loadSnippets();
-  titleInput.focus();
+  // --- init ---
+  (async () => {
+    try {
+      const settings = await getSettings();
+      state.layout = settings.layout;
+    } catch (err) {
+      recordError("settings/load", err);
+    }
+    syncLayoutRadios();
+    await loadSnippets();
+    titleInput.focus();
+  })();
 })();

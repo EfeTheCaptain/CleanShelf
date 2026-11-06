@@ -1,8 +1,13 @@
 {
   "manifest_version": 3,
   "name": "CleanShelf",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Save, folder, and copy snippets locally.",
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
   "permissions": ["storage", "clipboardWrite", "scripting", "activeTab"],
   "action": {
     "default_title": "Open CleanShelf"

@@ -1,3 +1,17 @@
+## v0.1.5
+
+- Two layout modes: grid (default, 3-column folder-tile grid with drill-in) and list (grouped-collapsible, unchanged)
+- Folder grid: click tile → drill into folder's snippets; Back returns to grid
+- Gear icon in footer opens Options view (layout radio, Export/Import JSON, hint)
+- Options replaces main view; Back returns; gear/debug footer hidden in Options
+- Export: anchor + Blob → downloads `cleanshelf-<ts>.json` with `{ version: 1, exportedAt, snippets }`
+- Import: file picker, validates snippets array, normalizes items, confirm() gate before replacing
+- Card max-width: 1280px (was 1000), backdrop padding 16px, max-height: calc(100vh - 32px)
+- Settings persisted under `cleanshelf_settings` in chrome.storage.local, loaded on init
+- Debug checks: 9 steps (added "settings readable"; "tabs wired" → "view functions"; DOM refs updated)
+- `drilledFolder` reset on layout change, import, and when folder no longer exists after save
+- No manifest changes (no new permissions)
+
 ## v0.1.4
 
 - Replaced popup window with in-page overlay (shadow DOM, closed mode)
