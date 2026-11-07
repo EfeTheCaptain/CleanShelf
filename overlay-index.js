@@ -248,7 +248,7 @@
 
   const footerBackup = el("span", "cs-footer-backup");
   footerBackup.setAttribute("data-i18n", "footer_backup");
-  footerBackup.style.cssText = "font-size: var(--cs-fs-2xs); color: var(--cs-text-dim); margin-left: 8px; white-space: nowrap;";
+  footerBackup.style.cssText = "display: inline-flex; align-items: center; font-size: var(--cs-fs-2xs); color: var(--cs-text-dim); margin-left: 8px; white-space: nowrap; line-height: 1;";
   footerLeft.appendChild(footerBackup);
 
   const btnGear = el("button", "cs-gear");

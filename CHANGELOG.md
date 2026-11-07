@@ -1,3 +1,7 @@
+## v1.2.5
+
+- UI: fixed backup hint vertical alignment next to Tips button (inline-flex, align-items center)
+
 ## v1.2.4
 
 - UI: added backup hint ("Click Gear icon to backup and export your data.") next to the Tips button in the footer, with EN/TR i18n
