@@ -135,6 +135,7 @@
       tip_subfolder: "Right-click a folder and select <strong>Insert Subfolder</strong> to group snippets.",
       tip_rename: "<strong>Double-click a Subfolder header</strong> to rename it. Right-click deletes it.",
       tip_drag_sub: "Drag & drop snippets onto a <strong>Subfolder</strong> to group them.",
+      footer_backup: "Click Gear icon to backup and export your data."
     },
     tr: {
       app_title: "CleanShelf",
@@ -267,6 +268,7 @@
       tip_subfolder: "Gruplamak için bir klasöre sağ tıklayın ve <strong>Alt Klasör Ekle</strong>'yi seçin.",
       tip_rename: "Yeniden adlandırmak için <strong>Alt Klasör başlığına çift tıklayın</strong>. Sağ tık siler.",
       tip_drag_sub: "Gruplamak için parçacıkları bir <strong>Alt Klasör'e</strong> sürükleyip bırakın.",
+      footer_backup: "Yedeklemek ve dışa aktarmak için Dişli simgesine tıklayın."
     }
   };
 

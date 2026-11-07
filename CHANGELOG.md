@@ -1,3 +1,7 @@
+## v1.2.4
+
+- UI: added backup hint ("Click Gear icon to backup and export your data.") next to the Tips button in the footer, with EN/TR i18n
+
 ## v1.2.3
 
 - Options: Language and Draft Save Rate moved to the right column under the Data section; each category is its own bordered island rectangle (no shared rectangle)
