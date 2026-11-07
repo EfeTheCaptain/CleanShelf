@@ -61,11 +61,9 @@
     if (CS.state.drilledFolder !== null) {
       ui.folderInput.value = CS.state.drilledFolder;
       ui.folderInput.disabled = true;
-      ui.folderInput.removeAttribute("list");
       ui.folderInput.placeholder = "Folder (locked)";
     } else {
       ui.folderInput.disabled = false;
-      ui.folderInput.setAttribute("list", "cs-folder-list");
       ui.folderInput.placeholder = "Folder";
     }
   }
@@ -388,6 +386,7 @@
       backBtn.addEventListener("click", () => {
         CS.state.drilledFolder = null;
         if (CS.state.editingSnippetId) cancelEdit();
+        if (CS.ui.folderInput) CS.ui.folderInput.value = "";
         updateFolderInputState();
         renderSnippets();
       });
@@ -462,7 +461,6 @@
         if (e.target.tagName === "INPUT") return;
         CS.state.drilledFolder = group.name;
         if (CS.state.editingSnippetId) cancelEdit();
-        updateFolderInputState();
         renderSnippets();
       });
       grid.appendChild(tile);

@@ -1,3 +1,8 @@
+## v0.1.33
+
+- Fixed folder input clearing when exiting drill mode (Back button / clicking tiles)
+- Removed unnecessary list attribute manipulation on disabled input
+
 ## v0.1.32
 
 - Added Draft Save Rate option (Fast: 400ms debounce, Relaxed: 2000ms debounce)
