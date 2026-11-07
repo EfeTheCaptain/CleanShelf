@@ -1,3 +1,8 @@
+## v0.1.36
+
+- Export now includes folders array and preserves type/spacer/sortOrder/updatedAt fields
+- Import normalizes spacers and sortOrder; merge mode merges folders; replace mode replaces folders
+
 ## v0.1.35
 
 - Added manual sort order via drag-and-drop reordering within folders

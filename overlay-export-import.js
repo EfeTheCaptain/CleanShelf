@@ -3,11 +3,13 @@
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
 
+
   function exportSnippets() {
     try {
       const data = {
-        version: 1,
+        version: 2, // Bumped version to indicate folders/spacers are included
         exportedAt: new Date().toISOString(),
+        folders: Array.from(CS.state.folders || []),
         snippets: CS.state.snippets || [],
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -21,14 +23,15 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      CS.toast.showToast(`Exported ${(CS.state.snippets || []).length} snippets`);
+      CS.toast.showToast(`Exported ${(CS.state.snippets || []).length} items`);
     } catch (err) {
       CS.recordError("export", err);
       CS.toast.showToast("Export failed", "error");
     }
   }
 
-  function importFromFile(file) {
+
+  function importFromFile(file, mode) {
     const reader = new FileReader();
     reader.onload = async () => {
       try {
@@ -36,20 +39,66 @@
         if (!data || !Array.isArray(data.snippets)) {
           throw new Error("invalid file: missing snippets array");
         }
+        
+        // Normalize snippets, preserving new fields
         const normalized = data.snippets.map((s) => ({
           id: (s && typeof s.id === "string" && s.id) ? s.id : crypto.randomUUID(),
           title: (s && typeof s.title === "string") ? s.title : "",
           folder: (s && typeof s.folder === "string") ? s.folder : "",
           content: (s && typeof s.content === "string") ? s.content : "",
+          type: (s && s.type === "spacer") ? "spacer" : undefined,
+          sortOrder: (s && typeof s.sortOrder === "number") ? s.sortOrder : undefined,
           createdAt: (s && typeof s.createdAt === "number") ? s.createdAt : Date.now(),
+          updatedAt: (s && typeof s.updatedAt === "number") ? s.updatedAt : undefined,
         }));
+        
         const current = (CS.state.snippets || []).length;
-        const ok = confirm(`Replace ${current} snippet${current === 1 ? "" : "s"} with ${normalized.length} from file?`);
+        let msg = "";
+        if (mode === "merge") {
+          msg = `Merge ${normalized.length} items from file into your ${current} items? (Existing items with the same ID will be overwritten).`;
+        } else {
+          msg = `Replace ${current} item${current === 1 ? "" : "s"} with ${normalized.length} from file?`;
+        }
+        
+        const ok = confirm(msg);
         if (!ok) return;
-        await CS.storage.saveSnippets(normalized);
+
+
+        let finalSnippets = normalized;
+        
+        // Handle folders
+        const fileFolders = Array.isArray(data.folders) ? data.folders : [];
+        // Extract folders from snippets just in case the export was from an older version
+        for (const s of normalized) {
+          if (s.folder && !fileFolders.includes(s.folder)) fileFolders.push(s.folder);
+        }
+
+
+        if (mode === "merge") {
+          const existing = await CS.storage.getSnippets();
+          const existingMap = new Map(existing.map(s => [s.id, s]));
+          
+          for (const s of normalized) {
+            existingMap.set(s.id, s);
+          }
+          finalSnippets = Array.from(existingMap.values());
+
+
+          // Merge folders
+          const currentFolders = await CS.storage.getFolders();
+          const mergedFolders = new Set([...currentFolders, ...fileFolders]);
+          await CS.storage.saveFolders(Array.from(mergedFolders));
+          CS.state.folders = mergedFolders;
+        } else {
+          // Replace folders
+          await CS.storage.saveFolders(fileFolders);
+          CS.state.folders = new Set(fileFolders);
+        }
+        
+        await CS.storage.saveSnippets(finalSnippets);
         CS.state.drilledFolder = null;
         await CS.snippets.load();
-        CS.toast.showToast(`Imported ${normalized.length} snippets`);
+        CS.toast.showToast(`Imported ${normalized.length} items (${mode})`);
       } catch (err) {
         CS.recordError("import", err);
         CS.toast.showToast("Import failed", "error");
@@ -61,6 +110,7 @@
     };
     reader.readAsText(file);
   }
+
 
   CS.exportImport = { exportSnippets, importFromFile };
 })();
