@@ -81,18 +81,15 @@
     ]);
     colLeft.appendChild(radioGroups.fontSize.group);
 
+    // Language and Draft Save Rate moved to right column (Data section)
     radioGroups.draftRate = buildRadioGroup("opt_draft_rate", "Draft Save Rate", "cs-draftrate", [
       { value: "fast", label: "Fast (400ms after typing stops)", i18nKey: "opt_fast", onSelect: setDraftRate },
       { value: "relaxed", label: "Relaxed (2 seconds after typing stops)", i18nKey: "opt_relaxed", onSelect: setDraftRate },
     ]);
-    colLeft.appendChild(radioGroups.draftRate.group);
-
-    // Language
     radioGroups.language = buildRadioGroup("opt_language", "Language", "cs-language", [
       { value: "en", label: "English", i18nKey: "opt_english", onSelect: setLanguage },
       { value: "tr", label: "Turkish", i18nKey: "opt_turkish", onSelect: setLanguage },
     ]);
-    colLeft.appendChild(radioGroups.language.group);
 
     // Data Group (Right Column)
     const dataGroup = el("div", "cs-options-group");
@@ -135,6 +132,12 @@
     dataHint.setAttribute("data-i18n", "opt_data_hint");
     dataGroup.appendChild(dataHint);
     colRight.appendChild(dataGroup);
+
+    // Language (right column - own island rectangle)
+    colRight.appendChild(radioGroups.language.group);
+
+    // Draft Save Rate (right column - own island rectangle)
+    colRight.appendChild(radioGroups.draftRate.group);
 
     body.appendChild(colLeft);
     body.appendChild(colRight);

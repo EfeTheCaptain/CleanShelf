@@ -1,3 +1,7 @@
+## v1.2.3
+
+- Options: Language and Draft Save Rate moved to the right column under the Data section; each category is its own bordered island rectangle (no shared rectangle)
+
 ## v1.2.2
 
 - UI: left panel ("Your snippets" + Folder/Subfolder buttons + folder tiles) now wrapped in the same bordered rectangle as the right panel form column, matching the search-box alignment fix
