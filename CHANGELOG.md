@@ -1,3 +1,7 @@
+## v0.1.39
+
+- Import now preserves subfolder type and subfolder assignment (snippets grouped under subfolders survive import/export)
+
 ## v0.1.38
 
 - Replaced Spacers with Subfolders (visual dividers + containers inside folders)

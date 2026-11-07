@@ -7,7 +7,7 @@
   function exportSnippets() {
     try {
       const data = {
-        version: 2, // Bumped version to indicate folders/spacers are included
+        version: 3, // Bumped version for subfolders
         exportedAt: new Date().toISOString(),
         folders: Array.from(CS.state.folders || []),
         snippets: CS.state.snippets || [],
@@ -46,7 +46,8 @@
           title: (s && typeof s.title === "string") ? s.title : "",
           folder: (s && typeof s.folder === "string") ? s.folder : "",
           content: (s && typeof s.content === "string") ? s.content : "",
-          type: (s && s.type === "spacer") ? "spacer" : undefined,
+          type: (s && s.type === "subfolder") ? "subfolder" : undefined, // Preserve subfolder type
+          subfolder: (s && typeof s.subfolder === "string") ? s.subfolder : undefined, // Preserve subfolder assignment
           sortOrder: (s && typeof s.sortOrder === "number") ? s.sortOrder : undefined,
           createdAt: (s && typeof s.createdAt === "number") ? s.createdAt : Date.now(),
           updatedAt: (s && typeof s.updatedAt === "number") ? s.updatedAt : undefined,
