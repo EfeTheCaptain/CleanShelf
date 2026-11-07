@@ -101,100 +101,60 @@
     return new Date(ts).toLocaleDateString();
   }
 
-  function buildSnippetCard(snippet) {
+  function buildSubfolderHeader(subfolder) {
     const { el } = CS.dom;
-    const isSubfolder = snippet.type === "subfolder";
+    const header = el("div", "cs-subfolder-header");
+    const isCollapsed = CS.state.collapsedSubfolders.has(subfolder.title);
+    header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
+    header.appendChild(el("span", null, subfolder.title || "Subfolder"));
     
-    if (isSubfolder) {
-      const box = el("div", "cs-subfolder-box");
-      const header = el("div", "cs-subfolder-header");
-      const isCollapsed = CS.state.collapsedSubfolders.has(snippet.title);
-      header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
-      header.appendChild(el("span", null, snippet.title || "Subfolder"));
-      
-      header.addEventListener("click", () => {
-        if (CS.state.collapsedSubfolders.has(snippet.title)) {
-          CS.state.collapsedSubfolders.delete(snippet.title);
-        } else {
-          CS.state.collapsedSubfolders.add(snippet.title);
-        }
-        renderSnippets();
-      });
+    header.addEventListener("click", () => {
+      if (CS.state.collapsedSubfolders.has(subfolder.title)) {
+        CS.state.collapsedSubfolders.delete(subfolder.title);
+      } else {
+        CS.state.collapsedSubfolders.add(subfolder.title);
+      }
+      renderSnippets();
+    });
 
 
-      header.addEventListener("dblclick", (e) => {
-        e.stopPropagation();
-        const newName = prompt("Subfolder name:", snippet.title || "");
-        if (newName !== null && newName.trim() !== snippet.title) {
-          const cleanName = newName.trim();
-          if (cleanName) {
-            const oldName = snippet.title;
-            snippet.title = cleanName;
-            for (const s of CS.state.snippets) {
-              if (s.subfolder === oldName) s.subfolder = cleanName;
-            }
-            CS.storage.saveSnippets(CS.state.snippets).then(() => load());
-          }
-        }
-      });
-
-
-      box.addEventListener("dragenter", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        box.classList.add("cs-drag-over");
-      });
-      
-      box.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.dataTransfer.dropEffect = "move";
-      });
-
-      box.addEventListener("dragleave", (e) => {
-        e.stopPropagation();
-        box.classList.remove("cs-drag-over");
-      });
-
-      box.addEventListener("drop", async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        box.classList.remove("cs-drag-over");
-        
-        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
-        if (!draggedId) return;
-
-        try {
-          const snippets = await CS.storage.getSnippets();
-          const dragged = snippets.find(s => s.id === draggedId);
-          if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== snippet.title) {
-            dragged.subfolder = snippet.title;
-            await CS.storage.saveSnippets(snippets);
-            await load();
-            CS.toast.showToast(`Moved to ${snippet.title}`);
-          }
-        } catch (err) {
-          CS.recordError("move-subfolder", err);
-        }
-      });
-
-      box.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (confirm(`Delete subfolder "${snippet.title}"? Snippets inside will be moved to the main folder.`)) {
-          CS.state.snippets = CS.state.snippets.filter(s => s.id !== snippet.id);
+    header.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      const newName = prompt("Subfolder name:", subfolder.title || "");
+      if (newName !== null && newName.trim() !== subfolder.title) {
+        const cleanName = newName.trim();
+        if (cleanName) {
+          const oldName = subfolder.title;
+          subfolder.title = cleanName;
           for (const s of CS.state.snippets) {
-            if (s.subfolder === snippet.title) delete s.subfolder;
+            if (s.subfolder === oldName) s.subfolder = cleanName;
           }
           CS.storage.saveSnippets(CS.state.snippets).then(() => load());
         }
-      });
-
-      box.appendChild(header);
-      return box;
-    }
+      }
+    });
 
 
+    header.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (confirm(`Delete subfolder "${subfolder.title}"? Snippets inside will be moved to the main folder.`)) {
+        CS.state.snippets = CS.state.snippets.filter(s => s.id !== subfolder.id);
+        for (const s of CS.state.snippets) {
+          if (s.subfolder === subfolder.title) delete s.subfolder;
+        }
+        CS.storage.saveSnippets(CS.state.snippets).then(() => load());
+      }
+    });
+
+
+    return header;
+  }
+
+  function buildSnippetCard(snippet) {
+    const { el } = CS.dom;
+    // (The isSubfolder check and header rendering are now gone, because it's in Chunk 1)
+    
     const cardEl = el("div", "cs-item");
     cardEl.setAttribute("role", "button");
     cardEl.setAttribute("tabindex", "0");
@@ -611,63 +571,21 @@
 
 
       listEl.appendChild(drillHeader);
-
       const itemsContainer = el("div", "cs-drill-items");
       if (CS.state.compactView) itemsContainer.classList.add("cs-compact");
 
 
-      // Separate subfolders and unassigned snippets
-      const subfolders = group.items.filter(s => s.type === "subfolder");
-      const unassigned = group.items.filter(s => s.type !== "subfolder" && !s.subfolder);
-
-
-      // Render unassigned snippets first
-      for (const s of unassigned) {
-        itemsContainer.appendChild(buildSnippetCard(s));
-      }
-
-
-      // Render subfolders and their children
-      for (const sub of subfolders) {
-        const box = buildSnippetCard(sub); // Renders header inside .cs-subfolder-box
-
-        const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
-        if (!isCollapsed) {
-          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
-          if (subItems.length > 0) {
-            const subContainer = el("div", "cs-subfolder-items");
-            for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
-            box.appendChild(subContainer);
-          }
-        }
-
-        itemsContainer.appendChild(box);
-      }
-
-
-      if (group.items.length === 0) {
-        itemsContainer.appendChild(el("p", "cs-empty", "This folder is empty."));
-      }
-
-      // Handle dropping into main area (removes subfolder assignment)
+      // 1. Root Drop Zone Logic (to drag OUT of a subfolder)
       itemsContainer.addEventListener("dragover", (e) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        if (e.target === itemsContainer) {
-          itemsContainer.classList.add("cs-drag-over");
-        }
+        if (e.target === itemsContainer) itemsContainer.classList.add("cs-drag-over");
       });
-
       itemsContainer.addEventListener("dragleave", (e) => {
-        if (e.target === itemsContainer) {
-          itemsContainer.classList.remove("cs-drag-over");
-        }
+        if (!itemsContainer.contains(e.relatedTarget)) itemsContainer.classList.remove("cs-drag-over");
       });
-
       itemsContainer.addEventListener("drop", async (e) => {
         itemsContainer.classList.remove("cs-drag-over");
-        if (e.target !== itemsContainer) return;
-        
+        if (e.target !== itemsContainer) return; 
         e.preventDefault();
         e.stopPropagation();
         
@@ -686,6 +604,81 @@
         }
       });
 
+
+      const subfolders = group.items.filter(s => s.type === "subfolder");
+      const unassigned = group.items.filter(s => s.type !== "subfolder" && !s.subfolder);
+
+
+      // 2. Render unassigned snippets
+      for (const s of unassigned) {
+        itemsContainer.appendChild(buildSnippetCard(s));
+      }
+
+
+      // 3. Render subfolder boxes
+      for (const sub of subfolders) {
+        const box = el("div", "cs-subfolder-box");
+        
+        // Box Drop Zone Logic (to drag INTO a subfolder)
+        box.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          box.classList.add("cs-drag-over");
+        });
+        box.addEventListener("dragleave", (e) => {
+          if (!box.contains(e.relatedTarget)) box.classList.remove("cs-drag-over");
+        });
+        box.addEventListener("drop", async (e) => {
+          box.classList.remove("cs-drag-over");
+          if (e.target !== box) return; 
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+          if (!draggedId) return;
+
+
+          try {
+            const snippets = await CS.storage.getSnippets();
+            const dragged = snippets.find(s => s.id === draggedId);
+            if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== sub.title) {
+              dragged.subfolder = sub.title;
+              
+              const maxOrder = Math.max(0, ...snippets.filter(s => s.subfolder === sub.title).map(s => s.sortOrder || 0));
+              dragged.sortOrder = maxOrder + 1;
+              
+              CS.state.sortMode = "manual";
+              await CS.storage.saveSnippets(snippets);
+              await load();
+              CS.toast.showToast(`Moved to ${sub.title}`);
+            }
+          } catch (err) {
+            CS.recordError("move-subfolder", err);
+          }
+        });
+
+
+        box.appendChild(buildSubfolderHeader(sub));
+
+
+        const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
+        if (!isCollapsed) {
+          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
+          if (subItems.length > 0) {
+            const subContainer = el("div", "cs-subfolder-items");
+            for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
+            box.appendChild(subContainer);
+          }
+        }
+        
+        itemsContainer.appendChild(box);
+      }
+
+
+      if (group.items.length === 0) {
+        itemsContainer.appendChild(el("p", "cs-empty", "This folder is empty."));
+      }
+      
       listEl.appendChild(itemsContainer);
       return;
     }
