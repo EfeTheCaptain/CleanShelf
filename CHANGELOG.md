@@ -1,3 +1,9 @@
+## v0.2.0
+
+- Fixed fatal JS initialization error in overlay-index.js: backdrop click listener referenced contextMenu before const declaration (moved listener after contextMenu definition)
+- Fixed Tips panel: Subfolder rename tip updated to "Double-click a Subfolder header to rename it. Right-click deletes it (with undo)."
+- Expanded Debug system: added "folders readable" check to verify folders storage integrity
+
 ## v0.1.48
 
 - Fixed drag-and-drop: added dragover/dragleave/drop listeners back to subfolder header (buildSubfolderHeader); removed `if (e.target !== ...) return` guards from both root (itemsContainer/items) and box drop handlers so drops work on empty space; added dragged.folder = sub.folder on move-into-subfolder; List View now has root drop zone (drag OUT to ungroup) + renders subfolder headers + children

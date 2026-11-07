@@ -32,6 +32,14 @@
       },
     },
     {
+      name: "folders readable",
+      fn: async () => {
+        const list = await CS.storage.getFolders();
+        if (!Array.isArray(list)) throw new Error("not an array");
+        return `${list.length} folders`;
+      },
+    },
+    {
       name: "settings readable",
       fn: async () => {
         const s = await CS.storage.getSettings();

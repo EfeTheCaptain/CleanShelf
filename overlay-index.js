@@ -226,7 +226,7 @@
     { text: "Drag & drop snippets inside a folder to <strong>manually reorder them</strong>.", type: "normal" },
     { text: "Use the <strong>+ Snippet</strong> button inside a folder to quickly add and focus on a new entry.", type: "normal" },
     { text: "Right-click a folder and select <strong>Insert Subfolder</strong> to group your snippets visually.", type: "normal" },
-    { text: "<strong>Double-click a Subfolder</strong> to rename it (e.g., 'Frontend', 'Backend').", type: "normal" },
+    { text: "<strong>Double-click a Subfolder header</strong> to rename it. Right-click deletes it (with undo).", type: "normal" },
     { text: "Drag & drop snippets onto a <strong>Subfolder</strong> to group them.", type: "normal" },
   ];
 
@@ -254,15 +254,6 @@
     }
   });
 
-
-  // Close tips on outside click
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
-    if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();
-    if (!tipsPanel.hidden && !tipsPanel.contains(e.target) && !btnTips.contains(e.target)) {
-      tipsPanel.hidden = true;
-    }
-  });
 
   const contextMenu = el("div", "cs-context-menu");
   contextMenu.hidden = true;
@@ -443,6 +434,9 @@
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
     if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();
+    if (!tipsPanel.hidden && !tipsPanel.contains(e.target) && !btnTips.contains(e.target)) {
+      tipsPanel.hidden = true;
+    }
   });
 
   backdrop.addEventListener("contextmenu", (e) => {
