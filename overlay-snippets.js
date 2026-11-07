@@ -538,6 +538,7 @@
 
   function renderSnippets() {
     updateLeftActionBtn();
+    updateFolderInputState(); // Sync input state with drilledFolder on every render
     if (CS.state.settings.layout === "grid") renderGridView();
     else renderListView();
   }

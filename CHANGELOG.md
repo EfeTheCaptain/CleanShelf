@@ -1,3 +1,7 @@
+## v0.1.34
+
+- Fixed folder input sync: renderSnippets() now calls updateFolderInputState() every render to lock/unlock input correctly
+
 ## v0.1.33
 
 - Fixed folder input clearing when exiting drill mode (Back button / clicking tiles)
