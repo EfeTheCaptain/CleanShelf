@@ -18,6 +18,7 @@
     originalEditData: null,
     compactView: false,
     sortMode: "newest",
+    draggingSnippetId: null
   });
 
   CS.recordError = (where, err) => {

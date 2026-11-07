@@ -1,3 +1,10 @@
+## v0.1.42
+
+- Fixed drag & drop: added draggingSnippetId state fallback for bulletproof dataTransfer
+- Added dragenter to subfolder headers for proper drop zone registration
+- Folder counts now show subfolder breakdown (e.g., "14 · 2sf")
+- ItemsContainer drop handler removes subfolder assignment when dropped into main area
+
 ## v0.1.41
 
 - Added + Subfolder button next to + Snippet button when inside a folder

@@ -27,14 +27,12 @@
       map.get(key).push(s);
     }
     
-    // Sort items within folders
     for (const [key, items] of map.entries()) {
       if (CS.state.sortMode === "title") {
         items.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
       } else if (CS.state.sortMode === "manual") {
         items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       } else {
-        // Default: newest first
         items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       }
     }
@@ -42,7 +40,13 @@
 
     const names = [...map.keys()].filter((k) => k !== CS.constants.UNFILED).sort();
     if (map.has(CS.constants.UNFILED)) names.push(CS.constants.UNFILED);
-    return names.map((name) => ({ name, items: map.get(name) }));
+    
+    return names.map((name) => {
+      const items = map.get(name);
+      const subfolders = items.filter(s => s.type === "subfolder").length;
+      const snippetCount = items.length - subfolders;
+      return { name, items, subfolders, snippetCount };
+    });
   }
 
   function renderFolderList(snippets) {
@@ -100,15 +104,13 @@
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
     const isSubfolder = snippet.type === "subfolder";
-
+    
     if (isSubfolder) {
-      // --- SUBFOLDER HEADER ---
       const header = el("div", "cs-subfolder-header");
       const isCollapsed = CS.state.collapsedSubfolders.has(snippet.title);
       header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
       header.appendChild(el("span", null, snippet.title || "Subfolder"));
-
-      // Click to collapse/expand
+      
       header.addEventListener("click", () => {
         if (CS.state.collapsedSubfolders.has(snippet.title)) {
           CS.state.collapsedSubfolders.delete(snippet.title);
@@ -118,41 +120,57 @@
         renderSnippets();
       });
 
-      // Double click to rename
+
       header.addEventListener("dblclick", (e) => {
         e.stopPropagation();
         const newName = prompt("Subfolder name:", snippet.title || "");
         if (newName !== null && newName.trim() !== snippet.title) {
           const cleanName = newName.trim();
           if (cleanName) {
+            const oldName = snippet.title;
             snippet.title = cleanName;
-            // Update all snippets inside this subfolder
             for (const s of CS.state.snippets) {
-              if (s.subfolder === snippet.title) s.subfolder = cleanName;
+              if (s.subfolder === oldName) s.subfolder = cleanName;
             }
             CS.storage.saveSnippets(CS.state.snippets).then(() => load());
           }
         }
       });
 
-      // Allow dropping snippets onto the subfolder header
-      header.addEventListener("dragover", (e) => {
+
+      // Fixed Drag & Drop for Subfolders
+      header.addEventListener("dragenter", (e) => {
         e.preventDefault();
         e.stopPropagation();
         header.classList.add("cs-drag-over");
       });
-      header.addEventListener("dragleave", () => header.classList.remove("cs-drag-over"));
+      
+      header.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = "move";
+      });
+
+
+      header.addEventListener("dragleave", (e) => {
+        e.stopPropagation();
+        header.classList.remove("cs-drag-over");
+      });
+
+
       header.addEventListener("drop", async (e) => {
         e.preventDefault();
         e.stopPropagation();
         header.classList.remove("cs-drag-over");
-        const draggedId = e.dataTransfer.getData("text/plain");
+        
+        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
         if (!draggedId) return;
+
 
         try {
           const snippets = await CS.storage.getSnippets();
           const dragged = snippets.find(s => s.id === draggedId);
-          if (dragged && dragged.type !== "subfolder") {
+          if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== snippet.title) {
             dragged.subfolder = snippet.title;
             await CS.storage.saveSnippets(snippets);
             await load();
@@ -163,7 +181,7 @@
         }
       });
 
-      // Right-click to delete subfolder
+
       header.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -176,10 +194,11 @@
         }
       });
 
+
       return header;
     }
 
-    // --- REGULAR SNIPPET CARD ---
+
     const cardEl = el("div", "cs-item");
     cardEl.setAttribute("role", "button");
     cardEl.setAttribute("tabindex", "0");
@@ -187,13 +206,15 @@
     cardEl.draggable = true;
     cardEl.dataset.id = snippet.id;
 
+
     cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
     cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+    
     const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
     if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
     cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+    
     cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
-
     cardEl.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -202,32 +223,36 @@
       }
     });
 
-    // Drag Start
+
     cardEl.addEventListener("dragstart", (e) => {
+      CS.state.draggingSnippetId = snippet.id;
       e.dataTransfer.setData("text/plain", snippet.id);
       e.dataTransfer.effectAllowed = "move";
       setTimeout(() => cardEl.classList.add("cs-dragging"), 0);
     });
 
+
     cardEl.addEventListener("dragend", () => {
+      CS.state.draggingSnippetId = null;
       cardEl.classList.remove("cs-dragging");
       document.querySelectorAll(".cs-drop-before, .cs-drop-after, .cs-drag-over").forEach(el => {
         el.classList.remove("cs-drop-before", "cs-drop-after", "cs-drag-over");
       });
     });
 
-    // Smart Drag Over (Top 50% vs Bottom 50%)
+
     cardEl.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.stopPropagation();
-
+      
       document.querySelectorAll(".cs-drop-before, .cs-drop-after").forEach(el => {
         if (el !== cardEl) el.classList.remove("cs-drop-before", "cs-drop-after");
       });
 
+
       const rect = cardEl.getBoundingClientRect();
       const offset = e.clientY - rect.top;
-
+      
       if (offset < rect.height / 2) {
         cardEl.classList.add("cs-drop-before");
         cardEl.classList.remove("cs-drop-after");
@@ -237,45 +262,50 @@
       }
     });
 
+
     cardEl.addEventListener("dragleave", () => {
       cardEl.classList.remove("cs-drop-before", "cs-drop-after");
     });
+
 
     // Drop to reorder
     cardEl.addEventListener("drop", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-
+      
       const isBefore = cardEl.classList.contains("cs-drop-before");
       cardEl.classList.remove("cs-drop-before", "cs-drop-after");
-
-      const draggedId = e.dataTransfer.getData("text/plain");
+      
+      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
       if (!draggedId || draggedId === snippet.id) return;
+
 
       try {
         const snippets = await CS.storage.getSnippets();
         const dragged = snippets.find(s => s.id === draggedId);
         if (!dragged) return;
 
-        // Inherit the target's folder and subfolder context
-        dragged.folder = snippet.folder;
-        dragged.subfolder = snippet.subfolder;
 
-        // Calculate new array order
+        dragged.folder = snippet.folder;
+        dragged.subfolder = snippet.subfolder; // Inherit target's subfolder
+
+
         const currentFolderItems = snippets
           .filter(s => s.folder === snippet.folder && s.subfolder === snippet.subfolder && s.type !== "subfolder")
           .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-
+        
         const targetIdx = currentFolderItems.findIndex(s => s.id === snippet.id);
         const insertIdx = isBefore ? targetIdx : targetIdx + 1;
 
+
         const draggedIdx = currentFolderItems.findIndex(s => s.id === draggedId);
         if (draggedIdx !== -1) currentFolderItems.splice(draggedIdx, 1);
-
+        
         currentFolderItems.splice(insertIdx, 0, dragged);
 
-        // Reassign sortOrder
+
         currentFolderItems.forEach((s, idx) => { s.sortOrder = idx; });
+
 
         CS.state.sortMode = "manual";
         await CS.storage.saveSnippets(snippets);
@@ -284,6 +314,7 @@
         CS.recordError("drag-reorder", err);
       }
     });
+
 
     return cardEl;
   }
@@ -492,7 +523,10 @@
         CS.state.collapsedFolders.has(group.name) ? "▸" : "▾"));
       const nameSpan = el("span", null, group.name);
       headerBtn.appendChild(nameSpan);
-      headerBtn.appendChild(el("span", "cs-folder-count", String(group.items.length)));
+      headerBtn.appendChild(el("span", "cs-folder-count",
+        group.subfolders > 0
+          ? `${group.snippetCount} · ${group.subfolders}sf`
+          : String(group.snippetCount)));
       
       bindFolderContextMenu(headerBtn, group.name);
       bindFolderDragDrop(headerBtn, group.name);
@@ -547,7 +581,10 @@
       const titleSpan = el("span", "cs-drill-title", group.name);
       drillHeader.appendChild(titleSpan);
       
-      const countSpan = el("span", "cs-drill-count", String(group.items.length));
+      const countSpan = el("span", "cs-drill-count",
+        group.subfolders > 0
+          ? `${group.snippetCount} · ${group.subfolders}sf`
+          : String(group.snippetCount));
       drillHeader.appendChild(countSpan);
       
       // Toggle Compact View
@@ -614,6 +651,23 @@
         itemsContainer.appendChild(el("p", "cs-empty", "This folder is empty."));
       }
 
+      // Handle dropping into main area (removes subfolder assignment)
+      itemsContainer.addEventListener("dragover", (e) => e.preventDefault());
+      itemsContainer.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+        if (!draggedId) return;
+        
+        const snippets = await CS.storage.getSnippets();
+        const dragged = snippets.find(s => s.id === draggedId);
+        
+        if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
+          delete dragged.subfolder;
+          await CS.storage.saveSnippets(snippets);
+          await load();
+        }
+      });
+
       listEl.appendChild(itemsContainer);
       return;
     }
@@ -630,7 +684,10 @@
       tile.appendChild(makeFolderIcon());
       const nameDiv = el("div", "cs-folder-tile-name", group.name);
       tile.appendChild(nameDiv);
-      tile.appendChild(el("div", "cs-folder-tile-count", String(group.items.length)));
+      tile.appendChild(el("div", "cs-folder-tile-count",
+        group.subfolders > 0
+          ? `${group.snippetCount} · ${group.subfolders}sf`
+          : String(group.snippetCount)));
       
       bindFolderContextMenu(tile, group.name);
       bindFolderDragDrop(tile, group.name);
