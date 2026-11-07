@@ -648,6 +648,7 @@
 
   function updateLeftActionBtn() {
     const btn = CS.ui.leftActionBtn;
+    const subBtn = CS.ui.leftSubfolderBtn;
     if (!btn) return;
     
     if (CS.state.drilledFolder !== null) {
@@ -656,12 +657,20 @@
         e.preventDefault();
         startInlineSnippetPrompt();
       };
+      if (subBtn) {
+        subBtn.hidden = false;
+        subBtn.onclick = (e) => {
+          e.preventDefault();
+          insertSubfolder(CS.state.drilledFolder);
+        };
+      }
     } else {
       btn.textContent = "+ Folder";
       btn.onclick = (e) => {
         e.preventDefault();
         createNewFolder();
       };
+      if (subBtn) subBtn.hidden = true;
     }
   }
 
@@ -711,6 +720,32 @@
     
     input.addEventListener("blur", onBlur);
     input.addEventListener("keydown", onKey);
+  }
+
+
+  async function insertSubfolder(folderName) {
+    const name = prompt("New subfolder name:");
+    if (!name || !name.trim()) return;
+    
+    try {
+      const snippets = await CS.storage.getSnippets();
+      const newSubfolder = {
+        id: crypto.randomUUID(),
+        type: "subfolder",
+        title: name.trim(),
+        folder: folderName,
+        createdAt: Date.now(),
+        sortOrder: -1
+      };
+      snippets.push(newSubfolder);
+      CS.state.sortMode = "manual";
+      await CS.storage.saveSnippets(snippets);
+      await load();
+      CS.toast.showToast("Subfolder created");
+    } catch (err) {
+      CS.recordError("insert-subfolder", err);
+      CS.toast.showToast("Failed to create subfolder", "error");
+    }
   }
 
 
@@ -990,6 +1025,7 @@
   CS.snippets = {
     groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
     renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder, updateLeftActionBtn, getUniqueTitle
+    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder,
+    insertSubfolder, updateLeftActionBtn, getUniqueTitle
   };
 })();

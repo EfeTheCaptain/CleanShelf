@@ -69,12 +69,29 @@
   const leftHeader = el("div", "cs-input-header");
   leftHeader.appendChild(el("label", "cs-label", "Your snippets"));
   
+  const leftBtnGroup = el("div");
+  leftBtnGroup.style.display = "flex";
+  leftBtnGroup.style.gap = "6px";
+
+
   const leftActionBtn = el("button", "cs-debug-toggle", "+ Folder");
   leftActionBtn.type = "button";
   leftActionBtn.style.padding = "2px 8px";
   leftActionBtn.style.marginTop = "0";
-  CS.ui.leftActionBtn = leftActionBtn; // Store for dynamic updates
-  leftHeader.appendChild(leftActionBtn);
+  CS.ui.leftActionBtn = leftActionBtn;
+
+
+  const leftSubfolderBtn = el("button", "cs-debug-toggle", "+ Subfolder");
+  leftSubfolderBtn.type = "button";
+  leftSubfolderBtn.style.padding = "2px 8px";
+  leftSubfolderBtn.style.marginTop = "0";
+  leftSubfolderBtn.hidden = true;
+  CS.ui.leftSubfolderBtn = leftSubfolderBtn;
+
+
+  leftBtnGroup.appendChild(leftActionBtn);
+  leftBtnGroup.appendChild(leftSubfolderBtn);
+  leftHeader.appendChild(leftBtnGroup);
   
   listSection.appendChild(leftHeader);
   const listEl = el("div", "cs-list");
@@ -347,22 +364,10 @@
     CS.ui.contextMenu.hide();
   });
 
-  insertSubfolderItem.addEventListener("click", async () => {
+  insertSubfolderItem.addEventListener("click", () => {
     const folderName = ctx.targetData;
-    const snippets = await CS.storage.getSnippets();
-    const newSubfolder = {
-      id: crypto.randomUUID(),
-      type: "subfolder",
-      title: "New Subfolder",
-      folder: folderName,
-      createdAt: Date.now(),
-      sortOrder: -1
-    };
-    snippets.push(newSubfolder);
-    CS.state.sortMode = "manual";
-    await CS.storage.saveSnippets(snippets);
-    await CS.snippets.load();
     CS.ui.contextMenu.hide();
+    if (folderName) CS.snippets.insertSubfolder(folderName);
   });
 
   function showMain() {

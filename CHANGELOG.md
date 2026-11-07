@@ -1,3 +1,8 @@
+## v0.1.41
+
+- Added + Subfolder button next to + Snippet button when inside a folder
+- insertSubfolder shared function used by both button and context menu
+
 ## v0.1.40
 
 - Functional subfolders: collapsible headers, rename propagates to child snippets
