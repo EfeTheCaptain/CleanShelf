@@ -343,7 +343,10 @@
   flex-direction: column;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 4px;
+  background: var(--cs-bg-panel);
+  border: 1px solid var(--cs-border);
+  border-radius: 10px;
+  padding: 16px;
 }
 
 .cs-right-panel {

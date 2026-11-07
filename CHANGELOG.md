@@ -1,3 +1,7 @@
+## v1.2.2
+
+- UI: left panel ("Your snippets" + Folder/Subfolder buttons + folder tiles) now wrapped in the same bordered rectangle as the right panel form column, matching the search-box alignment fix
+
 ## v1.2.1
 
 - UI: search box moved into the right panel form column so it shares the same tile/rectangle as the New snippet fields and Save button; left panel folder tiles start flush under the header
