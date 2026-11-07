@@ -1,3 +1,7 @@
+## v1.1.7
+
+- Verified drag-and-drop subfolder drop zones: buildSubfolderHeader has dragover/dragleave/drop listeners; itemsContainer and box drop guards removed so drops work on empty space; root drop removes subfolder assignment; renderListView splits subfolders/unassigned with root drop zone
+
 ## v1.1.6
 
 - Removed unnecessary options view re-render in setLanguage(): applyTranslations() updates all [data-i18n] labels in place, no DOM replacement needed — avoids orphaned radio inputs and stale view references
