@@ -1,3 +1,7 @@
+## v1.2.1
+
+- UI: search box moved into the right panel form column so it shares the same tile/rectangle as the New snippet fields and Save button; left panel folder tiles start flush under the header
+
 ## v1.2.0
 
 - Fixed search focus on reopen: onKey typing keys now preventDefault/stopPropagation and inject the character directly into searchInput, plus a short focus retry loop so typing never goes to the page behind the overlay

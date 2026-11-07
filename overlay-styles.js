@@ -321,16 +321,13 @@
 .cs-view[hidden] { display: none; }
 
 .cs-search-row {
-  display: flex;
-  justify-content: flex-end;
   margin-bottom: 12px;
   flex-shrink: 0;
-  padding-right: 16px;
 }
 
 .cs-search-input {
-  max-width: 500px;
   width: 100%;
+  max-width: none;
 }
 
 .cs-main-layout {

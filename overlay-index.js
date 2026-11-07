@@ -67,7 +67,7 @@
     CS.snippets.renderSnippets();
   });
   searchRow.appendChild(searchInput);
-  mainView.appendChild(searchRow);
+  // searchRow is moved into the right panel below so it shares the form column
 
   const mainLayout = el("div", "cs-main-layout");
   
@@ -113,6 +113,7 @@
 
   // --- RIGHT PANEL ---
   const rightPanel = el("div", "cs-right-panel");
+  rightPanel.prepend(searchRow);
   const inputHeader = el("div", "cs-input-header");
   
   const formLabel = el("label", "cs-label", "New snippet");
