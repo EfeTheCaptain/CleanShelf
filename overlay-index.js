@@ -25,7 +25,6 @@
   CS.ui.backdrop = backdrop;
   CS.ui.card = card;
 
-  // Prevent browser right-click on the card (except inputs)
   card.addEventListener("contextmenu", (e) => {
     if (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
       e.preventDefault();
@@ -73,13 +72,11 @@
   leftBtnGroup.style.display = "flex";
   leftBtnGroup.style.gap = "6px";
 
-
   const leftActionBtn = el("button", "cs-debug-toggle", "+ Folder");
   leftActionBtn.type = "button";
   leftActionBtn.style.padding = "2px 8px";
   leftActionBtn.style.marginTop = "0";
   CS.ui.leftActionBtn = leftActionBtn;
-
 
   const leftSubfolderBtn = el("button", "cs-debug-toggle", "+ Subfolder");
   leftSubfolderBtn.type = "button";
@@ -87,7 +84,6 @@
   leftSubfolderBtn.style.marginTop = "0";
   leftSubfolderBtn.hidden = true;
   CS.ui.leftSubfolderBtn = leftSubfolderBtn;
-
 
   leftBtnGroup.appendChild(leftActionBtn);
   leftBtnGroup.appendChild(leftSubfolderBtn);
@@ -180,17 +176,14 @@
   footerLeft.style.display = "flex";
   footerLeft.style.gap = "8px";
 
-
   const btnDebug = el("button", "cs-debug-toggle", "Debug ▾");
   btnDebug.type = "button";
   
   const btnTips = el("button", "cs-debug-toggle", "? Tips");
   btnTips.type = "button";
 
-
   footerLeft.appendChild(btnDebug);
   footerLeft.appendChild(btnTips);
-
 
   const btnGear = el("button", "cs-gear");
   btnGear.type = "button";
@@ -204,18 +197,14 @@
   CS.ui.btnDebug = btnDebug;
   CS.ui.btnGear = btnGear;
 
-
   // ---- TIPS PANEL ----
   const tipsPanel = el("div", "cs-tips-panel");
   tipsPanel.hidden = true;
 
-
   const tipsHeader = el("div", "cs-tips-header", "CleanShelf Tips");
   tipsPanel.appendChild(tipsHeader);
 
-
   const tipsList = el("ul", "cs-tips-list");
-
 
   const tipsData = [
     { text: "<strong>Right-click</strong> snippets or folders for more options (Rename, Delete, Sort, Subfolders).", type: "normal" },
@@ -230,7 +219,6 @@
     { text: "Drag & drop snippets onto a <strong>Subfolder</strong> to group them.", type: "normal" },
   ];
 
-
   for (const tip of tipsData) {
     const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
     li.innerHTML = tip.text;
@@ -239,8 +227,6 @@
   tipsPanel.appendChild(tipsList);
   shadow.appendChild(tipsPanel);
 
-
-  // Toggle Tips Panel
   btnTips.addEventListener("click", (e) => {
     e.stopPropagation();
     const opening = tipsPanel.hidden;
@@ -254,7 +240,7 @@
     }
   });
 
-
+  // ---- CONTEXT MENU ----
   const contextMenu = el("div", "cs-context-menu");
   contextMenu.hidden = true;
   
@@ -361,6 +347,18 @@
     if (folderName) CS.snippets.insertSubfolder(folderName);
   });
 
+  // ---- DEBUG PANEL ----
+  const debugBuilt = CS.debug.buildDebugPanel();
+  CS.ui.debug = debugBuilt;
+  card.appendChild(debugBuilt.panel);
+
+  btnDebug.addEventListener("click", () => {
+    const opening = debugBuilt.panel.hidden;
+    debugBuilt.panel.hidden = !opening;
+    btnDebug.textContent = opening ? "Debug ▴" : "Debug ▾";
+  });
+
+  // ---- VIEW TRANSITIONS ----
   function showMain() {
     CS.state.view = "main";
     mainView.hidden = false;
@@ -387,6 +385,7 @@
 
   btnGear.addEventListener("click", showOptions);
 
+  // ---- LIFECYCLE ----
   function close() {
     if (CS.snippets.hasEditChanges()) {
       const ok = confirm("You have unsaved changes to this snippet.\n\nClick OK to Update, or Cancel to Discard changes.");
@@ -443,6 +442,7 @@
     if (!contextMenu.contains(e.target)) ctx.hide();
   });
 
+  // ---- BOOTSTRAP ----
   (async () => {
     try {
       CS.state.settings = await CS.storage.getSettings();
