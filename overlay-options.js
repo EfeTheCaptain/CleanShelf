@@ -186,23 +186,6 @@
     if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
       try { CS.i18n.applyTranslations(); } catch (err) { CS.recordError("i18n", err); }
     }
-    // Re-render options view so radio labels and group titles reflect new language
-    if (CS.ui.options && CS.ui.options.view && CS.ui.card) {
-      const newView = buildOptionsView(() => {
-        CS.state.view = "main";
-        CS.ui.mainView.hidden = false;
-        CS.ui.options.view.hidden = true;
-        CS.ui.footer.hidden = false;
-        if (CS.state.editingSnippetId) {
-          CS.ui.contentInput.focus();
-        } else {
-          CS.ui.titleInput.focus();
-        }
-      });
-      CS.ui.card.replaceChild(newView.view, CS.ui.options.view);
-      CS.ui.options = newView;
-      CS.options.syncOptionRadios();
-    }
   }
 
   function setDraftRate(rate) {

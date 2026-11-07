@@ -1,3 +1,7 @@
+## v1.1.6
+
+- Removed unnecessary options view re-render in setLanguage(): applyTranslations() updates all [data-i18n] labels in place, no DOM replacement needed — avoids orphaned radio inputs and stale view references
+
 ## v1.1.5
 
 - Fixed Options UI not translating: radio group titles and option labels now use data-i18n attributes so applyTranslations() updates them when language changes; setLanguage() re-renders the options view with new language labels
