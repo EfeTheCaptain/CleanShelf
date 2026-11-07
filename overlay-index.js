@@ -208,8 +208,9 @@
     { text: "Drag & drop snippets onto folders to move them.", type: "normal" },
     { text: "Drag & drop snippets inside a folder to <strong>manually reorder them</strong>.", type: "normal" },
     { text: "Use the <strong>+ Snippet</strong> button inside a folder to quickly add and focus on a new entry.", type: "normal" },
-    { text: "Right-click a folder and select <strong>Insert Spacer</strong> to group your snippets visually.", type: "normal" },
-    { text: "<strong>Double-click a Spacer</strong> to rename it (e.g., 'Frontend', 'Backend').", type: "normal" },
+    { text: "Right-click a folder and select <strong>Insert Subfolder</strong> to group your snippets visually.", type: "normal" },
+    { text: "<strong>Double-click a Subfolder</strong> to rename it (e.g., 'Frontend', 'Backend').", type: "normal" },
+    { text: "Drag & drop snippets onto a <strong>Subfolder</strong> to group them.", type: "normal" },
   ];
 
 
@@ -263,8 +264,8 @@
   sortNewestItem.type = "button";
   const sortTitleItem = el("button", "cs-context-item", "Sort A-Z");
   sortTitleItem.type = "button";
-  const insertSpacerItem = el("button", "cs-context-item", "Insert Spacer");
-  insertSpacerItem.type = "button";
+  const insertSubfolderItem = el("button", "cs-context-item", "Insert Subfolder");
+  insertSubfolderItem.type = "button";
 
   contextMenu.appendChild(editItem);
   contextMenu.appendChild(deleteSnippetItem);
@@ -272,7 +273,7 @@
   contextMenu.appendChild(deleteFolderItem);
   contextMenu.appendChild(sortNewestItem);
   contextMenu.appendChild(sortTitleItem);
-  contextMenu.appendChild(insertSpacerItem);
+  contextMenu.appendChild(insertSubfolderItem);
   shadow.appendChild(contextMenu);
 
   const ctx = {
@@ -289,7 +290,7 @@
         deleteFolderItem.hidden = true;
         sortNewestItem.hidden = true;
         sortTitleItem.hidden = true;
-        insertSpacerItem.hidden = true;
+        insertSubfolderItem.hidden = true;
       } else {
         editItem.hidden = true;
         deleteSnippetItem.hidden = true;
@@ -297,7 +298,7 @@
         deleteFolderItem.hidden = false;
         sortNewestItem.hidden = false;
         sortTitleItem.hidden = false;
-        insertSpacerItem.hidden = false;
+        insertSubfolderItem.hidden = false;
       }
 
       contextMenu.style.left = x + "px";
@@ -346,18 +347,18 @@
     CS.ui.contextMenu.hide();
   });
 
-  insertSpacerItem.addEventListener("click", async () => {
+  insertSubfolderItem.addEventListener("click", async () => {
     const folderName = ctx.targetData;
     const snippets = await CS.storage.getSnippets();
-    const newSpacer = {
+    const newSubfolder = {
       id: crypto.randomUUID(),
-      type: "spacer",
-      title: "New Section",
+      type: "subfolder",
+      title: "New Subfolder",
       folder: folderName,
       createdAt: Date.now(),
       sortOrder: -1
     };
-    snippets.push(newSpacer);
+    snippets.push(newSubfolder);
     CS.state.sortMode = "manual";
     await CS.storage.saveSnippets(snippets);
     await CS.snippets.load();

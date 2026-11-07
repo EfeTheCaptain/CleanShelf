@@ -1,3 +1,10 @@
+## v0.1.38
+
+- Replaced Spacers with Subfolders (visual dividers + containers inside folders)
+- Drag snippets onto a Subfolder to group them; drop on main area to ungroup
+- Double-click Subfolder to rename; Insert Subfolder from folder context menu
+- CSS: .cs-subfolder, .cs-subfolder-items styling
+
 ## v0.1.37
 
 - Replaced static hint text with interactive ? Tips panel

@@ -1101,27 +1101,44 @@
   min-height: auto;
 }
 
-.cs-item.cs-spacer {
-  background: transparent;
+.cs-item.cs-subfolder {
+  background: var(--cs-bg-panel);
   border: 1px dashed var(--cs-border-strong);
   color: var(--cs-text-muted);
   cursor: grab;
-  padding: 12px;
+  padding: 10px 12px;
   text-align: center;
   font-weight: 600;
   text-transform: uppercase;
   font-size: var(--cs-fs-xs);
   letter-spacing: 1px;
+  margin-top: 12px;
 }
 
-.cs-item.cs-spacer:hover {
+.cs-item.cs-subfolder:hover {
   background: var(--cs-bg-surface);
+  color: var(--cs-text);
 }
 
-.cs-item.cs-spacer .cs-item-copy {
+.cs-item.cs-subfolder .cs-item-copy {
   display: none !important;
 }
 
+.cs-item.cs-subfolder.cs-drop-target {
+  border-color: var(--cs-accent) !important;
+  background: var(--cs-bg-surface-hover) !important;
+}
+
+.cs-subfolder-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  padding: 4px 0 12px 16px;
+  border-left: 2px solid var(--cs-border-strong);
+  margin-left: 6px;
+}
+
+/* Drag and drop reordering indicator */
 .cs-item.cs-drop-target {
   border-top: 3px solid var(--cs-accent) !important;
   padding-top: 9px !important;
