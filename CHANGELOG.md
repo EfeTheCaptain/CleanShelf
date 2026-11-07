@@ -1,3 +1,7 @@
+## v0.1.45
+
+- Subfolder Box: subfolder header + items wrapped in .cs-subfolder-box dashed container with min-height 80px for empty drop space; drop anywhere in box to move snippet into subfolder; drag out to main area removes subfolder assignment; .cs-drill-items.cs-drag-over style added
+
 ## v0.1.44
 
 - Fixed drag & drop out of subfolder: itemsContainer has min-height for empty root drop zone, dragover registers on background only

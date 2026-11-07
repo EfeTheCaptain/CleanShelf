@@ -1103,11 +1103,29 @@
   min-height: auto;
 }
 
+.cs-subfolder-box {
+  border: 2px dashed var(--cs-border-strong);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 12px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.cs-subfolder-box.cs-drag-over {
+  border-color: var(--cs-accent);
+  background: var(--cs-bg-surface-hover);
+}
+
 .cs-subfolder-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: var(--cs-bg-surface);
   border: 1px solid var(--cs-border);
   border-left: 3px solid var(--cs-accent);
@@ -1117,35 +1135,23 @@
   font-size: var(--cs-fs-sm);
   cursor: pointer;
   user-select: none;
-  margin-top: 12px;
   transition: background 0.1s, border-color 0.1s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .cs-subfolder-header:hover {
   background: var(--cs-bg-surface-hover);
   border-color: var(--cs-border-hover);
-  border-left-color: var(--cs-accent);
-}
-
-.cs-subfolder-header.cs-drag-over {
-  border-color: var(--cs-accent) !important;
-  background: var(--cs-bg-surface-hover) !important;
-  box-shadow: 0 0 0 2px var(--cs-accent);
 }
 
 .cs-subfolder-items {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 8px 0 8px 16px;
-  border-left: 2px solid var(--cs-border-strong);
-  margin-left: 8px;
-  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
 }
 
-.cs-subfolder-items[hidden] {
-  display: none !important;
+.cs-drill-items.cs-drag-over {
+  background: var(--cs-bg-surface);
+  outline: 2px dashed var(--cs-border-strong);
 }
 
 /* Drag and drop insertion lines */

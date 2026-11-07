@@ -106,6 +106,7 @@
     const isSubfolder = snippet.type === "subfolder";
     
     if (isSubfolder) {
+      const box = el("div", "cs-subfolder-box");
       const header = el("div", "cs-subfolder-header");
       const isCollapsed = CS.state.collapsedSubfolders.has(snippet.title);
       header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
@@ -138,34 +139,30 @@
       });
 
 
-      // Fixed Drag & Drop for Subfolders
-      header.addEventListener("dragenter", (e) => {
+      box.addEventListener("dragenter", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        header.classList.add("cs-drag-over");
+        box.classList.add("cs-drag-over");
       });
       
-      header.addEventListener("dragover", (e) => {
+      box.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
         e.dataTransfer.dropEffect = "move";
       });
 
-
-      header.addEventListener("dragleave", (e) => {
+      box.addEventListener("dragleave", (e) => {
         e.stopPropagation();
-        header.classList.remove("cs-drag-over");
+        box.classList.remove("cs-drag-over");
       });
 
-
-      header.addEventListener("drop", async (e) => {
+      box.addEventListener("drop", async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        header.classList.remove("cs-drag-over");
+        box.classList.remove("cs-drag-over");
         
         const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
         if (!draggedId) return;
-
 
         try {
           const snippets = await CS.storage.getSnippets();
@@ -181,8 +178,7 @@
         }
       });
 
-
-      header.addEventListener("contextmenu", (e) => {
+      box.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         e.stopPropagation();
         if (confirm(`Delete subfolder "${snippet.title}"? Snippets inside will be moved to the main folder.`)) {
@@ -194,8 +190,8 @@
         }
       });
 
-
-      return header;
+      box.appendChild(header);
+      return box;
     }
 
 
@@ -633,7 +629,7 @@
 
       // Render subfolders and their children
       for (const sub of subfolders) {
-        itemsContainer.appendChild(buildSnippetCard(sub)); // Renders header
+        const box = buildSnippetCard(sub); // Renders header inside .cs-subfolder-box
 
         const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
         if (!isCollapsed) {
@@ -641,9 +637,11 @@
           if (subItems.length > 0) {
             const subContainer = el("div", "cs-subfolder-items");
             for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
-            itemsContainer.appendChild(subContainer);
+            box.appendChild(subContainer);
           }
         }
+
+        itemsContainer.appendChild(box);
       }
 
 
