@@ -3,13 +3,17 @@
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
   function getFilteredSnippets() {
-    const q = (CS.state.searchQuery || "").trim().toLowerCase();
+    const q = (CS.state.searchQuery || "").trim();
+    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+    const qLower = q.toLocaleLowerCase(lang);
+    
     const all = CS.state.snippets || [];
-    if (!q) return all;
+    if (!qLower) return all;
+    
     return all.filter(s => 
-      (s.title || "").toLowerCase().includes(q) || 
-      (s.content || "").toLowerCase().includes(q) || 
-      (s.folder || "").toLowerCase().includes(q)
+      (s.title || "").toLocaleLowerCase(lang).includes(qLower) || 
+      (s.content || "").toLocaleLowerCase(lang).includes(qLower) || 
+      (s.folder || "").toLocaleLowerCase(lang).includes(qLower)
     );
   }
 
@@ -995,12 +999,13 @@
   }
 
   function getUniqueTitle(baseTitle, folder, snippets) {
+    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
     const cleanBase = baseTitle.replace(/\s*\(\d+\)$/, "").trim() || "Untitled";
     let candidate = cleanBase;
     let counter = 2;
 
 
-    while (snippets.some(s => (s.title || "").toLowerCase() === candidate.toLowerCase() && (s.folder || "") === folder)) {
+    while (snippets.some(s => (s.title || "").toLocaleLowerCase(lang) === candidate.toLocaleLowerCase(lang) && (s.folder || "") === folder)) {
       candidate = `${cleanBase} (${counter})`;
       counter++;
     }
@@ -1035,8 +1040,9 @@
 
       // Duplicate check
       if (finalTitle) {
+        const lang = CS.state.settings.language === "tr" ? "tr" : "en";
         const existingSnippet = snippets.find(s =>
-          (s.title || "").toLowerCase() === finalTitle.toLowerCase() &&
+          (s.title || "").toLocaleLowerCase(lang) === finalTitle.toLocaleLowerCase(lang) &&
           (s.folder || "") === (folder || "") &&
           s.id !== CS.state.editingSnippetId
         );

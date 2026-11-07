@@ -1,3 +1,11 @@
+## v1.2.0
+
+- Fixed Turkish character handling: search and duplicate detection now use toLocaleLowerCase('tr') when Turkish is active (fixes İ/ı, I/i mapping)
+
+## v1.1.0
+
+- Turkish i18n support: overlay-i18n.js module with EN/TR dictionaries, data-i18n attributes on all UI elements, language setting in Options, translated toasts/confirms/tips
+
 ## v1.0.0
 
 - Stable release: Debug panel crash fixed (contextMenu reference order), folders readable check added, drag-and-drop drop zones fixed on subfolder header/root/box, dark-sepia theme, 2-column Options with Import Merge, List view subfolder rendering

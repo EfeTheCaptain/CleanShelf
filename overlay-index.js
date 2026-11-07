@@ -38,8 +38,10 @@
   shadow.appendChild(toastEl);
   CS.ui.toast = toastEl;
 
+  // --- HEADER ---
   const header = el("header", "cs-header");
   const headerText = el("div", "cs-header-text");
+  
   const titleEl = el("h1", "cs-title", "CleanShelf");
   titleEl.setAttribute("data-i18n", "app_title");
   headerText.appendChild(titleEl);
@@ -47,16 +49,18 @@
   const subtitleEl = el("p", "cs-preview", "");
   subtitleEl.setAttribute("data-i18n", "app_subtitle");
   headerText.appendChild(subtitleEl);
+  
   header.appendChild(headerText);
   card.appendChild(header);
 
+  // --- MAIN VIEW ---
   const mainView = el("div", "cs-view");
   mainView.dataset.view = "main";
   CS.ui.mainView = mainView;
 
   const searchRow = el("div", "cs-search-row");
   const searchInput = el("input", "cs-input cs-search-input");
-  searchInput.placeholder = "Search snippets by title, content, or folder...";
+  searchInput.setAttribute("data-i18n-placeholder", "search_placeholder");
   searchInput.addEventListener("input", () => {
     CS.state.searchQuery = searchInput.value.toLowerCase();
     CS.snippets.renderSnippets();
@@ -66,12 +70,15 @@
 
   const mainLayout = el("div", "cs-main-layout");
   
+  // --- LEFT PANEL ---
   const leftPanel = el("div", "cs-left-panel");
   const listSection = el("div", "cs-section cs-section-list");
   listSection.style.margin = "0";
   
   const leftHeader = el("div", "cs-input-header");
-  leftHeader.appendChild(el("label", "cs-label", "Your snippets"));
+  const leftLabel = el("label", "cs-label", "Your snippets");
+  leftLabel.setAttribute("data-i18n", "your_snippets");
+  leftHeader.appendChild(leftLabel);
   
   const leftBtnGroup = el("div");
   leftBtnGroup.style.display = "flex";
@@ -103,10 +110,11 @@
   CS.ui.listEl = listEl;
   mainLayout.appendChild(leftPanel);
 
+  // --- RIGHT PANEL ---
   const rightPanel = el("div", "cs-right-panel");
-  
   const inputHeader = el("div", "cs-input-header");
-  const formLabel = el("label", "cs-label", "");
+  
+  const formLabel = el("label", "cs-label", "New snippet");
   formLabel.setAttribute("data-i18n", "new_snippet");
   CS.ui.formLabel = formLabel;
   inputHeader.appendChild(formLabel);
@@ -117,7 +125,8 @@
   draftIndicator.appendChild(dotIcon);
   draftIndicator.appendChild(checkIcon);
   draftIndicator.appendChild(errIcon);
-  const draftText = el("span", "cs-draft-text", "");
+  
+  const draftText = el("span", "cs-draft-text", "Draft");
   draftText.setAttribute("data-i18n", "draft_label");
   draftIndicator.appendChild(draftText);
   inputHeader.appendChild(draftIndicator);
@@ -128,12 +137,15 @@
   const titleInput = el("input", "cs-input");
   titleInput.type = "text";
   titleInput.setAttribute("data-i18n-placeholder", "title_placeholder");
+  
   const folderInput = el("input", "cs-input cs-input-folder");
   folderInput.type = "text";
   folderInput.setAttribute("data-i18n-placeholder", "folder_placeholder");
   folderInput.setAttribute("list", "cs-folder-list");
+  
   fieldRow.appendChild(titleInput);
   fieldRow.appendChild(folderInput);
+  
   const folderDatalist = document.createElement("datalist");
   folderDatalist.id = "cs-folder-list";
   rightPanel.appendChild(fieldRow);
@@ -182,8 +194,8 @@
   CS.ui.options = optionsBuilt;
   card.appendChild(optionsBuilt.view);
 
+  // --- FOOTER ---
   const footer = el("div", "cs-footer");
-  
   const footerLeft = el("div");
   footerLeft.style.display = "flex";
   footerLeft.style.gap = "8px";
@@ -211,15 +223,15 @@
   CS.ui.btnDebug = btnDebug;
   CS.ui.btnGear = btnGear;
 
-  // ---- TIPS PANEL ----
+  // --- TIPS PANEL ---
   const tipsPanel = el("div", "cs-tips-panel");
   tipsPanel.hidden = true;
 
   const tipsHeader = el("div", "cs-tips-header", "CleanShelf Tips");
+  tipsHeader.setAttribute("data-i18n", "tip_title");
   tipsPanel.appendChild(tipsHeader);
 
   const tipsList = el("ul", "cs-tips-list");
-
   const tipsData = [
     { key: "tip_rc", type: "normal" },
     { key: "tip_backup", type: "warning" },
@@ -235,7 +247,7 @@
 
   for (const tip of tipsData) {
     const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
-    li.innerHTML = CS.i18n.t(tip.key);
+    li.innerHTML = CS.i18n.t(tip.key); // Translate tip
     tipsList.appendChild(li);
   }
   tipsPanel.appendChild(tipsList);
@@ -254,13 +266,14 @@
     }
   });
 
-  // ---- CONTEXT MENU ----
+  // --- CONTEXT MENU ---
   const contextMenu = el("div", "cs-context-menu");
   contextMenu.hidden = true;
   
   const editItem = el("button", "cs-context-item", "Edit");
   editItem.type = "button";
   editItem.setAttribute("data-i18n", "menu_edit");
+
   const deleteSnippetItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteSnippetItem.type = "button";
   deleteSnippetItem.setAttribute("data-i18n", "menu_delete");
@@ -268,6 +281,7 @@
   const renameFolderItem = el("button", "cs-context-item", "Rename");
   renameFolderItem.type = "button";
   renameFolderItem.setAttribute("data-i18n", "menu_rename");
+
   const deleteFolderItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteFolderItem.type = "button";
   deleteFolderItem.setAttribute("data-i18n", "menu_delete");
@@ -275,9 +289,11 @@
   const sortNewestItem = el("button", "cs-context-item", "Sort Newest");
   sortNewestItem.type = "button";
   sortNewestItem.setAttribute("data-i18n", "menu_sort_newest");
+
   const sortTitleItem = el("button", "cs-context-item", "Sort A-Z");
   sortTitleItem.type = "button";
   sortTitleItem.setAttribute("data-i18n", "menu_sort_az");
+
   const insertSubfolderItem = el("button", "cs-context-item", "Insert Subfolder");
   insertSubfolderItem.type = "button";
   insertSubfolderItem.setAttribute("data-i18n", "menu_insert_subfolder");
@@ -368,7 +384,7 @@
     if (folderName) CS.snippets.insertSubfolder(folderName);
   });
 
-  // ---- DEBUG PANEL ----
+  // --- DEBUG PANEL ---
   const debugBuilt = CS.debug.buildDebugPanel();
   CS.ui.debug = debugBuilt;
   card.appendChild(debugBuilt.panel);
@@ -376,10 +392,10 @@
   btnDebug.addEventListener("click", () => {
     const opening = debugBuilt.panel.hidden;
     debugBuilt.panel.hidden = !opening;
-    btnDebug.textContent = opening ? "Debug ▴" : "Debug ▾";
+    btnDebug.textContent = opening ? CS.i18n.t("btn_debug_up") : CS.i18n.t("btn_debug");
   });
 
-  // ---- VIEW TRANSITIONS ----
+  // --- VIEW TRANSITIONS ---
   function showMain() {
     CS.state.view = "main";
     mainView.hidden = false;
@@ -406,10 +422,10 @@
 
   btnGear.addEventListener("click", showOptions);
 
-  // ---- LIFECYCLE ----
+  // --- LIFECYCLE ---
   function close() {
     if (CS.snippets.hasEditChanges()) {
-      const ok = confirm("You have unsaved changes to this snippet.\n\nClick OK to Update, or Cancel to Discard changes.");
+      const ok = confirm(CS.i18n.t("confirm_unsaved"));
       if (ok) {
         CS.snippets.handleSave().then(() => {
           CS.drafts.flushDraft();
@@ -451,6 +467,7 @@
     try { ac.abort(); } catch (_) {}
   };
 
+  // Placed after all elements are created to prevent ReferenceErrors
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
     if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();
@@ -463,7 +480,7 @@
     if (!contextMenu.contains(e.target)) ctx.hide();
   });
 
-  // ---- BOOTSTRAP ----
+  // --- BOOTSTRAP ---
   (async () => {
     try {
       CS.state.settings = await CS.storage.getSettings();
@@ -472,7 +489,7 @@
     }
     CS.options.applySettingsToDom();
     CS.options.syncOptionRadios();
-    CS.i18n.applyTranslations();
+    CS.i18n.applyTranslations(); // Apply language immediately
     await CS.drafts.loadDraft();
     await CS.snippets.load();
     titleInput.focus();
