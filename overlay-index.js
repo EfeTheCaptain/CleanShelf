@@ -63,7 +63,8 @@
   const searchInput = el("input", "cs-input cs-search-input");
   searchInput.setAttribute("data-i18n-placeholder", "search_placeholder");
   searchInput.addEventListener("input", () => {
-    CS.state.searchQuery = searchInput.value.toLowerCase();
+    const lang = (CS.state.settings && CS.state.settings.language) || "en";
+    CS.state.searchQuery = searchInput.value.toLocaleLowerCase(lang);
     CS.snippets.renderSnippets();
   });
   searchRow.appendChild(searchInput);
@@ -497,6 +498,6 @@ if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
 }
     await CS.drafts.loadDraft();
     await CS.snippets.load();
-    titleInput.focus();
+    searchInput.focus();
   })();
 })();

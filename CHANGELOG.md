@@ -1,3 +1,8 @@
+## v1.1.9
+
+- Fixed Turkish search: search input handler now uses toLocaleLowerCase(lang) instead of toLowerCase() so İ/ı and I/i are detected correctly
+- Fixed reopen focus: searchInput.focus() called after load() so typing goes into overlay, not page behind
+
 ## v1.1.8
 
 - Fixed search bar focus: changed keydown listener from window capture phase back to document capture phase so typing goes into the overlay's search input, not the page behind
