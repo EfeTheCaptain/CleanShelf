@@ -1,3 +1,7 @@
+## v0.1.44
+
+- Fixed drag & drop out of subfolder: itemsContainer has min-height for empty root drop zone, dragover registers on background only
+
 ## v0.1.43
 
 - Subfolder header now uses cs-bg-surface, cs-text-strong, bold weight, left accent border, and box-shadow for stronger visual hierarchy

@@ -643,6 +643,8 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 8px;
   align-content: start;
+  padding: 12px;
+  min-height: 150px;
 }
 
 .cs-item {

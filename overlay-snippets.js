@@ -652,9 +652,27 @@
       }
 
       // Handle dropping into main area (removes subfolder assignment)
-      itemsContainer.addEventListener("dragover", (e) => e.preventDefault());
-      itemsContainer.addEventListener("drop", async (e) => {
+      itemsContainer.addEventListener("dragover", (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        if (e.target === itemsContainer) {
+          itemsContainer.classList.add("cs-drag-over");
+        }
+      });
+
+      itemsContainer.addEventListener("dragleave", (e) => {
+        if (e.target === itemsContainer) {
+          itemsContainer.classList.remove("cs-drag-over");
+        }
+      });
+
+      itemsContainer.addEventListener("drop", async (e) => {
+        itemsContainer.classList.remove("cs-drag-over");
+        if (e.target !== itemsContainer) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
         const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
         if (!draggedId) return;
         
@@ -663,8 +681,10 @@
         
         if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
           delete dragged.subfolder;
+          dragged.sortOrder = -1;
           await CS.storage.saveSnippets(snippets);
           await load();
+          CS.toast.showToast("Moved to main folder");
         }
       });
 
