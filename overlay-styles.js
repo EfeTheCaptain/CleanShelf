@@ -321,8 +321,16 @@
 .cs-view[hidden] { display: none; }
 
 .cs-search-row {
+  display: flex;
+  justify-content: flex-end;
   margin-bottom: 12px;
   flex-shrink: 0;
+  padding-right: 16px;
+}
+
+.cs-search-input {
+  max-width: 500px;
+  width: 100%;
 }
 
 .cs-main-layout {
@@ -1116,9 +1124,12 @@
   transition: border-color 0.1s, background 0.1s;
 }
 
-.cs-subfolder-box.cs-drag-over {
+.cs-subfolder-box.cs-drag-over,
+.cs-folder-items.cs-drag-over,
+.cs-subfolder-header.cs-drag-over {
   border-color: var(--cs-accent);
   background: var(--cs-bg-surface-hover);
+  box-shadow: 0 0 0 2px var(--cs-accent);
 }
 
 .cs-subfolder-header {

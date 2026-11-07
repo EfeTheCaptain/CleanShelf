@@ -23,10 +23,10 @@
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      CS.toast.showToast(`Exported ${(CS.state.snippets || []).length} items`);
+      CS.toast.showToast(CS.i18n.t("toast_exported", { count: (CS.state.snippets || []).length }));
     } catch (err) {
       CS.recordError("export", err);
-      CS.toast.showToast("Export failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_export"), "error");
     }
   }
 
@@ -54,12 +54,9 @@
         }));
         
         const current = (CS.state.snippets || []).length;
-        let msg = "";
-        if (mode === "merge") {
-          msg = `Merge ${normalized.length} items from file into your ${current} items? (Existing items with the same ID will be overwritten).`;
-        } else {
-          msg = `Replace ${current} item${current === 1 ? "" : "s"} with ${normalized.length} from file?`;
-        }
+        const msg = mode === "merge"
+          ? CS.i18n.t("confirm_import_merge", { count: normalized.length, current })
+          : CS.i18n.t("confirm_import_replace", { current, count: normalized.length });
         
         const ok = confirm(msg);
         if (!ok) return;
@@ -99,15 +96,15 @@
         await CS.storage.saveSnippets(finalSnippets);
         CS.state.drilledFolder = null;
         await CS.snippets.load();
-        CS.toast.showToast(`Imported ${normalized.length} items (${mode})`);
+        CS.toast.showToast(CS.i18n.t("toast_imported", { count: normalized.length }));
       } catch (err) {
         CS.recordError("import", err);
-        CS.toast.showToast("Import failed", "error");
+        CS.toast.showToast(CS.i18n.t("err_import"), "error");
       }
     };
     reader.onerror = (err) => {
       CS.recordError("import/read", err);
-      CS.toast.showToast("Import read failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_import_read"), "error");
     };
     reader.readAsText(file);
   }

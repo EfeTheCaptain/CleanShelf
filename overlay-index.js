@@ -63,8 +63,7 @@
   const searchInput = el("input", "cs-input cs-search-input");
   searchInput.setAttribute("data-i18n-placeholder", "search_placeholder");
   searchInput.addEventListener("input", () => {
-    const lang = (CS.state.settings && CS.state.settings.language) || "en";
-    CS.state.searchQuery = searchInput.value.toLocaleLowerCase(lang);
+    CS.state.searchQuery = searchInput.value;
     CS.snippets.renderSnippets();
   });
   searchRow.appendChild(searchInput);
@@ -196,6 +195,39 @@
   CS.ui.options = optionsBuilt;
   card.appendChild(optionsBuilt.view);
 
+  let lastFocusedOverlayEl = null;
+  shadow.addEventListener("focusin", (e) => {
+    lastFocusedOverlayEl = e.target;
+  });
+
+  function isTextControl(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
+  }
+
+  function isVisibleControl(el) {
+    return !!el && el.isConnected && !el.disabled && el.offsetParent !== null;
+  }
+
+  function focusPrimary() {
+    const candidate = isTextControl(lastFocusedOverlayEl) && isVisibleControl(lastFocusedOverlayEl)
+      ? lastFocusedOverlayEl
+      : (CS.state.view === "options" && optionsBuilt.backBtn ? optionsBuilt.backBtn : searchInput);
+    if (!candidate) return;
+    try { candidate.focus({ preventScroll: true }); } catch (_) {
+      try { candidate.focus(); } catch (_) {}
+    }
+  }
+  CS.ui.focusPrimary = focusPrimary;
+  queueMicrotask(focusPrimary);
+  let focusAttempts = 0;
+  (function ensureFocus() {
+    if (shadow.activeElement === searchInput) return;
+    searchInput.focus();
+    if (focusAttempts++ < 10) setTimeout(ensureFocus, 30);
+  })();
+
   // --- FOOTER ---
   const footer = el("div", "cs-footer");
   const footerLeft = el("div");
@@ -249,7 +281,8 @@
 
   for (const tip of tipsData) {
     const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
-    li.innerHTML = (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(tip.key) : tip.key; // Translate tip
+    li.setAttribute("data-i18n-html", tip.key);
+    li.innerHTML = (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(tip.key) : tip.key;
     tipsList.appendChild(li);
   }
   tipsPanel.appendChild(tipsList);
@@ -413,9 +446,6 @@
   }
 
   function showOptions() {
-    if (CS.state.editingSnippetId) {
-      CS.snippets.cancelEdit();
-    }
     CS.state.view = "options";
     mainView.hidden = true;
     optionsBuilt.view.hidden = false;
@@ -428,13 +458,21 @@
 
   // --- LIFECYCLE ---
   function close() {
+    if (host.__csClosing) return;
+    host.__csClosing = true;
     if (CS.snippets.hasEditChanges()) {
       const ok = confirm((CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t("confirm_unsaved") : "Unsaved changes. Discard?");
       if (ok) {
-        CS.snippets.handleSave().then(() => {
+        CS.snippets.handleSave().then((saved) => {
+          if (saved === false) {
+            host.__csClosing = false;
+            return;
+          }
           CS.drafts.flushDraft();
           if (typeof host.__csCleanup === "function") host.__csCleanup();
           host.remove();
+        }).catch(() => {
+          host.__csClosing = false;
         });
         return;
       }
@@ -444,6 +482,7 @@
     if (typeof host.__csCleanup === "function") host.__csCleanup();
     host.remove();
   }
+  host.__csClose = close;
 
   function onKey(e) {
     if (e.key === "Escape" || e.key === "Esc") {
@@ -462,6 +501,23 @@
       e.preventDefault();
       e.stopPropagation();
       close();
+      return;
+    }
+
+    const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+    const insideOverlay = path.includes(host);
+    if (!insideOverlay && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const typing = e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter";
+      if (typing) {
+        focusPrimary();
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key.length === 1) {
+          searchInput.value += e.key;
+          CS.state.searchQuery = searchInput.value;
+          CS.snippets.renderSnippets();
+        }
+      }
     }
   }
 
@@ -498,6 +554,9 @@ if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
 }
     await CS.drafts.loadDraft();
     await CS.snippets.load();
-    searchInput.focus();
+    focusPrimary();
+    requestAnimationFrame(() => {
+      try { focusPrimary(); } catch (_) {}
+    });
   })();
 })();

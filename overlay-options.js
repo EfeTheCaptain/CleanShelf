@@ -131,7 +131,9 @@
     dataGroup.appendChild(importReplaceBtn);
     dataGroup.appendChild(importMergeBtn);
     dataGroup.appendChild(fileInput);
-    dataGroup.appendChild(el("p", "cs-options-hint", "Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends."));
+    const dataHint = el("p", "cs-options-hint", "Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends.");
+    dataHint.setAttribute("data-i18n", "opt_data_hint");
+    dataGroup.appendChild(dataHint);
     colRight.appendChild(dataGroup);
 
     body.appendChild(colLeft);
@@ -198,8 +200,10 @@
   function setLayout(layout) {
     if (layout !== "grid" && layout !== "list") return;
     if (CS.state.settings.layout === layout) return;
+    const wasDrilled = CS.state.drilledFolder !== null;
     CS.state.settings.layout = layout;
     CS.state.drilledFolder = null;
+    if (wasDrilled && !CS.state.editingSnippetId && CS.ui && CS.ui.folderInput) CS.ui.folderInput.value = "";
     CS.snippets.renderSnippets();
     CS.storage.persistSettings();
   }

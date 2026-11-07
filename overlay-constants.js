@@ -3,8 +3,19 @@
   const HOST_ID = "__cleanshelf_host__";
   const existing = document.getElementById(HOST_ID);
   if (existing) {
-    try { if (typeof existing.__csCleanup === "function") existing.__csCleanup(); } catch (_) {}
-    existing.remove();
+    try {
+      if (typeof existing.__csClose === "function") {
+        existing.__csClose();
+      } else {
+        if (typeof existing.__csCleanup === "function") existing.__csCleanup();
+        existing.remove();
+      }
+    } catch (_) {
+      try {
+        if (typeof existing.__csCleanup === "function") existing.__csCleanup();
+        existing.remove();
+      } catch (_) {}
+    }
     globalThis.CleanShelf = { aborted: true };
     return;
   }

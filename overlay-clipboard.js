@@ -23,13 +23,13 @@
 
   async function copySnippet(snippet) {
     const text = snippet && snippet.content ? snippet.content : "";
-    if (!text) { CS.toast.showToast("Nothing to copy", "error"); return; }
+    if (!text) { CS.toast.showToast(CS.i18n.t("toast_nothing"), "error"); return; }
     try {
       await copyText(text);
-      CS.toast.showToast("Copied to clipboard");
+      CS.toast.showToast(CS.i18n.t("toast_copied"));
     } catch (err) {
       CS.recordError("clipboard", err);
-      CS.toast.showToast("Copy failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_copy"), "error");
     }
   }
 

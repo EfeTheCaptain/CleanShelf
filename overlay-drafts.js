@@ -70,7 +70,10 @@
     if (CS.state.editingSnippetId) return;
 
     const draft = currentDraft();
-    if (isDraftEmpty(draft)) return;
+    if (isDraftEmpty(draft)) {
+      chrome.storage.local.remove(CS.constants.DRAFT_KEY).catch(() => {});
+      return;
+    }
     chrome.storage.local.set({ [CS.constants.DRAFT_KEY]: draft }).catch(() => {});
   }
 

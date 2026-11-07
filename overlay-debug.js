@@ -3,7 +3,7 @@
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
 
-  const _t = (k) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(k) : k;
+  const _t = (k, p) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(k, p) : k;
 
   const checks = [
     {
@@ -116,6 +116,7 @@
     const li = el("li", "cs-debug-step");
     const status = el("span", "cs-debug-step-status");
     const name = el("span", "cs-debug-step-name", _t(check.name));
+    name.setAttribute("data-i18n", check.name);
     const detail = el("span", "cs-debug-step-detail");
     li.appendChild(status);
     li.appendChild(name);
@@ -129,14 +130,19 @@
     panel.hidden = true;
 
     const lastErrorRow = el("div", "cs-debug-row");
-    lastErrorRow.appendChild(el("span", "cs-debug-key", _t("debug_last_error")));
+    const lastErrorLabel = el("span", "cs-debug-key", _t("debug_last_error"));
+    lastErrorLabel.setAttribute("data-i18n", "debug_last_error");
+    lastErrorRow.appendChild(lastErrorLabel);
     const lastErrorEl = el("span", "cs-debug-val", "none");
     lastErrorRow.appendChild(lastErrorEl);
     panel.appendChild(lastErrorRow);
 
     const checkRow = el("div", "cs-debug-row");
-    checkRow.appendChild(el("span", "cs-debug-key", _t("debug_checkup")));
+    const checkLabel = el("span", "cs-debug-key", _t("debug_checkup"));
+    checkLabel.setAttribute("data-i18n", "debug_checkup");
+    checkRow.appendChild(checkLabel);
     const runBtn = el("button", "cs-debug-btn", _t("debug_run"));
+    runBtn.setAttribute("data-i18n", "debug_run");
     runBtn.type = "button";
     runBtn.addEventListener("click", () => runChecks());
     checkRow.appendChild(runBtn);
@@ -184,7 +190,7 @@
 
     runBtn.disabled = false;
     CS.toast.showToast(
-      failed === 0 ? _t("toast_saved") : `${failed} check${failed === 1 ? "" : "s"} failed`,
+      failed === 0 ? _t("toast_all_passed") : _t("toast_checks_failed", { count: failed }),
       failed === 0 ? "success" : "error"
     );
   }

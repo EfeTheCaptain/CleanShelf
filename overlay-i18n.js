@@ -16,7 +16,14 @@
       btn_save: "Save",
       btn_update: "Update",
       btn_cancel: "Cancel",
+      btn_undo: "Undo",
       your_snippets: "Your snippets",
+      empty_no_snippets: "No snippets found.",
+      empty_folder: "This folder is empty.",
+      load_failed: "Could not load snippets. Open Debug.",
+      untitled: "Untitled",
+      copy: "Copy",
+      card_hint: "Click to copy. Right-click for options.",
       search_placeholder: "Search snippets by title, content, or folder...",
       btn_folder: "+ Folder",
       btn_subfolder: "+ Subfolder",
@@ -57,6 +64,7 @@
       opt_fast: "Fast (400ms after typing stops)",
       opt_relaxed: "Relaxed (2 seconds after typing stops)",
       opt_data: "Data",
+      opt_data_hint: "Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends.",
       opt_export: "Export JSON",
       opt_import_replace: "Import (Replace)",
       opt_import_merge: "Import (Merge)",
@@ -84,7 +92,13 @@
       toast_deleted: "Snippet deleted",
       toast_folder_created: "Folder created",
       toast_subfolder_created: "Subfolder created",
+      toast_subfolder_deleted: "Subfolder deleted",
+      toast_folder_deleted: "Folder deleted",
+      toast_folder_renamed: "Folder renamed",
+      toast_moved_main: "Moved to main folder",
       toast_moved: "Moved to {folder}",
+      toast_all_passed: "All checks passed",
+      toast_checks_failed: "Failed checks: {count}",
       toast_restored: "Restored",
       toast_copied: "Copied to clipboard",
       toast_nothing: "Nothing to copy",
@@ -95,10 +109,22 @@
       err_copy: "Copy failed",
       err_export: "Export failed",
       err_import: "Import failed",
+      err_import_read: "Import read failed",
+      err_folder_exists: "Folder already exists",
+      prompt_new_folder: "New folder name:",
+      prompt_new_subfolder: "New subfolder name:",
+      prompt_rename_subfolder: "Subfolder name:",
+      time_just_now: "just now",
+      time_minutes: "{count}m ago",
+      time_hours: "{count}h ago",
+      time_days: "{count}d ago",
       confirm_delete_snippet: "Delete this snippet?",
       confirm_delete_folder: 'There are {count} snippets in "{folder}". Are you sure you want to delete?',
       confirm_unsaved: "You have unsaved changes to this snippet.\n\nClick OK to Update, or Cancel to Discard changes.",
       confirm_duplicate: 'A snippet titled "{title}" already exists in this folder.\n\nClick OK to REPLACE it.\nClick Cancel to ADD AS NEW.',
+      confirm_delete_subfolder: 'Delete subfolder "{name}"? Snippets inside will be moved to the main folder.',
+      confirm_import_merge: "Merge {count} items from file into your {current} items? Existing items with the same ID will be overwritten.",
+      confirm_import_replace: "Replace {current} item(s) with {count} from file?",
       tip_rc: "<strong>Right-click</strong> snippets or folders for more options.",
       tip_backup: "<strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong>",
       tip_local: "<strong>Data stays in your browser (up to ~10MB).</strong> No tracking. No network calls.",
@@ -122,7 +148,14 @@
       btn_save: "Kaydet",
       btn_update: "Güncelle",
       btn_cancel: "İptal",
+      btn_undo: "Geri Al",
       your_snippets: "Parçacıklarınız",
+      empty_no_snippets: "Parçacık bulunamadı.",
+      empty_folder: "Bu klasör boş.",
+      load_failed: "Parçacıklar yüklenemedi. Hata Ayıklama'yı açın.",
+      untitled: "Başlıksız",
+      copy: "Kopyala",
+      card_hint: "Kopyalamak için tıklayın. Seçenekler için sağ tıklayın.",
       search_placeholder: "Başlık, içerik veya klasöre göre arayın...",
       btn_folder: "+ Klasör",
       btn_subfolder: "+ Alt Klasör",
@@ -163,6 +196,7 @@
       opt_fast: "Hızlı (yazmayı bıraktıktan 400ms sonra)",
       opt_relaxed: "Rahat (yazmayı bıraktıktan 2 saniye sonra)",
       opt_data: "Veri",
+      opt_data_hint: "Dışa aktarma tüm parçacıkları indirir. Değiştir her şeyin üzerine yazar. Birleştir kimlik çakışmalarını kontrol eder ve günceller veya ekler.",
       opt_export: "JSON Dışa Aktar",
       opt_import_replace: "İçe Aktar (Değiştir)",
       opt_import_merge: "İçe Aktar (Birleştir)",
@@ -190,7 +224,13 @@
       toast_deleted: "Parçacık silindi",
       toast_folder_created: "Klasör oluşturuldu",
       toast_subfolder_created: "Alt klasör oluşturuldu",
+      toast_subfolder_deleted: "Alt klasör silindi",
+      toast_folder_deleted: "Klasör silindi",
+      toast_folder_renamed: "Klasör yeniden adlandırıldı",
+      toast_moved_main: "Ana klasöre taşındı",
       toast_moved: "{folder} klasörüne taşındı",
+      toast_all_passed: "Tüm kontroller geçti",
+      toast_checks_failed: "Başarısız kontrol: {count}",
       toast_restored: "Geri yüklendi",
       toast_copied: "Panoya kopyalandı",
       toast_nothing: "Kopyalanacak bir şey yok",
@@ -201,10 +241,22 @@
       err_copy: "Kopyalama başarısız",
       err_export: "Dışa aktarma başarısız",
       err_import: "İçe aktarma başarısız",
+      err_import_read: "İçe aktarma okuması başarısız",
+      err_folder_exists: "Klasör zaten var",
+      prompt_new_folder: "Yeni klasör adı:",
+      prompt_new_subfolder: "Yeni alt klasör adı:",
+      prompt_rename_subfolder: "Alt klasör adı:",
+      time_just_now: "az önce",
+      time_minutes: "{count} dk önce",
+      time_hours: "{count} sa önce",
+      time_days: "{count} gün önce",
       confirm_delete_snippet: "Bu parçacık silinsin mi?",
       confirm_delete_folder: '"{folder}" klasöründe {count} parçacık var. Silmek istediğinizden emin misiniz?',
       confirm_unsaved: "Kaydedilmemiş değişiklikleriniz var.\n\nGüncellemek için Tamam'a, İptal etmek için İptal'e tıklayın.",
       confirm_duplicate: '"{title}" başlıklı bir parçacık bu klasörde zaten var.\n\nDeğiştirmek için Tamam\'a, yeni olarak eklemek için İptal\'e tıklayın.',
+      confirm_delete_subfolder: '"{name}" alt klasörü silinsin mi? İçindeki parçacıklar ana klasöre taşınacak.',
+      confirm_import_merge: "Dosyadaki {count} öğe mevcut {current} öğeyle birleştirilsin mi? Aynı kimliğe sahip mevcut öğelerin üzerine yazılacak.",
+      confirm_import_replace: "Mevcut {current} öğe, dosyadaki {count} öğeyle değiştirilsin mi?",
       tip_rc: "Daha fazla seçenek için parçacıklara veya klasörlere <strong>sağ tıklayın</strong>.",
       tip_backup: "<strong>Geliştirici veri kaybından sorumlu değildir. VERİLERİNİZİ YEDEKLEYİN!</strong>",
       tip_local: "<strong>Veriler tarayıcınızda kalır (~10MB'a kadar).</strong> İzleme yok. Ağ çağrısı yok.",
@@ -235,11 +287,16 @@
     const shadow = CS.ui && CS.ui.shadow;
     if (!shadow) return;
     const lang = (CS.state && CS.state.settings && CS.state.settings.language) || "en";
-    document.documentElement.lang = lang;
+    if (CS.ui && CS.ui.host) CS.ui.host.lang = lang;
 
     shadow.querySelectorAll("[data-i18n]").forEach(el => {
       const key = el.getAttribute("data-i18n");
       el.textContent = t(key);
+    });
+
+    shadow.querySelectorAll("[data-i18n-html]").forEach(el => {
+      const key = el.getAttribute("data-i18n-html");
+      el.innerHTML = t(key);
     });
 
     shadow.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
@@ -253,6 +310,17 @@
     } else {
       if (CS.ui.formLabel) CS.ui.formLabel.textContent = t("new_snippet");
       if (CS.ui.saveBtn) CS.ui.saveBtn.textContent = t("btn_save");
+    }
+
+    if (CS.ui.btnDebug) {
+      const open = CS.ui.debug && CS.ui.debug.panel && !CS.ui.debug.panel.hidden;
+      CS.ui.btnDebug.textContent = t(open ? "btn_debug_up" : "btn_debug");
+    }
+
+    if (CS.snippets) {
+      if (typeof CS.snippets.updateLeftActionBtn === "function") CS.snippets.updateLeftActionBtn();
+      if (typeof CS.snippets.updateFolderInputState === "function") CS.snippets.updateFolderInputState();
+      if (typeof CS.snippets.renderSnippets === "function") CS.snippets.renderSnippets();
     }
   }
 

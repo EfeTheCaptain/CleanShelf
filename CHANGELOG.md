@@ -1,3 +1,13 @@
+## v1.2.0
+
+- Fixed search focus on reopen: onKey typing keys now preventDefault/stopPropagation and inject the character directly into searchInput, plus a short focus retry loop so typing never goes to the page behind the overlay
+- Fixed Turkish search: search input stores raw value and filter uses toLocaleLowerCase(lang) so İ/ı and I/i match correctly
+- Fixed drag-and-drop into/out of subfolders: dropEffect="move" on all dragover handlers, shadow-aware queries via CS.ui.shadow, folder-scoped move/reorder/off-by-one fix, subfolder cleared on folder move
+- Fixed folder rename/delete: storage-based, folder-scoped with confirm keys and Undo restoring markers + assignments
+- i18n: added EN/TR keys for all dynamic controls (buttons, prompts, toasts, empty states, debug rows, tips); applyTranslations() updates debug btn text, tips, left action btn, folder input state, and snippets
+- Toolbar/shortcut toggle now calls existing.__csClose() when available, preserving unsaved-edit/draft logic
+- UI: search box shortened and right-aligned to match the New snippet field width
+
 ## v1.1.9
 
 - Fixed Turkish search: search input handler now uses toLocaleLowerCase(lang) instead of toLowerCase() so İ/ı and I/i are detected correctly
@@ -38,10 +48,6 @@
 
 - Added document.documentElement.lang for browser spellchecker/CSS and to prevent aggressive Chrome translation
 - Escape key robustness: onKey now handles both "Escape" and "Esc", listener attached to window capture phase as fallback
-
-## v1.2.0
-
-- Fixed Turkish character handling: search and duplicate detection now use toLocaleLowerCase('tr') when Turkish is active (fixes İ/ı, I/i mapping)
 
 ## v1.1.0
 
