@@ -1,3 +1,9 @@
+## v0.1.37
+
+- Replaced static hint text with interactive ? Tips panel
+- Tips panel opens upward from footer, lists all features (right-click menus, drag-drop, spacers, sort modes, etc.)
+- Tips panel closes on outside click and Escape key
+
 ## v0.1.36
 
 - Export now includes folders array and preserves type/spacer/sortOrder/updatedAt fields

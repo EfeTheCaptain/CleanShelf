@@ -157,32 +157,93 @@
   CS.ui.options = optionsBuilt;
   card.appendChild(optionsBuilt.view);
 
-  const hintText = el("p", "cs-hint");
-  hintText.innerHTML = "Tip: Right-click snippets or folders for more options.<br>Data stays in your browser (up to ~10MB). No tracking. No network calls.<br><strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.";
-  card.appendChild(hintText);
-
   const footer = el("div", "cs-footer");
+  
+  const footerLeft = el("div");
+  footerLeft.style.display = "flex";
+  footerLeft.style.gap = "8px";
+
+
   const btnDebug = el("button", "cs-debug-toggle", "Debug ▾");
   btnDebug.type = "button";
+  
+  const btnTips = el("button", "cs-debug-toggle", "? Tips");
+  btnTips.type = "button";
+
+
+  footerLeft.appendChild(btnDebug);
+  footerLeft.appendChild(btnTips);
+
+
   const btnGear = el("button", "cs-gear");
   btnGear.type = "button";
   btnGear.setAttribute("aria-label", "Options");
   btnGear.appendChild(makeGearIcon());
-  footer.appendChild(btnDebug);
+  
+  footer.appendChild(footerLeft);
   footer.appendChild(btnGear);
   card.appendChild(footer);
   CS.ui.footer = footer;
   CS.ui.btnDebug = btnDebug;
   CS.ui.btnGear = btnGear;
 
-  const debugBuilt = CS.debug.buildDebugPanel();
-  CS.ui.debug = debugBuilt;
-  card.appendChild(debugBuilt.panel);
 
-  btnDebug.addEventListener("click", () => {
-    const opening = debugBuilt.panel.hidden;
-    debugBuilt.panel.hidden = !opening;
-    btnDebug.textContent = opening ? "Debug ▴" : "Debug ▾";
+  // ---- TIPS PANEL ----
+  const tipsPanel = el("div", "cs-tips-panel");
+  tipsPanel.hidden = true;
+
+
+  const tipsHeader = el("div", "cs-tips-header", "CleanShelf Tips");
+  tipsPanel.appendChild(tipsHeader);
+
+
+  const tipsList = el("ul", "cs-tips-list");
+
+
+  const tipsData = [
+    { text: "<strong>Right-click</strong> snippets or folders for more options (Rename, Delete, Sort, Spacers).", type: "normal" },
+    { text: "<strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.", type: "warning" },
+    { text: "<strong>Data stays in your browser (up to ~10MB).</strong> No tracking. No network calls.", type: "normal" },
+    { text: "Click any snippet card to instantly <strong>copy it to your clipboard</strong>.", type: "normal" },
+    { text: "Drag & drop snippets onto folders to move them.", type: "normal" },
+    { text: "Drag & drop snippets inside a folder to <strong>manually reorder them</strong>.", type: "normal" },
+    { text: "Use the <strong>+ Snippet</strong> button inside a folder to quickly add and focus on a new entry.", type: "normal" },
+    { text: "Right-click a folder and select <strong>Insert Spacer</strong> to group your snippets visually.", type: "normal" },
+    { text: "<strong>Double-click a Spacer</strong> to rename it (e.g., 'Frontend', 'Backend').", type: "normal" },
+  ];
+
+
+  for (const tip of tipsData) {
+    const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
+    li.innerHTML = tip.text;
+    tipsList.appendChild(li);
+  }
+  tipsPanel.appendChild(tipsList);
+  shadow.appendChild(tipsPanel);
+
+
+  // Toggle Tips Panel
+  btnTips.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const opening = tipsPanel.hidden;
+    tipsPanel.hidden = !opening;
+    
+    if (opening) {
+      const rect = btnTips.getBoundingClientRect();
+      tipsPanel.style.left = Math.max(16, rect.left - 100) + "px";
+      tipsPanel.style.bottom = (window.innerHeight - rect.top + 8) + "px";
+      tipsPanel.style.top = "auto";
+    }
+  });
+
+
+  // Close tips on outside click
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) close();
+    if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();
+    if (!tipsPanel.hidden && !tipsPanel.contains(e.target) && !btnTips.contains(e.target)) {
+      tipsPanel.hidden = true;
+    }
   });
 
   const contextMenu = el("div", "cs-context-menu");
@@ -349,6 +410,12 @@
 
   function onKey(e) {
     if (e.key === "Escape") {
+      if (!tipsPanel.hidden) {
+        tipsPanel.hidden = true;
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       if (ctx.targetType) {
         ctx.hide();
         e.preventDefault();
