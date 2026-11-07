@@ -1,4 +1,9 @@
-## v1.2.0
+## v1.1.1
+
+- Added document.documentElement.lang for browser spellchecker/CSS and to prevent aggressive Chrome translation
+- Escape key robustness: onKey now handles both "Escape" and "Esc", listener attached to window capture phase as fallback
+
+## v1.1.0
 
 - Fixed Turkish character handling: search and duplicate detection now use toLocaleLowerCase('tr') when Turkish is active (fixes İ/ı, I/i mapping)
 

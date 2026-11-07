@@ -442,7 +442,7 @@
   }
 
   function onKey(e) {
-    if (e.key === "Escape") {
+    if (e.key === "Escape" || e.key === "Esc") {
       if (!tipsPanel.hidden) {
         tipsPanel.hidden = true;
         e.preventDefault();
@@ -462,7 +462,7 @@
   }
 
   const ac = new AbortController();
-  document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
+  window.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
   host.__csCleanup = () => {
     try { ac.abort(); } catch (_) {}
   };

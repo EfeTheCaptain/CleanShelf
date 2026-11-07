@@ -235,6 +235,8 @@
     const host = CS.ui && CS.ui.host;
     if (!host || !host.shadowRoot) return;
     const shadow = host.shadowRoot;
+    const lang = (CS.state && CS.state.settings && CS.state.settings.language) || "en";
+    document.documentElement.lang = lang;
 
     shadow.querySelectorAll("[data-i18n]").forEach(el => {
       const key = el.getAttribute("data-i18n");
