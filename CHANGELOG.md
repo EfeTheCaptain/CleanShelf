@@ -1,10 +1,13 @@
+## v0.1.47
+
+- Fixed missing dark-sepia theme in overlay-storage.js validThemes, overlay-debug.js settings check, overlay-options.js UI/validation (6 themes total)
+- Added 2-column Options layout (settings left, Data/Import-Export right) with Import (Replace) + Import (Merge) buttons
+- Fixed renderListView: separates subfolders from snippets, renders buildSubfolderHeader + children (prevents buildSnippetCard crash on subfolders)
+- Fixed Tips panel first tip: "Spacers" → "Subfolders"
+
 ## v0.1.46
 
 - Refactored subfolder rendering: extracted buildSubfolderHeader() shared builder; buildSnippetCard() only renders snippet cards; renderGridView() builds .cs-subfolder-box per subfolder with root drop-zone (drag OUT to ungroup) and per-box drop zone (drag IN to move into subfolder, cascading sort order)
-
-## v0.1.45
-
-- Subfolder Box: subfolder header + items wrapped in .cs-subfolder-box dashed container with min-height 80px for empty drop space; drop anywhere in box to move snippet into subfolder; drag out to main area removes subfolder assignment; .cs-drill-items.cs-drag-over style added
 
 ## v0.1.44
 

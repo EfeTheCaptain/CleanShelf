@@ -473,6 +473,7 @@
       const wrap = el("section", "cs-folder");
       if (CS.state.collapsedFolders.has(group.name)) wrap.classList.add("collapsed");
 
+
       const headerBtn = el("button", "cs-folder-header");
       headerBtn.type = "button";
       headerBtn.appendChild(el("span", "cs-folder-caret",
@@ -487,6 +488,7 @@
       bindFolderContextMenu(headerBtn, group.name);
       bindFolderDragDrop(headerBtn, group.name);
 
+
       headerBtn.addEventListener("click", (e) => {
         if (e.target.tagName === "INPUT") return;
         if (CS.state.collapsedFolders.has(group.name)) CS.state.collapsedFolders.delete(group.name);
@@ -494,9 +496,33 @@
         renderSnippets();
       });
 
+
       const items = el("div", "cs-folder-items");
-      const ordered = group.items; // Order already computed by groupByFolder
-      for (const s of ordered) items.appendChild(buildSnippetCard(s));
+      
+      const subfolders = group.items.filter(s => s.type === "subfolder");
+      const unassigned = group.items.filter(s => s.type !== "subfolder" && !s.subfolder);
+
+
+      // Render unassigned snippets first
+      for (const s of unassigned) {
+        items.appendChild(buildSnippetCard(s));
+      }
+
+
+      // Render subfolders and their children in List View
+      for (const sub of subfolders) {
+        items.appendChild(buildSubfolderHeader(sub));
+        const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
+        if (!isCollapsed) {
+          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
+          if (subItems.length > 0) {
+            const subContainer = el("div", "cs-subfolder-items");
+            for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
+            items.appendChild(subContainer);
+          }
+        }
+      }
+
 
       wrap.appendChild(headerBtn);
       wrap.appendChild(items);

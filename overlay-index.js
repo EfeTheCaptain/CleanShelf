@@ -218,7 +218,7 @@
 
 
   const tipsData = [
-    { text: "<strong>Right-click</strong> snippets or folders for more options (Rename, Delete, Sort, Spacers).", type: "normal" },
+    { text: "<strong>Right-click</strong> snippets or folders for more options (Rename, Delete, Sort, Subfolders).", type: "normal" },
     { text: "<strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.", type: "warning" },
     { text: "<strong>Data stays in your browser (up to ~10MB).</strong> No tracking. No network calls.", type: "normal" },
     { text: "Click any snippet card to instantly <strong>copy it to your clipboard</strong>.", type: "normal" },
