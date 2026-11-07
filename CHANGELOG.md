@@ -1,3 +1,7 @@
+## v1.1.3
+
+- Fixed applyTranslations: uses CS.ui.shadow instead of host.shadowRoot (closed shadow mode returns null for host.shadowRoot, which previously crashed translation on bootstrap)
+
 ## v1.1.2
 
 - Defensive i18n: all CS.i18n.t() / applyTranslations() calls guarded with typeof checks so overlay-index.js initialization never crashes if overlay-i18n.js fails to load
