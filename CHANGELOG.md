@@ -1,15 +1,17 @@
+## v1.1.2
+
+- Defensive i18n: all CS.i18n.t() / applyTranslations() calls guarded with typeof checks so overlay-index.js initialization never crashes if overlay-i18n.js fails to load
+
 ## v1.1.1
 
 - Added document.documentElement.lang for browser spellchecker/CSS and to prevent aggressive Chrome translation
 - Escape key robustness: onKey now handles both "Escape" and "Esc", listener attached to window capture phase as fallback
 
-## v1.1.0
+## v1.2.0
 
 - Fixed Turkish character handling: search and duplicate detection now use toLocaleLowerCase('tr') when Turkish is active (fixes İ/ı, I/i mapping)
 
 ## v1.1.0
-
-- Turkish i18n support: overlay-i18n.js module with EN/TR dictionaries, data-i18n attributes on all UI elements, language setting in Options, translated toasts/confirms/tips
 
 ## v1.0.0
 

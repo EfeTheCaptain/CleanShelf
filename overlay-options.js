@@ -4,7 +4,7 @@
   if (!CS || CS.aborted) return;
 
   const radioGroups = {};
-  const t = (key) => CS.i18n.t(key);
+  const t = (key) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(key) : key;
 
   function buildRadioGroup(title, name, options) {
     const { el } = CS.dom;

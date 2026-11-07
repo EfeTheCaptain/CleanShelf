@@ -17,6 +17,7 @@
 
   const shadow = host.attachShadow({ mode: "closed" });
   CS.styles.applyStyles(shadow);
+  CS.ui.shadow = shadow;
 
   const backdrop = el("div", "cs-backdrop");
   const card = el("div", "cs-card");
@@ -247,7 +248,7 @@
 
   for (const tip of tipsData) {
     const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
-    li.innerHTML = CS.i18n.t(tip.key); // Translate tip
+    li.innerHTML = (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(tip.key) : tip.key; // Translate tip
     tipsList.appendChild(li);
   }
   tipsPanel.appendChild(tipsList);
@@ -389,10 +390,12 @@
   CS.ui.debug = debugBuilt;
   card.appendChild(debugBuilt.panel);
 
+  const _t = (k) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(k) : k;
+
   btnDebug.addEventListener("click", () => {
     const opening = debugBuilt.panel.hidden;
     debugBuilt.panel.hidden = !opening;
-    btnDebug.textContent = opening ? CS.i18n.t("btn_debug_up") : CS.i18n.t("btn_debug");
+    btnDebug.textContent = opening ? _t("btn_debug_up") : _t("btn_debug");
   });
 
   // --- VIEW TRANSITIONS ---
@@ -425,7 +428,7 @@
   // --- LIFECYCLE ---
   function close() {
     if (CS.snippets.hasEditChanges()) {
-      const ok = confirm(CS.i18n.t("confirm_unsaved"));
+      const ok = confirm((CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t("confirm_unsaved") : "Unsaved changes. Discard?");
       if (ok) {
         CS.snippets.handleSave().then(() => {
           CS.drafts.flushDraft();
@@ -489,7 +492,9 @@
     }
     CS.options.applySettingsToDom();
     CS.options.syncOptionRadios();
-    CS.i18n.applyTranslations(); // Apply language immediately
+if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
+  try { CS.i18n.applyTranslations(); } catch (err) { CS.recordError("i18n", err); }
+}
     await CS.drafts.loadDraft();
     await CS.snippets.load();
     titleInput.focus();
