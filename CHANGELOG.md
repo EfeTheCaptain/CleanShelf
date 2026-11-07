@@ -1,3 +1,7 @@
+## v0.1.48
+
+- Fixed drag-and-drop: added dragover/dragleave/drop listeners back to subfolder header (buildSubfolderHeader); removed `if (e.target !== ...) return` guards from both root (itemsContainer/items) and box drop handlers so drops work on empty space; added dragged.folder = sub.folder on move-into-subfolder; List View now has root drop zone (drag OUT to ungroup) + renders subfolder headers + children
+
 ## v0.1.47
 
 - Fixed missing dark-sepia theme in overlay-storage.js validThemes, overlay-debug.js settings check, overlay-options.js UI/validation (6 themes total)

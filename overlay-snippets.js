@@ -148,6 +148,45 @@
     });
 
 
+    // Added Drag/Drop listeners back to the header
+    header.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      header.classList.add("cs-drag-over");
+    });
+    header.addEventListener("dragleave", (e) => {
+      if (!header.contains(e.relatedTarget)) header.classList.remove("cs-drag-over");
+    });
+    header.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      header.classList.remove("cs-drag-over");
+      
+      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+      if (!draggedId) return;
+
+
+      try {
+        const snippets = await CS.storage.getSnippets();
+        const dragged = snippets.find(s => s.id === draggedId);
+        if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== subfolder.title) {
+          dragged.subfolder = subfolder.title;
+          dragged.folder = subfolder.folder;
+          
+          const maxOrder = Math.max(0, ...snippets.filter(s => s.subfolder === subfolder.title).map(s => s.sortOrder || 0));
+          dragged.sortOrder = maxOrder + 1;
+          
+          CS.state.sortMode = "manual";
+          await CS.storage.saveSnippets(snippets);
+          await load();
+          CS.toast.showToast(`Moved to ${subfolder.title}`);
+        }
+      } catch (err) {
+        CS.recordError("move-subfolder", err);
+      }
+    });
+
+
     return header;
   }
 
@@ -499,17 +538,44 @@
 
       const items = el("div", "cs-folder-items");
       
+      // Root Drop Zone for List View
+      items.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (e.target === items) items.classList.add("cs-drag-over");
+      });
+      items.addEventListener("dragleave", (e) => {
+        if (!items.contains(e.relatedTarget)) items.classList.remove("cs-drag-over");
+      });
+      items.addEventListener("drop", async (e) => {
+        items.classList.remove("cs-drag-over");
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+        if (!draggedId) return;
+        
+        const snippets = await CS.storage.getSnippets();
+        const dragged = snippets.find(s => s.id === draggedId);
+        
+        if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
+          delete dragged.subfolder;
+          dragged.sortOrder = -1;
+          await CS.storage.saveSnippets(snippets);
+          await load();
+          CS.toast.showToast("Moved to main folder");
+        }
+      });
+
+
       const subfolders = group.items.filter(s => s.type === "subfolder");
       const unassigned = group.items.filter(s => s.type !== "subfolder" && !s.subfolder);
 
 
-      // Render unassigned snippets first
       for (const s of unassigned) {
         items.appendChild(buildSnippetCard(s));
       }
 
 
-      // Render subfolders and their children in List View
       for (const sub of subfolders) {
         items.appendChild(buildSubfolderHeader(sub));
         const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
@@ -611,7 +677,7 @@
       });
       itemsContainer.addEventListener("drop", async (e) => {
         itemsContainer.classList.remove("cs-drag-over");
-        if (e.target !== itemsContainer) return; 
+        // REMOVED: if (e.target !== itemsContainer) return; 
         e.preventDefault();
         e.stopPropagation();
         
@@ -656,7 +722,7 @@
         });
         box.addEventListener("drop", async (e) => {
           box.classList.remove("cs-drag-over");
-          if (e.target !== box) return; 
+          // REMOVED: if (e.target !== box) return; 
           e.preventDefault();
           e.stopPropagation();
           
@@ -669,6 +735,7 @@
             const dragged = snippets.find(s => s.id === draggedId);
             if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== sub.title) {
               dragged.subfolder = sub.title;
+              dragged.folder = sub.folder;
               
               const maxOrder = Math.max(0, ...snippets.filter(s => s.subfolder === sub.title).map(s => s.sortOrder || 0));
               dragged.sortOrder = maxOrder + 1;
