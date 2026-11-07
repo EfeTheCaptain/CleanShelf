@@ -198,10 +198,20 @@
   const deleteFolderItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteFolderItem.type = "button";
 
+  const sortNewestItem = el("button", "cs-context-item", "Sort Newest");
+  sortNewestItem.type = "button";
+  const sortTitleItem = el("button", "cs-context-item", "Sort A-Z");
+  sortTitleItem.type = "button";
+  const insertSpacerItem = el("button", "cs-context-item", "Insert Spacer");
+  insertSpacerItem.type = "button";
+
   contextMenu.appendChild(editItem);
   contextMenu.appendChild(deleteSnippetItem);
   contextMenu.appendChild(renameFolderItem);
   contextMenu.appendChild(deleteFolderItem);
+  contextMenu.appendChild(sortNewestItem);
+  contextMenu.appendChild(sortTitleItem);
+  contextMenu.appendChild(insertSpacerItem);
   shadow.appendChild(contextMenu);
 
   const ctx = {
@@ -216,11 +226,17 @@
         deleteSnippetItem.hidden = false;
         renameFolderItem.hidden = true;
         deleteFolderItem.hidden = true;
+        sortNewestItem.hidden = true;
+        sortTitleItem.hidden = true;
+        insertSpacerItem.hidden = true;
       } else {
         editItem.hidden = true;
         deleteSnippetItem.hidden = true;
         renameFolderItem.hidden = false;
         deleteFolderItem.hidden = false;
+        sortNewestItem.hidden = false;
+        sortTitleItem.hidden = false;
+        insertSpacerItem.hidden = false;
       }
 
       contextMenu.style.left = x + "px";
@@ -255,6 +271,36 @@
     const name = ctx.targetData;
     ctx.hide();
     if (name) await CS.snippets.deleteFolder(name);
+  });
+
+  sortNewestItem.addEventListener("click", () => {
+    CS.state.sortMode = "newest";
+    CS.snippets.renderSnippets();
+    CS.ui.contextMenu.hide();
+  });
+
+  sortTitleItem.addEventListener("click", () => {
+    CS.state.sortMode = "title";
+    CS.snippets.renderSnippets();
+    CS.ui.contextMenu.hide();
+  });
+
+  insertSpacerItem.addEventListener("click", async () => {
+    const folderName = ctx.targetData;
+    const snippets = await CS.storage.getSnippets();
+    const newSpacer = {
+      id: crypto.randomUUID(),
+      type: "spacer",
+      title: "New Section",
+      folder: folderName,
+      createdAt: Date.now(),
+      sortOrder: -1
+    };
+    snippets.push(newSpacer);
+    CS.state.sortMode = "manual";
+    await CS.storage.saveSnippets(snippets);
+    await CS.snippets.load();
+    CS.ui.contextMenu.hide();
   });
 
   function showMain() {

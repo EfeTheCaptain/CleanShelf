@@ -2,7 +2,6 @@
   "use strict";
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
-
   function getFilteredSnippets() {
     const q = (CS.state.searchQuery || "").trim().toLowerCase();
     const all = CS.state.snippets || [];
@@ -14,26 +13,33 @@
     );
   }
 
+
   function groupByFolder(snippets) {
     const map = new Map();
-    
-    // 1. Pre-fill with explicit empty folders
     if (CS.state.folders) {
       for (const f of CS.state.folders) {
-        if (f && f !== CS.constants.UNFILED) {
-          map.set(f, []);
-        }
+        if (f && f !== CS.constants.UNFILED) map.set(f, []);
       }
     }
-
-    // 2. Add snippets to folders
     for (const s of snippets) {
       const key = (s && s.folder) ? s.folder : CS.constants.UNFILED;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(s);
     }
     
-    // 3. Sort folders, push Unfiled to end
+    // Sort items within folders
+    for (const [key, items] of map.entries()) {
+      if (CS.state.sortMode === "title") {
+        items.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+      } else if (CS.state.sortMode === "manual") {
+        items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+      } else {
+        // Default: newest first
+        items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      }
+    }
+
+
     const names = [...map.keys()].filter((k) => k !== CS.constants.UNFILED).sort();
     if (map.has(CS.constants.UNFILED)) names.push(CS.constants.UNFILED);
     return names.map((name) => ({ name, items: map.get(name) }));
@@ -93,27 +99,45 @@
 
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
-    const cardEl = el("div", "cs-item");
-    cardEl.setAttribute("role", "button");
+    const isSpacer = snippet.type === "spacer";
+    const cardEl = el("div", isSpacer ? "cs-item cs-spacer" : "cs-item");
+    
     cardEl.setAttribute("tabindex", "0");
-    cardEl.title = "Click to copy. Right-click for options.";
     cardEl.draggable = true;
+    cardEl.dataset.id = snippet.id;
 
-    cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
-    cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
-    
-    const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
-    if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
 
-    cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
-    
-    cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
-    cardEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        CS.clipboard.copySnippet(snippet);
-      }
-    });
+    if (!isSpacer) {
+      cardEl.setAttribute("role", "button");
+      cardEl.title = "Click to copy. Right-click for options.";
+      cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
+      cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+      
+      const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
+      if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
+      cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+      
+      cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
+      cardEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          CS.clipboard.copySnippet(snippet);
+        }
+      });
+    } else {
+      cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Section Header"));
+      cardEl.addEventListener("dblclick", () => {
+        const newName = prompt("Spacer title:", snippet.title || "");
+        if (newName !== null && newName.trim() !== snippet.title) {
+          snippet.title = newName.trim();
+          CS.storage.saveSnippets(CS.state.snippets).then(() => {
+            CS.state.sortMode = "manual";
+            load();
+          });
+        }
+      });
+    }
+
 
     cardEl.addEventListener("contextmenu", (e) => {
       e.preventDefault();
@@ -123,15 +147,66 @@
       }
     });
 
+
+    // Drag & Drop for Reordering
     cardEl.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", snippet.id);
       e.dataTransfer.effectAllowed = "move";
       cardEl.classList.add("cs-dragging");
     });
 
+
     cardEl.addEventListener("dragend", () => {
       cardEl.classList.remove("cs-dragging");
+      document.querySelectorAll(".cs-drop-target").forEach(el => el.classList.remove("cs-drop-target"));
     });
+
+
+    cardEl.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      cardEl.classList.add("cs-drop-target");
+    });
+
+
+    cardEl.addEventListener("dragleave", () => {
+      cardEl.classList.remove("cs-drop-target");
+    });
+
+
+    cardEl.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cardEl.classList.remove("cs-drop-target");
+      
+      const draggedId = e.dataTransfer.getData("text/plain");
+      if (!draggedId || draggedId === snippet.id) return;
+
+
+      const currentItems = Array.from(cardEl.parentElement.querySelectorAll(".cs-item"));
+      const fromIdx = currentItems.findIndex(el => el.dataset.id === draggedId);
+      const toIdx = currentItems.findIndex(el => el.dataset.id === snippet.id);
+
+
+      if (fromIdx === -1 || toIdx === -1) return;
+
+
+      // Reorder in state array
+      const allSnippets = CS.state.snippets;
+      const draggedSnippet = allSnippets.find(s => s.id === draggedId);
+      
+      // Remove from array and insert before target
+      const newItems = currentItems.map(el => allSnippets.find(s => s.id === el.dataset.id));
+      newItems.splice(toIdx, 0, newItems.splice(fromIdx, 1)[0]);
+
+
+      // Assign new sortOrder based on visual order
+      newItems.forEach((s, idx) => { s.sortOrder = idx; });
+      
+      CS.state.sortMode = "manual";
+      await CS.storage.saveSnippets(allSnippets);
+      await load();
+    });
+
 
     return cardEl;
   }
@@ -353,7 +428,7 @@
       });
 
       const items = el("div", "cs-folder-items");
-      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const ordered = group.items; // Order already computed by groupByFolder
       for (const s of ordered) items.appendChild(buildSnippetCard(s));
 
       wrap.appendChild(headerBtn);
@@ -429,7 +504,9 @@
 
       const items = el("div", "cs-drill-items");
       if (CS.state.compactView) items.classList.add("cs-compact");
-      const ordered = group.items.slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      
+      const ordered = group.items; // Use the order already computed by groupByFolder
+      
       for (const s of ordered) items.appendChild(buildSnippetCard(s));
       
       if (ordered.length === 0) {

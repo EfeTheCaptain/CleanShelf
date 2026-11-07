@@ -1,3 +1,11 @@
+## v0.1.35
+
+- Added manual sort order via drag-and-drop reordering within folders
+- Added Sort Newest / Sort A-Z options in folder context menu
+- Added Insert Spacer (section header) option in folder context menu
+- Added spacer double-click to rename; dbl-clicking opens prompt
+- CSS for .cs-spacer and .cs-drop-target
+
 ## v0.1.34
 
 - Fixed folder input sync: renderSnippets() now calls updateFolderInputState() every render to lock/unlock input correctly

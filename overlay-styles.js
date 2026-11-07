@@ -1051,6 +1051,32 @@
   min-height: auto;
 }
 
+.cs-item.cs-spacer {
+  background: transparent;
+  border: 1px dashed var(--cs-border-strong);
+  color: var(--cs-text-muted);
+  cursor: grab;
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: var(--cs-fs-xs);
+  letter-spacing: 1px;
+}
+
+.cs-item.cs-spacer:hover {
+  background: var(--cs-bg-surface);
+}
+
+.cs-item.cs-spacer .cs-item-copy {
+  display: none !important;
+}
+
+.cs-item.cs-drop-target {
+  border-top: 3px solid var(--cs-accent) !important;
+  padding-top: 9px !important;
+}
+
 `;
 
   function applyStyles(shadowRoot) {
