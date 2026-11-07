@@ -1,3 +1,7 @@
+## v1.0.0
+
+- Stable release: Debug panel crash fixed (contextMenu reference order), folders readable check added, drag-and-drop drop zones fixed on subfolder header/root/box, dark-sepia theme, 2-column Options with Import Merge, List view subfolder rendering
+
 ## v0.2.0
 
 - Fixed fatal JS initialization error in overlay-index.js: backdrop click listener referenced contextMenu before const declaration (moved listener after contextMenu definition)
