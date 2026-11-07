@@ -1,3 +1,7 @@
+## v1.1.5
+
+- Fixed Options UI not translating: radio group titles and option labels now use data-i18n attributes so applyTranslations() updates them when language changes; setLanguage() re-renders the options view with new language labels
+
 ## v1.1.4
 
 - Fixed fatal crash: CS.debug.buildDebugPanel() now guarded — if overlay-debug.js fails, initialization continues and gear/ESC/backdrop click handlers wire up correctly

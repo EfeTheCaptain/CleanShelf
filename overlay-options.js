@@ -4,12 +4,13 @@
   if (!CS || CS.aborted) return;
 
   const radioGroups = {};
-  const t = (key) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(key) : key;
 
-  function buildRadioGroup(title, name, options) {
+  function buildRadioGroup(titleKey, title, name, options) {
     const { el } = CS.dom;
     const group = el("div", "cs-options-group");
-    group.appendChild(el("label", "cs-label", title));
+    const titleLabel = el("label", "cs-label", title);
+    if (titleKey) titleLabel.setAttribute("data-i18n", titleKey);
+    group.appendChild(titleLabel);
     const inputs = {};
     for (const opt of options) {
       const wrap = el("label", "cs-option-radio");
@@ -21,7 +22,9 @@
         if (input.checked) opt.onSelect(opt.value);
       });
       wrap.appendChild(input);
-      wrap.appendChild(el("span", null, opt.label));
+      const span = el("span", null, opt.label);
+      if (opt.i18nKey) span.setAttribute("data-i18n", opt.i18nKey);
+      wrap.appendChild(span);
       group.appendChild(wrap);
       inputs[opt.value] = input;
     }
@@ -35,11 +38,12 @@
     view.hidden = true;
 
     const header = el("div", "cs-options-header");
-    const backBtn = el("button", "cs-back-btn", t("btn_back"));
+    const backBtn = el("button", "cs-back-btn", "← Back");
     backBtn.type = "button";
+    backBtn.setAttribute("data-i18n", "btn_back");
     backBtn.addEventListener("click", onBack);
     header.appendChild(backBtn);
-    const titleEl = el("h2", "cs-options-title", t("opt_title"));
+    const titleEl = el("h2", "cs-options-title", "Options");
     titleEl.setAttribute("data-i18n", "opt_title");
     header.appendChild(titleEl);
     view.appendChild(header);
@@ -48,61 +52,66 @@
     const colLeft = el("div", "cs-options-col");
     const colRight = el("div", "cs-options-col");
 
-    radioGroups.layout = buildRadioGroup(t("opt_layout"), "cs-layout", [
-      { value: "grid", label: t("opt_grid"), onSelect: setLayout },
-      { value: "list", label: t("opt_list"), onSelect: setLayout },
+    radioGroups.layout = buildRadioGroup("opt_layout", "Layout", "cs-layout", [
+      { value: "grid", label: "Folder grid (icons, 3 columns)", i18nKey: "opt_grid", onSelect: setLayout },
+      { value: "list", label: "List (grouped by folder)", i18nKey: "opt_list", onSelect: setLayout },
     ]);
     colLeft.appendChild(radioGroups.layout.group);
 
-    radioGroups.theme = buildRadioGroup(t("opt_theme"), "cs-theme", [
-      { value: "dark", label: t("opt_dark"), onSelect: setTheme },
-      { value: "light", label: t("opt_light"), onSelect: setTheme },
-      { value: "dracula", label: t("opt_dracula"), onSelect: setTheme },
-      { value: "nord", label: t("opt_nord"), onSelect: setTheme },
-      { value: "sepia", label: t("opt_sepia"), onSelect: setTheme },
-      { value: "dark-sepia", label: t("opt_dark_sepia"), onSelect: setTheme },
+    radioGroups.theme = buildRadioGroup("opt_theme", "Color scheme", "cs-theme", [
+      { value: "dark", label: "Dark", i18nKey: "opt_dark", onSelect: setTheme },
+      { value: "light", label: "Light", i18nKey: "opt_light", onSelect: setTheme },
+      { value: "dracula", label: "Dracula", i18nKey: "opt_dracula", onSelect: setTheme },
+      { value: "nord", label: "Nord", i18nKey: "opt_nord", onSelect: setTheme },
+      { value: "sepia", label: "Sepia", i18nKey: "opt_sepia", onSelect: setTheme },
+      { value: "dark-sepia", label: "Dark Sepia", i18nKey: "opt_dark_sepia", onSelect: setTheme },
     ]);
     colLeft.appendChild(radioGroups.theme.group);
 
-    radioGroups.contrast = buildRadioGroup(t("opt_contrast"), "cs-contrast", [
-      { value: "normal", label: t("opt_normal"), onSelect: setContrast },
-      { value: "high", label: t("opt_high"), onSelect: setContrast },
+    radioGroups.contrast = buildRadioGroup("opt_contrast", "Contrast", "cs-contrast", [
+      { value: "normal", label: "Normal", i18nKey: "opt_normal", onSelect: setContrast },
+      { value: "high", label: "High", i18nKey: "opt_high", onSelect: setContrast },
     ]);
     colLeft.appendChild(radioGroups.contrast.group);
 
-    radioGroups.fontSize = buildRadioGroup(t("opt_font_size"), "cs-fontsize", [
-      { value: "sm", label: t("opt_sm"), onSelect: setFontSize },
-      { value: "md", label: t("opt_md"), onSelect: setFontSize },
-      { value: "lg", label: t("opt_lg"), onSelect: setFontSize },
+    radioGroups.fontSize = buildRadioGroup("opt_font_size", "Font size", "cs-fontsize", [
+      { value: "sm", label: "Small", i18nKey: "opt_sm", onSelect: setFontSize },
+      { value: "md", label: "Medium", i18nKey: "opt_md", onSelect: setFontSize },
+      { value: "lg", label: "Large", i18nKey: "opt_lg", onSelect: setFontSize },
     ]);
     colLeft.appendChild(radioGroups.fontSize.group);
 
-    radioGroups.draftRate = buildRadioGroup(t("opt_draft_rate"), "cs-draftrate", [
-      { value: "fast", label: t("opt_fast"), onSelect: setDraftRate },
-      { value: "relaxed", label: t("opt_relaxed"), onSelect: setDraftRate },
+    radioGroups.draftRate = buildRadioGroup("opt_draft_rate", "Draft Save Rate", "cs-draftrate", [
+      { value: "fast", label: "Fast (400ms after typing stops)", i18nKey: "opt_fast", onSelect: setDraftRate },
+      { value: "relaxed", label: "Relaxed (2 seconds after typing stops)", i18nKey: "opt_relaxed", onSelect: setDraftRate },
     ]);
     colLeft.appendChild(radioGroups.draftRate.group);
 
     // Language
-    radioGroups.language = buildRadioGroup(t("opt_language"), "cs-language", [
-      { value: "en", label: t("opt_english"), onSelect: setLanguage },
-      { value: "tr", label: t("opt_turkish"), onSelect: setLanguage },
+    radioGroups.language = buildRadioGroup("opt_language", "Language", "cs-language", [
+      { value: "en", label: "English", i18nKey: "opt_english", onSelect: setLanguage },
+      { value: "tr", label: "Turkish", i18nKey: "opt_turkish", onSelect: setLanguage },
     ]);
     colLeft.appendChild(radioGroups.language.group);
 
     // Data Group (Right Column)
     const dataGroup = el("div", "cs-options-group");
-    dataGroup.appendChild(el("label", "cs-label", t("opt_data")));
+    const dataLabel = el("label", "cs-label", "Data");
+    dataLabel.setAttribute("data-i18n", "opt_data");
+    dataGroup.appendChild(dataLabel);
     
-    const exportBtn = el("button", "cs-btn cs-option-action", t("opt_export"));
+    const exportBtn = el("button", "cs-btn cs-option-action", "Export JSON");
     exportBtn.type = "button";
+    exportBtn.setAttribute("data-i18n", "opt_export");
     exportBtn.addEventListener("click", () => CS.exportImport.exportSnippets());
     
-    const importReplaceBtn = el("button", "cs-btn cs-option-action", t("opt_import_replace"));
+    const importReplaceBtn = el("button", "cs-btn cs-option-action", "Import (Replace)");
     importReplaceBtn.type = "button";
+    importReplaceBtn.setAttribute("data-i18n", "opt_import_replace");
     
-    const importMergeBtn = el("button", "cs-btn cs-option-action cs-option-secondary", t("opt_import_merge"));
+    const importMergeBtn = el("button", "cs-btn cs-option-action cs-option-secondary", "Import (Merge)");
     importMergeBtn.type = "button";
+    importMergeBtn.setAttribute("data-i18n", "opt_import_merge");
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -122,6 +131,7 @@
     dataGroup.appendChild(importReplaceBtn);
     dataGroup.appendChild(importMergeBtn);
     dataGroup.appendChild(fileInput);
+    dataGroup.appendChild(el("p", "cs-options-hint", "Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends."));
     colRight.appendChild(dataGroup);
 
     body.appendChild(colLeft);
@@ -169,11 +179,29 @@
   }
 
   function setLanguage(lang) {
+    if (lang !== "en" && lang !== "tr") return;
     if (CS.state.settings.language === lang) return;
     CS.state.settings.language = lang;
     CS.storage.persistSettings();
     if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
       try { CS.i18n.applyTranslations(); } catch (err) { CS.recordError("i18n", err); }
+    }
+    // Re-render options view so radio labels and group titles reflect new language
+    if (CS.ui.options && CS.ui.options.view && CS.ui.card) {
+      const newView = buildOptionsView(() => {
+        CS.state.view = "main";
+        CS.ui.mainView.hidden = false;
+        CS.ui.options.view.hidden = true;
+        CS.ui.footer.hidden = false;
+        if (CS.state.editingSnippetId) {
+          CS.ui.contentInput.focus();
+        } else {
+          CS.ui.titleInput.focus();
+        }
+      });
+      CS.ui.card.replaceChild(newView.view, CS.ui.options.view);
+      CS.ui.options = newView;
+      CS.options.syncOptionRadios();
     }
   }
 
