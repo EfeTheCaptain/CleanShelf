@@ -100,69 +100,60 @@
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
     const isSubfolder = snippet.type === "subfolder";
-    const cardEl = el("div", isSubfolder ? "cs-item cs-subfolder" : "cs-item");
-    
-    cardEl.setAttribute("tabindex", "0");
-    cardEl.draggable = true;
-    cardEl.dataset.id = snippet.id;
 
+    if (isSubfolder) {
+      // --- SUBFOLDER HEADER ---
+      const header = el("div", "cs-subfolder-header");
+      const isCollapsed = CS.state.collapsedSubfolders.has(snippet.title);
+      header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
+      header.appendChild(el("span", null, snippet.title || "Subfolder"));
 
-    if (!isSubfolder) {
-      cardEl.setAttribute("role", "button");
-      cardEl.title = "Click to copy. Right-click for options.";
-      cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
-      cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
-      
-      const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
-      if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
-      cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
-      
-      cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
-      cardEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          CS.clipboard.copySnippet(snippet);
+      // Click to collapse/expand
+      header.addEventListener("click", () => {
+        if (CS.state.collapsedSubfolders.has(snippet.title)) {
+          CS.state.collapsedSubfolders.delete(snippet.title);
+        } else {
+          CS.state.collapsedSubfolders.add(snippet.title);
         }
+        renderSnippets();
       });
-    } else {
-      cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Subfolder"));
-      
-      // Double click to rename subfolder
-      cardEl.addEventListener("dblclick", () => {
+
+      // Double click to rename
+      header.addEventListener("dblclick", (e) => {
+        e.stopPropagation();
         const newName = prompt("Subfolder name:", snippet.title || "");
         if (newName !== null && newName.trim() !== snippet.title) {
-          snippet.title = newName.trim();
-          CS.storage.saveSnippets(CS.state.snippets).then(() => {
-            CS.state.sortMode = "manual";
-            load();
-          });
+          const cleanName = newName.trim();
+          if (cleanName) {
+            snippet.title = cleanName;
+            // Update all snippets inside this subfolder
+            for (const s of CS.state.snippets) {
+              if (s.subfolder === snippet.title) s.subfolder = cleanName;
+            }
+            CS.storage.saveSnippets(CS.state.snippets).then(() => load());
+          }
         }
       });
 
-
-      // Drop snippets onto the subfolder
-      cardEl.addEventListener("dragover", (e) => {
+      // Allow dropping snippets onto the subfolder header
+      header.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cardEl.classList.add("cs-drop-target");
+        header.classList.add("cs-drag-over");
       });
-      cardEl.addEventListener("dragleave", () => {
-        cardEl.classList.remove("cs-drop-target");
-      });
-      cardEl.addEventListener("drop", async (e) => {
+      header.addEventListener("dragleave", () => header.classList.remove("cs-drag-over"));
+      header.addEventListener("drop", async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        cardEl.classList.remove("cs-drop-target");
-        
+        header.classList.remove("cs-drag-over");
         const draggedId = e.dataTransfer.getData("text/plain");
         if (!draggedId) return;
-
 
         try {
           const snippets = await CS.storage.getSnippets();
           const dragged = snippets.find(s => s.id === draggedId);
           if (dragged && dragged.type !== "subfolder") {
-            dragged.subfolder = snippet.title; // Assign to this subfolder
+            dragged.subfolder = snippet.title;
             await CS.storage.saveSnippets(snippets);
             await load();
             CS.toast.showToast(`Moved to ${snippet.title}`);
@@ -171,8 +162,37 @@
           CS.recordError("move-subfolder", err);
         }
       });
+
+      // Right-click to delete subfolder
+      header.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm(`Delete subfolder "${snippet.title}"? Snippets inside will be moved to the main folder.`)) {
+          CS.state.snippets = CS.state.snippets.filter(s => s.id !== snippet.id);
+          for (const s of CS.state.snippets) {
+            if (s.subfolder === snippet.title) delete s.subfolder;
+          }
+          CS.storage.saveSnippets(CS.state.snippets).then(() => load());
+        }
+      });
+
+      return header;
     }
 
+    // --- REGULAR SNIPPET CARD ---
+    const cardEl = el("div", "cs-item");
+    cardEl.setAttribute("role", "button");
+    cardEl.setAttribute("tabindex", "0");
+    cardEl.title = "Click to copy. Right-click for options.";
+    cardEl.draggable = true;
+    cardEl.dataset.id = snippet.id;
+
+    cardEl.appendChild(el("div", "cs-item-title", snippet.title || "Untitled"));
+    cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
+    const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
+    if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
+    cardEl.appendChild(el("span", "cs-item-copy", "Copy"));
+    cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
 
     cardEl.addEventListener("contextmenu", (e) => {
       e.preventDefault();
@@ -182,61 +202,88 @@
       }
     });
 
-
+    // Drag Start
     cardEl.addEventListener("dragstart", (e) => {
       e.dataTransfer.setData("text/plain", snippet.id);
       e.dataTransfer.effectAllowed = "move";
-      cardEl.classList.add("cs-dragging");
+      setTimeout(() => cardEl.classList.add("cs-dragging"), 0);
     });
-
 
     cardEl.addEventListener("dragend", () => {
       cardEl.classList.remove("cs-dragging");
-      document.querySelectorAll(".cs-drop-target").forEach(el => el.classList.remove("cs-drop-target"));
+      document.querySelectorAll(".cs-drop-before, .cs-drop-after, .cs-drag-over").forEach(el => {
+        el.classList.remove("cs-drop-before", "cs-drop-after", "cs-drag-over");
+      });
     });
 
-
-    // Reordering logic (same as before)
+    // Smart Drag Over (Top 50% vs Bottom 50%)
     cardEl.addEventListener("dragover", (e) => {
       e.preventDefault();
-      cardEl.classList.add("cs-drop-target");
-    });
+      e.stopPropagation();
 
+      document.querySelectorAll(".cs-drop-before, .cs-drop-after").forEach(el => {
+        if (el !== cardEl) el.classList.remove("cs-drop-before", "cs-drop-after");
+      });
+
+      const rect = cardEl.getBoundingClientRect();
+      const offset = e.clientY - rect.top;
+
+      if (offset < rect.height / 2) {
+        cardEl.classList.add("cs-drop-before");
+        cardEl.classList.remove("cs-drop-after");
+      } else {
+        cardEl.classList.add("cs-drop-after");
+        cardEl.classList.remove("cs-drop-before");
+      }
+    });
 
     cardEl.addEventListener("dragleave", () => {
-      cardEl.classList.remove("cs-drop-target");
+      cardEl.classList.remove("cs-drop-before", "cs-drop-after");
     });
 
-
+    // Drop to reorder
     cardEl.addEventListener("drop", async (e) => {
       e.preventDefault();
       e.stopPropagation();
-      cardEl.classList.remove("cs-drop-target");
-      
+
+      const isBefore = cardEl.classList.contains("cs-drop-before");
+      cardEl.classList.remove("cs-drop-before", "cs-drop-after");
+
       const draggedId = e.dataTransfer.getData("text/plain");
       if (!draggedId || draggedId === snippet.id) return;
 
+      try {
+        const snippets = await CS.storage.getSnippets();
+        const dragged = snippets.find(s => s.id === draggedId);
+        if (!dragged) return;
 
-      const currentItems = Array.from(cardEl.parentElement.querySelectorAll(".cs-item"));
-      const fromIdx = currentItems.findIndex(el => el.dataset.id === draggedId);
-      const toIdx = currentItems.findIndex(el => el.dataset.id === snippet.id);
+        // Inherit the target's folder and subfolder context
+        dragged.folder = snippet.folder;
+        dragged.subfolder = snippet.subfolder;
 
+        // Calculate new array order
+        const currentFolderItems = snippets
+          .filter(s => s.folder === snippet.folder && s.subfolder === snippet.subfolder && s.type !== "subfolder")
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
 
-      if (fromIdx === -1 || toIdx === -1) return;
+        const targetIdx = currentFolderItems.findIndex(s => s.id === snippet.id);
+        const insertIdx = isBefore ? targetIdx : targetIdx + 1;
 
+        const draggedIdx = currentFolderItems.findIndex(s => s.id === draggedId);
+        if (draggedIdx !== -1) currentFolderItems.splice(draggedIdx, 1);
 
-      const allSnippets = CS.state.snippets;
-      const newItems = currentItems.map(el => allSnippets.find(s => s.id === el.dataset.id));
-      newItems.splice(toIdx, 0, newItems.splice(fromIdx, 1)[0]);
+        currentFolderItems.splice(insertIdx, 0, dragged);
 
+        // Reassign sortOrder
+        currentFolderItems.forEach((s, idx) => { s.sortOrder = idx; });
 
-      newItems.forEach((s, idx) => { s.sortOrder = idx; });
-      
-      CS.state.sortMode = "manual";
-      await CS.storage.saveSnippets(allSnippets);
-      await load();
+        CS.state.sortMode = "manual";
+        await CS.storage.saveSnippets(snippets);
+        await load();
+      } catch (err) {
+        CS.recordError("drag-reorder", err);
+      }
     });
-
 
     return cardEl;
   }
@@ -536,48 +583,37 @@
       if (CS.state.compactView) itemsContainer.classList.add("cs-compact");
 
 
-      // Split into subfolders and unassigned snippets
+      // Separate subfolders and unassigned snippets
       const subfolders = group.items.filter(s => s.type === "subfolder");
       const unassigned = group.items.filter(s => s.type !== "subfolder" && !s.subfolder);
 
 
-      // Render each subfolder and its snippets
-      for (const sub of subfolders) {
-        itemsContainer.appendChild(buildSnippetCard(sub));
-        
-        const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
-        if (subItems.length > 0) {
-          const subContainer = el("div", "cs-subfolder-items");
-          for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
-          itemsContainer.appendChild(subContainer);
-        }
-      }
-
-
-      // Render unassigned snippets
+      // Render unassigned snippets first
       for (const s of unassigned) {
         itemsContainer.appendChild(buildSnippetCard(s));
       }
-      
-      // Handle dropping into the main folder area (removes subfolder assignment)
-      itemsContainer.addEventListener("dragover", (e) => e.preventDefault());
-      itemsContainer.addEventListener("drop", async (e) => {
-        e.preventDefault();
-        const draggedId = e.dataTransfer.getData("text/plain");
-        const snippets = await CS.storage.getSnippets();
-        const dragged = snippets.find(s => s.id === draggedId);
-        if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
-          delete dragged.subfolder;
-          await CS.storage.saveSnippets(snippets);
-          await load();
+
+
+      // Render subfolders and their children
+      for (const sub of subfolders) {
+        itemsContainer.appendChild(buildSnippetCard(sub)); // Renders header
+
+        const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
+        if (!isCollapsed) {
+          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
+          if (subItems.length > 0) {
+            const subContainer = el("div", "cs-subfolder-items");
+            for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
+            itemsContainer.appendChild(subContainer);
+          }
         }
-      });
+      }
 
 
       if (group.items.length === 0) {
         itemsContainer.appendChild(el("p", "cs-empty", "This folder is empty."));
       }
-      
+
       listEl.appendChild(itemsContainer);
       return;
     }

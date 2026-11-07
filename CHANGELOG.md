@@ -1,3 +1,9 @@
+## v0.1.40
+
+- Functional subfolders: collapsible headers, rename propagates to child snippets
+- Smart drag & drop: top 50% drop before card, bottom 50% drop after card
+- Right-click subfolder header to delete; snippets inside move to main folder
+
 ## v0.1.39
 
 - Import now preserves subfolder type and subfolder assignment (snippets grouped under subfolders survive import/export)

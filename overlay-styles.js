@@ -1101,47 +1101,61 @@
   min-height: auto;
 }
 
-.cs-item.cs-subfolder {
+.cs-subfolder-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   background: var(--cs-bg-panel);
-  border: 1px dashed var(--cs-border-strong);
+  border: 1px solid var(--cs-border);
+  border-radius: 6px;
   color: var(--cs-text-muted);
-  cursor: grab;
-  padding: 10px 12px;
-  text-align: center;
   font-weight: 600;
-  text-transform: uppercase;
-  font-size: var(--cs-fs-xs);
-  letter-spacing: 1px;
-  margin-top: 12px;
+  font-size: var(--cs-fs-sm);
+  cursor: pointer;
+  user-select: none;
+  margin-top: 10px;
+  transition: background 0.1s, border-color 0.1s;
 }
 
-.cs-item.cs-subfolder:hover {
+.cs-subfolder-header:hover {
   background: var(--cs-bg-surface);
   color: var(--cs-text);
+  border-color: var(--cs-border-hover);
 }
 
-.cs-item.cs-subfolder .cs-item-copy {
-  display: none !important;
-}
-
-.cs-item.cs-subfolder.cs-drop-target {
+.cs-subfolder-header.cs-drag-over {
   border-color: var(--cs-accent) !important;
   background: var(--cs-bg-surface-hover) !important;
 }
 
 .cs-subfolder-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 8px;
-  padding: 4px 0 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 8px 16px;
   border-left: 2px solid var(--cs-border-strong);
-  margin-left: 6px;
+  margin-left: 8px;
+  margin-bottom: 8px;
 }
 
-/* Drag and drop reordering indicator */
-.cs-item.cs-drop-target {
+.cs-subfolder-items[hidden] {
+  display: none !important;
+}
+
+/* Drag and drop insertion lines */
+.cs-drop-before {
   border-top: 3px solid var(--cs-accent) !important;
-  padding-top: 9px !important;
+  margin-top: -3px;
+}
+
+.cs-drop-after {
+  border-bottom: 3px solid var(--cs-accent) !important;
+  margin-bottom: -3px;
+}
+
+.cs-item.cs-dragging {
+  opacity: 0.4;
 }
 
 `;

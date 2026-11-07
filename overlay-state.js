@@ -10,6 +10,7 @@
     lastError: null,
     lastErrorAt: null,
     collapsedFolders: new Set(),
+    collapsedSubfolders: new Set(),
     snippets: [],
     folders: new Set(),
     draftTimer: null,
