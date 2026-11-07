@@ -71,10 +71,10 @@
     if (CS.state.drilledFolder !== null) {
       ui.folderInput.value = CS.state.drilledFolder;
       ui.folderInput.disabled = true;
-      ui.folderInput.placeholder = "Folder (locked)";
+      ui.folderInput.placeholder = CS.i18n.t("folder_locked");
     } else {
       ui.folderInput.disabled = false;
-      ui.folderInput.placeholder = "Folder";
+      ui.folderInput.placeholder = CS.i18n.t("folder_placeholder");
     }
   }
 
@@ -138,7 +138,7 @@
     header.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (confirm(`Delete subfolder "${subfolder.title}"? Snippets inside will be moved to the main folder.`)) {
+      if (confirm(CS.i18n.t("confirm_delete_snippet"))) {
         CS.state.snippets = CS.state.snippets.filter(s => s.id !== subfolder.id);
         for (const s of CS.state.snippets) {
           if (s.subfolder === subfolder.title) delete s.subfolder;
@@ -179,7 +179,7 @@
           CS.state.sortMode = "manual";
           await CS.storage.saveSnippets(snippets);
           await load();
-          CS.toast.showToast(`Moved to ${subfolder.title}`);
+          CS.toast.showToast(CS.i18n.t("toast_moved", { folder: subfolder.title }));
         }
       } catch (err) {
         CS.recordError("move-subfolder", err);
@@ -352,12 +352,12 @@
             snippets[idx].updatedAt = Date.now();
             await CS.storage.saveSnippets(snippets);
             await load();
-            CS.toast.showToast(`Moved to ${folderName}`);
+            CS.toast.showToast(CS.i18n.t("toast_moved", { folder: folderName }));
           }
         }
       } catch (err) {
         CS.recordError("move", err);
-        CS.toast.showToast("Move failed", "error");
+        CS.toast.showToast(CS.i18n.t("err_save"), "error");
       }
     });
   }
@@ -370,7 +370,7 @@
       CS.state.folders.add(newName);
       CS.storage.saveFolders([...CS.state.folders]).then(() => {
         load();
-        CS.toast.showToast(`Created "${newName}"`);
+        CS.toast.showToast(CS.i18n.t("toast_folder_created"));
       });
     }
   }
@@ -450,10 +450,10 @@
       }
       
       await load();
-      CS.toast.showToast("Folder renamed");
+      CS.toast.showToast(CS.i18n.t("toast_saved"));
     } catch (err) {
       CS.recordError("folder/rename", err);
-      CS.toast.showToast("Rename failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     }
   }
 
@@ -463,7 +463,7 @@
       const toDelete = snippets.filter((s) => s.folder === folderName);
       
       if (toDelete.length > 0) {
-        const ok = confirm(`There are ${toDelete.length} snippets in "${folderName}". Are you sure you want to delete?`);
+        const ok = confirm(CS.i18n.t("confirm_delete_folder", { count: toDelete.length, folder: folderName }));
         if (!ok) return;
       }
 
@@ -477,7 +477,7 @@
       
       await load();
       
-      CS.toast.showToast("Folder deleted", "success", "Undo", async () => {
+      CS.toast.showToast(CS.i18n.t("toast_deleted"), "success", "Undo", async () => {
         if (CS.state.folders) {
           CS.state.folders.add(folderName);
           await CS.storage.saveFolders([...CS.state.folders]);
@@ -486,12 +486,12 @@
         const restored = [...current, ...toDelete];
         await CS.storage.saveSnippets(restored);
         await load();
-        CS.toast.showToast("Restored");
+        CS.toast.showToast(CS.i18n.t("toast_restored"));
       });
 
     } catch (err) {
       CS.recordError("folder/delete", err);
-      CS.toast.showToast("Delete failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     }
   }
 
@@ -562,7 +562,7 @@
           dragged.sortOrder = -1;
           await CS.storage.saveSnippets(snippets);
           await load();
-          CS.toast.showToast("Moved to main folder");
+          CS.toast.showToast(CS.i18n.t("toast_saved"));
         }
       });
 
@@ -692,7 +692,7 @@
           dragged.sortOrder = -1;
           await CS.storage.saveSnippets(snippets);
           await load();
-          CS.toast.showToast("Moved to main folder");
+          CS.toast.showToast(CS.i18n.t("toast_saved"));
         }
       });
 
@@ -743,7 +743,7 @@
               CS.state.sortMode = "manual";
               await CS.storage.saveSnippets(snippets);
               await load();
-              CS.toast.showToast(`Moved to ${sub.title}`);
+              CS.toast.showToast(CS.i18n.t("toast_moved", { folder: sub.title }));
             }
           } catch (err) {
             CS.recordError("move-subfolder", err);
@@ -902,10 +902,10 @@
       CS.state.sortMode = "manual";
       await CS.storage.saveSnippets(snippets);
       await load();
-      CS.toast.showToast("Subfolder created");
+      CS.toast.showToast(CS.i18n.t("toast_subfolder_created"));
     } catch (err) {
       CS.recordError("insert-subfolder", err);
-      CS.toast.showToast("Failed to create subfolder", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     }
   }
 
@@ -1020,7 +1020,7 @@
 
     const content = ui.contentInput ? ui.contentInput.value.trim() : "";
     if (!title && !content) {
-      CS.toast.showToast("Add a title or content", "error");
+      CS.toast.showToast(CS.i18n.t("err_empty"), "error");
       return;
     }
     
@@ -1043,7 +1043,7 @@
 
 
         if (existingSnippet) {
-          const replace = confirm(`A snippet titled "${finalTitle}" already exists in this folder.\n\nClick OK to REPLACE it.\nClick Cancel to ADD AS NEW.`);
+          const replace = confirm(CS.i18n.t("confirm_duplicate", { title: finalTitle }));
           
           if (replace) {
             // Overwrite target
@@ -1069,7 +1069,7 @@
             updateFolderInputState();
             await CS.drafts.clearDraft();
             await load();
-            CS.toast.showToast("Replaced existing snippet");
+            CS.toast.showToast(CS.i18n.t("toast_saved"));
             return;
           } else {
             finalTitle = getUniqueTitle(finalTitle, folder || "", snippets);
@@ -1126,10 +1126,10 @@
       updateFolderInputState();
       await CS.drafts.clearDraft();
       await load();
-      CS.toast.showToast(isEditing ? "Updated" : "Saved");
+      CS.toast.showToast(CS.i18n.t(isEditing ? "toast_updated" : "toast_saved"));
     } catch (err) {
       CS.recordError("save", err);
-      CS.toast.showToast("Save failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     } finally {
       if (ui.saveBtn) ui.saveBtn.disabled = false;
     }
@@ -1149,17 +1149,17 @@
       await CS.storage.saveSnippets(filtered);
       await load();
       
-      CS.toast.showToast("Snippet deleted", "success", "Undo", async () => {
+      CS.toast.showToast(CS.i18n.t("toast_deleted"), "success", "Undo", async () => {
         const current = await CS.storage.getSnippets();
         current.push(snippetToDelete);
         await CS.storage.saveSnippets(current);
         await load();
-        CS.toast.showToast("Restored");
+        CS.toast.showToast(CS.i18n.t("toast_restored"));
       });
       
     } catch (err) {
       CS.recordError("delete", err);
-      CS.toast.showToast("Delete failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     }
   }
 
@@ -1170,16 +1170,16 @@
     try {
       const folders = await CS.storage.getFolders();
       if (folders.includes(trimmed)) {
-        CS.toast.showToast("Folder already exists", "error");
+        CS.toast.showToast(CS.i18n.t("err_save"), "error");
         return;
       }
       folders.push(trimmed);
       await CS.storage.saveFolders(folders);
       await CS.snippets.load();
-      CS.toast.showToast(`Folder "${trimmed}" created`);
+      CS.toast.showToast(CS.i18n.t("toast_folder_created"));
     } catch (err) {
       CS.recordError("folder/create", err);
-      CS.toast.showToast("Create folder failed", "error");
+      CS.toast.showToast(CS.i18n.t("err_save"), "error");
     }
   }
 

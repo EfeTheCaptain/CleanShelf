@@ -40,8 +40,13 @@
 
   const header = el("header", "cs-header");
   const headerText = el("div", "cs-header-text");
-  headerText.appendChild(el("h1", "cs-title", "CleanShelf"));
-  headerText.appendChild(el("p", "cs-preview", "Save, folder, and copy your code snippets locally."));
+  const titleEl = el("h1", "cs-title", "CleanShelf");
+  titleEl.setAttribute("data-i18n", "app_title");
+  headerText.appendChild(titleEl);
+  
+  const subtitleEl = el("p", "cs-preview", "");
+  subtitleEl.setAttribute("data-i18n", "app_subtitle");
+  headerText.appendChild(subtitleEl);
   header.appendChild(headerText);
   card.appendChild(header);
 
@@ -76,6 +81,7 @@
   leftActionBtn.type = "button";
   leftActionBtn.style.padding = "2px 8px";
   leftActionBtn.style.marginTop = "0";
+  leftActionBtn.setAttribute("data-i18n", "btn_folder");
   CS.ui.leftActionBtn = leftActionBtn;
 
   const leftSubfolderBtn = el("button", "cs-debug-toggle", "+ Subfolder");
@@ -83,6 +89,7 @@
   leftSubfolderBtn.style.padding = "2px 8px";
   leftSubfolderBtn.style.marginTop = "0";
   leftSubfolderBtn.hidden = true;
+  leftSubfolderBtn.setAttribute("data-i18n", "btn_subfolder");
   CS.ui.leftSubfolderBtn = leftSubfolderBtn;
 
   leftBtnGroup.appendChild(leftActionBtn);
@@ -99,7 +106,8 @@
   const rightPanel = el("div", "cs-right-panel");
   
   const inputHeader = el("div", "cs-input-header");
-  const formLabel = el("label", "cs-label", "New snippet");
+  const formLabel = el("label", "cs-label", "");
+  formLabel.setAttribute("data-i18n", "new_snippet");
   CS.ui.formLabel = formLabel;
   inputHeader.appendChild(formLabel);
 
@@ -109,7 +117,9 @@
   draftIndicator.appendChild(dotIcon);
   draftIndicator.appendChild(checkIcon);
   draftIndicator.appendChild(errIcon);
-  draftIndicator.appendChild(el("span", "cs-draft-text", "Draft"));
+  const draftText = el("span", "cs-draft-text", "");
+  draftText.setAttribute("data-i18n", "draft_label");
+  draftIndicator.appendChild(draftText);
   inputHeader.appendChild(draftIndicator);
   CS.ui.draftIndicator = draftIndicator;
   rightPanel.appendChild(inputHeader);
@@ -117,10 +127,10 @@
   const fieldRow = el("div", "cs-field-row");
   const titleInput = el("input", "cs-input");
   titleInput.type = "text";
-  titleInput.placeholder = "Title";
+  titleInput.setAttribute("data-i18n-placeholder", "title_placeholder");
   const folderInput = el("input", "cs-input cs-input-folder");
   folderInput.type = "text";
-  folderInput.placeholder = "Folder";
+  folderInput.setAttribute("data-i18n-placeholder", "folder_placeholder");
   folderInput.setAttribute("list", "cs-folder-list");
   fieldRow.appendChild(titleInput);
   fieldRow.appendChild(folderInput);
@@ -130,17 +140,19 @@
   rightPanel.appendChild(folderDatalist);
 
   const contentInput = el("textarea", "cs-textarea");
-  contentInput.placeholder = "Paste your snippet here…";
+  contentInput.setAttribute("data-i18n-placeholder", "content_placeholder");
   rightPanel.appendChild(contentInput);
 
   const btnRow = el("div", "cs-btn-row");
   const saveBtn = el("button", "cs-btn", "Save");
   saveBtn.type = "button";
+  saveBtn.setAttribute("data-i18n", "btn_save");
   saveBtn.addEventListener("click", () => CS.snippets.handleSave());
   
   const cancelEditBtn = el("button", "cs-btn cs-option-secondary", "Cancel");
   cancelEditBtn.type = "button";
   cancelEditBtn.hidden = true;
+  cancelEditBtn.setAttribute("data-i18n", "btn_cancel");
   cancelEditBtn.addEventListener("click", () => CS.snippets.cancelEdit());
 
   btnRow.appendChild(saveBtn);
@@ -178,9 +190,11 @@
 
   const btnDebug = el("button", "cs-debug-toggle", "Debug ▾");
   btnDebug.type = "button";
+  btnDebug.setAttribute("data-i18n", "btn_debug");
   
   const btnTips = el("button", "cs-debug-toggle", "? Tips");
   btnTips.type = "button";
+  btnTips.setAttribute("data-i18n", "btn_tips");
 
   footerLeft.appendChild(btnDebug);
   footerLeft.appendChild(btnTips);
@@ -207,21 +221,21 @@
   const tipsList = el("ul", "cs-tips-list");
 
   const tipsData = [
-    { text: "<strong>Right-click</strong> snippets or folders for more options (Rename, Delete, Sort, Subfolders).", type: "normal" },
-    { text: "<strong>Dev is not responsible for data loss. BACKUP YOUR DATA!</strong> Use the gear icon to Import/Export.", type: "warning" },
-    { text: "<strong>Data stays in your browser (up to ~10MB).</strong> No tracking. No network calls.", type: "normal" },
-    { text: "Click any snippet card to instantly <strong>copy it to your clipboard</strong>.", type: "normal" },
-    { text: "Drag & drop snippets onto folders to move them.", type: "normal" },
-    { text: "Drag & drop snippets inside a folder to <strong>manually reorder them</strong>.", type: "normal" },
-    { text: "Use the <strong>+ Snippet</strong> button inside a folder to quickly add and focus on a new entry.", type: "normal" },
-    { text: "Right-click a folder and select <strong>Insert Subfolder</strong> to group your snippets visually.", type: "normal" },
-    { text: "<strong>Double-click a Subfolder header</strong> to rename it. Right-click deletes it (with undo).", type: "normal" },
-    { text: "Drag & drop snippets onto a <strong>Subfolder</strong> to group them.", type: "normal" },
+    { key: "tip_rc", type: "normal" },
+    { key: "tip_backup", type: "warning" },
+    { key: "tip_local", type: "normal" },
+    { key: "tip_copy", type: "normal" },
+    { key: "tip_drag", type: "normal" },
+    { key: "tip_reorder", type: "normal" },
+    { key: "tip_plus", type: "normal" },
+    { key: "tip_subfolder", type: "normal" },
+    { key: "tip_rename", type: "normal" },
+    { key: "tip_drag_sub", type: "normal" },
   ];
 
   for (const tip of tipsData) {
     const li = el("li", tip.type === "warning" ? "cs-tip cs-tip-warning" : "cs-tip");
-    li.innerHTML = tip.text;
+    li.innerHTML = CS.i18n.t(tip.key);
     tipsList.appendChild(li);
   }
   tipsPanel.appendChild(tipsList);
@@ -246,20 +260,27 @@
   
   const editItem = el("button", "cs-context-item", "Edit");
   editItem.type = "button";
+  editItem.setAttribute("data-i18n", "menu_edit");
   const deleteSnippetItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteSnippetItem.type = "button";
+  deleteSnippetItem.setAttribute("data-i18n", "menu_delete");
   
   const renameFolderItem = el("button", "cs-context-item", "Rename");
   renameFolderItem.type = "button";
+  renameFolderItem.setAttribute("data-i18n", "menu_rename");
   const deleteFolderItem = el("button", "cs-context-item cs-danger", "Delete");
   deleteFolderItem.type = "button";
+  deleteFolderItem.setAttribute("data-i18n", "menu_delete");
 
   const sortNewestItem = el("button", "cs-context-item", "Sort Newest");
   sortNewestItem.type = "button";
+  sortNewestItem.setAttribute("data-i18n", "menu_sort_newest");
   const sortTitleItem = el("button", "cs-context-item", "Sort A-Z");
   sortTitleItem.type = "button";
+  sortTitleItem.setAttribute("data-i18n", "menu_sort_az");
   const insertSubfolderItem = el("button", "cs-context-item", "Insert Subfolder");
   insertSubfolderItem.type = "button";
+  insertSubfolderItem.setAttribute("data-i18n", "menu_insert_subfolder");
 
   contextMenu.appendChild(editItem);
   contextMenu.appendChild(deleteSnippetItem);
@@ -451,6 +472,7 @@
     }
     CS.options.applySettingsToDom();
     CS.options.syncOptionRadios();
+    CS.i18n.applyTranslations();
     await CS.drafts.loadDraft();
     await CS.snippets.load();
     titleInput.focus();

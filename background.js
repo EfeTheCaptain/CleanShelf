@@ -2,6 +2,7 @@ const OVERLAY_FILES = [
   "overlay-constants.js",
   "overlay-dom.js",
   "overlay-styles.js",
+  "overlay-i18n.js",
   "overlay-state.js",
   "overlay-storage.js",
   "overlay-toast.js",

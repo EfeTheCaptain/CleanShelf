@@ -17,7 +17,7 @@
       DRAFT_KEY: "cleanshelf_draft",
       UNFILED: "Unfiled",
       DRAFT_DEBOUNCE_MS: 400,
-      DEFAULT_SETTINGS: { layout: "grid", theme: "dark", contrast: "normal", fontSize: "md", draftRate: "fast" },
+      DEFAULT_SETTINGS: { layout: "grid", theme: "dark", contrast: "normal", fontSize: "md", draftRate: "fast", language: "en" },
     },
   };
 })();

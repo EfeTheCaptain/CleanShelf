@@ -24,6 +24,7 @@ const validThemes = ["dark", "light", "dracula", "nord", "sepia", "dark-sepia"];
         contrast: s.contrast === "high" ? "high" : "normal",
         fontSize: s.fontSize === "sm" ? "sm" : s.fontSize === "lg" ? "lg" : "md",
         draftRate: s.draftRate === "relaxed" ? "relaxed" : "fast",
+        language: s.language === "tr" ? "tr" : "en",
       };
     } catch (_) {
       return { ...CS.constants.DEFAULT_SETTINGS };
