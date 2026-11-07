@@ -1106,27 +1106,30 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: var(--cs-bg-panel);
+  background: var(--cs-bg-surface);
   border: 1px solid var(--cs-border);
+  border-left: 3px solid var(--cs-accent);
   border-radius: 6px;
-  color: var(--cs-text-muted);
-  font-weight: 600;
+  color: var(--cs-text-strong);
+  font-weight: 700;
   font-size: var(--cs-fs-sm);
   cursor: pointer;
   user-select: none;
-  margin-top: 10px;
+  margin-top: 12px;
   transition: background 0.1s, border-color 0.1s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .cs-subfolder-header:hover {
-  background: var(--cs-bg-surface);
-  color: var(--cs-text);
+  background: var(--cs-bg-surface-hover);
   border-color: var(--cs-border-hover);
+  border-left-color: var(--cs-accent);
 }
 
 .cs-subfolder-header.cs-drag-over {
   border-color: var(--cs-accent) !important;
   background: var(--cs-bg-surface-hover) !important;
+  box-shadow: 0 0 0 2px var(--cs-accent);
 }
 
 .cs-subfolder-items {
