@@ -156,6 +156,7 @@
     header.addEventListener("dragover", (e) => {
       e.preventDefault();
       e.stopPropagation();
+      e.dataTransfer.dropEffect = "move";
       header.classList.add("cs-drag-over");
     });
     header.addEventListener("dragleave", (e) => {
@@ -545,6 +546,7 @@
       // Root Drop Zone for List View
       items.addEventListener("dragover", (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
         if (e.target === items) items.classList.add("cs-drag-over");
       });
       items.addEventListener("dragleave", (e) => {
@@ -674,6 +676,7 @@
       // 1. Root Drop Zone Logic (to drag OUT of a subfolder)
       itemsContainer.addEventListener("dragover", (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
         if (e.target === itemsContainer) itemsContainer.classList.add("cs-drag-over");
       });
       itemsContainer.addEventListener("dragleave", (e) => {
@@ -719,6 +722,7 @@
         box.addEventListener("dragover", (e) => {
           e.preventDefault();
           e.stopPropagation();
+          e.dataTransfer.dropEffect = "move";
           box.classList.add("cs-drag-over");
         });
         box.addEventListener("dragleave", (e) => {

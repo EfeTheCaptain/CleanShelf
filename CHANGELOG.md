@@ -1,3 +1,8 @@
+## v1.1.8
+
+- Fixed search bar focus: changed keydown listener from window capture phase back to document capture phase so typing goes into the overlay's search input, not the page behind
+- Fixed drag-and-drop: added e.dataTransfer.dropEffect = "move" to all dragover handlers (itemsContainer root, box subfolder, header) so Chrome accepts the drops
+
 ## v1.1.7
 
 - Verified drag-and-drop subfolder drop zones: buildSubfolderHeader has dragover/dragleave/drop listeners; itemsContainer and box drop guards removed so drops work on empty space; root drop removes subfolder assignment; renderListView splits subfolders/unassigned with root drop zone

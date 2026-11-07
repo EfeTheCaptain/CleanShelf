@@ -465,7 +465,7 @@
   }
 
   const ac = new AbortController();
-  window.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
+  document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
   host.__csCleanup = () => {
     try { ac.abort(); } catch (_) {}
   };
