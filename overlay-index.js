@@ -386,17 +386,17 @@
   });
 
   // --- DEBUG PANEL ---
-  const debugBuilt = CS.debug.buildDebugPanel();
-  CS.ui.debug = debugBuilt;
-  card.appendChild(debugBuilt.panel);
-
-  const _t = (k) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(k) : k;
-
-  btnDebug.addEventListener("click", () => {
-    const opening = debugBuilt.panel.hidden;
-    debugBuilt.panel.hidden = !opening;
-    btnDebug.textContent = opening ? _t("btn_debug_up") : _t("btn_debug");
-  });
+  if (CS.debug && typeof CS.debug.buildDebugPanel === "function") {
+    const debugBuilt = CS.debug.buildDebugPanel();
+    CS.ui.debug = debugBuilt;
+    card.appendChild(debugBuilt.panel);
+    const _t = (k) => (CS.i18n && typeof CS.i18n.t === "function") ? CS.i18n.t(k) : k;
+    btnDebug.addEventListener("click", () => {
+      const opening = debugBuilt.panel.hidden;
+      debugBuilt.panel.hidden = !opening;
+      btnDebug.textContent = opening ? _t("btn_debug_up") : _t("btn_debug");
+    });
+  }
 
   // --- VIEW TRANSITIONS ---
   function showMain() {

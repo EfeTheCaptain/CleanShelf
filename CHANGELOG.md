@@ -1,3 +1,9 @@
+## v1.1.4
+
+- Fixed fatal crash: CS.debug.buildDebugPanel() now guarded — if overlay-debug.js fails, initialization continues and gear/ESC/backdrop click handlers wire up correctly
+- Restored full overlay-debug.js with renderCheckRow, buildDebugPanel, runChecks, and CS.debug export (was truncated)
+- Defensive CS.i18n.applyTranslations() in overlay-options.js setLanguage()
+
 ## v1.1.3
 
 - Fixed applyTranslations: uses CS.ui.shadow instead of host.shadowRoot (closed shadow mode returns null for host.shadowRoot, which previously crashed translation on bootstrap)

@@ -172,7 +172,9 @@
     if (CS.state.settings.language === lang) return;
     CS.state.settings.language = lang;
     CS.storage.persistSettings();
-    CS.i18n.applyTranslations();
+    if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
+      try { CS.i18n.applyTranslations(); } catch (err) { CS.recordError("i18n", err); }
+    }
   }
 
   function setDraftRate(rate) {
