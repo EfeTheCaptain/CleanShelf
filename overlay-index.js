@@ -26,6 +26,11 @@
   CS.ui.backdrop = backdrop;
   CS.ui.card = card;
 
+  // --- Block mouse clicks from leaking to webpage ---
+  card.addEventListener("pointerdown", (e) => e.stopPropagation());
+  card.addEventListener("mousedown", (e) => e.stopPropagation());
+  card.addEventListener("click", (e) => e.stopPropagation());
+
   card.addEventListener("contextmenu", (e) => {
     if (e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
       e.preventDefault();
@@ -507,17 +512,17 @@
       if (!tipsPanel.hidden) {
         tipsPanel.hidden = true;
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         return;
       }
       if (ctx.targetType) {
         ctx.hide();
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         return;
       }
       e.preventDefault();
-      e.stopPropagation();
+      e.stopImmediatePropagation();
       close();
       return;
     }
@@ -525,21 +530,20 @@
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const insideOverlay = path.includes(host);
 
-    // 1. Block the webpage from receiving keystrokes if we are inside the overlay
+    // 1. If typing inside CleanShelf, completely block the webpage from seeing it
     if (insideOverlay) {
-      e.stopPropagation(); 
+      e.stopImmediatePropagation(); 
       return;
     }
 
-    // 2. Redirect typing to the overlay if focus is outside
+    // 2. If focus is outside the overlay, hijack the keystroke and redirect it
     if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const typing = e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter";
       if (typing) {
         focusPrimary();
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         
-        // Manually insert the character since we blocked default
         const active = shadow.activeElement;
         if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
           if (e.key === "Backspace") {
@@ -549,34 +553,42 @@
           } else if (e.key.length === 1) {
             active.value += e.key;
           }
-          // Trigger input event so drafts save
           active.dispatchEvent(new Event("input", { bubbles: true }));
         }
       }
     }
   }
 
-  // --- ADD THIS PASTE HANDLER ---
   function onPaste(e) {
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const insideOverlay = path.includes(host);
-    if (!insideOverlay) {
-      focusPrimary();
-      e.preventDefault();
-      e.stopPropagation();
-      const text = (e.clipboardData || window.clipboardData).getData("text");
-      const active = shadow.activeElement;
-      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
-        active.value += text;
-        active.dispatchEvent(new Event("input", { bubbles: true }));
-      }
+
+    if (insideOverlay) {
+      // Block ChatGPT/sites from intercepting the paste. Let the browser paste into our input normally.
+      e.stopImmediatePropagation();
+      return;
+    }
+
+    // If focus is outside the overlay, hijack the paste and redirect it
+    focusPrimary();
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    
+    const text = (e.clipboardData || window.clipboardData).getData("text");
+    const active = shadow.activeElement;
+    if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+      const start = active.selectionStart || 0;
+      const end = active.selectionEnd || 0;
+      const val = active.value;
+      active.value = val.slice(0, start) + text + val.slice(end);
+      active.selectionStart = active.selectionEnd = start + text.length;
+      active.dispatchEvent(new Event("input", { bubbles: true }));
     }
   }
-  // --- END ADD ---
 
   const ac = new AbortController();
-  document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
-  document.addEventListener("paste", onPaste, { capture: true, signal: ac.signal });
+  window.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
+  window.addEventListener("paste", onPaste, { capture: true, signal: ac.signal });
   host.__csCleanup = () => {
     try { ac.abort(); } catch (_) {}
   };

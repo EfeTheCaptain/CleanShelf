@@ -400,3 +400,9 @@
 
 - Fixed click-through: backdrop pointerdown stopPropagation() blocks clicks from leaking to the webpage when overlay is open
 
+## v1.2.8
+
+- Fixed AI-site event interception: moved keydown/paste listeners from document to window with capture:true; replaced stopPropagation() with stopImmediatePropagation() so ChatGPT/Claude/Gemini can't steal keystrokes before CleanShelf sees them
+- Fixed paste cursor position: onPaste now inserts text at selectionStart/selectionEnd instead of appending to end
+- Fixed mouse click-through: card pointerdown/mousedown/click all stopPropagation() so webpage click handlers don't fire inside CleanShelf
+
