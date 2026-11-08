@@ -524,47 +524,68 @@
 
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const insideOverlay = path.includes(host);
+
+    // 1. Block the webpage from receiving keystrokes if we are inside the overlay
     if (insideOverlay) {
-      // Block keydown from reaching page-level keyboard shortcuts when overlay has focus
-      e.stopPropagation();
-    } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.stopPropagation(); 
+      return;
+    }
+
+    // 2. Redirect typing to the overlay if focus is outside
+    if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const typing = e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter";
       if (typing) {
         focusPrimary();
         e.preventDefault();
         e.stopPropagation();
-        if (e.key.length === 1) {
-          searchInput.value += e.key;
-          CS.state.searchQuery = searchInput.value;
-          CS.snippets.renderSnippets();
+        
+        // Manually insert the character since we blocked default
+        const active = shadow.activeElement;
+        if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+          if (e.key === "Backspace") {
+            active.value = active.value.slice(0, -1);
+          } else if (e.key === "Enter" && active.tagName === "TEXTAREA") {
+            active.value += "\n";
+          } else if (e.key.length === 1) {
+            active.value += e.key;
+          }
+          // Trigger input event so drafts save
+          active.dispatchEvent(new Event("input", { bubbles: true }));
         }
       }
     }
   }
 
-  const ac = new AbortController();
-  document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
-  document.addEventListener("paste", (e) => {
+  // --- ADD THIS PASTE HANDLER ---
+  function onPaste(e) {
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const insideOverlay = path.includes(host);
     if (!insideOverlay) {
+      focusPrimary();
       e.preventDefault();
       e.stopPropagation();
-      focusPrimary();
-      const clipboardData = e.clipboardData || window.clipboardData;
-      const text = clipboardData && typeof clipboardData.getData === "function" ? clipboardData.getData("text") : "";
-      if (text) {
-        searchInput.value += text;
-        CS.state.searchQuery = searchInput.value;
-        CS.snippets.renderSnippets();
+      const text = (e.clipboardData || window.clipboardData).getData("text");
+      const active = shadow.activeElement;
+      if (active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA")) {
+        active.value += text;
+        active.dispatchEvent(new Event("input", { bubbles: true }));
       }
     }
-  }, { capture: true, signal: ac.signal });
+  }
+  // --- END ADD ---
+
+  const ac = new AbortController();
+  document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
+  document.addEventListener("paste", onPaste, { capture: true, signal: ac.signal });
   host.__csCleanup = () => {
     try { ac.abort(); } catch (_) {}
   };
 
   // Placed after all elements are created to prevent ReferenceErrors
+  backdrop.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+  });
+
   backdrop.addEventListener("click", (e) => {
     if (e.target === backdrop) close();
     if (!contextMenu.hidden && !contextMenu.contains(e.target)) ctx.hide();

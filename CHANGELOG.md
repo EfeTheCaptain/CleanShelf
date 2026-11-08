@@ -396,3 +396,7 @@
 - Fixed typing/paste going to page behind: onKey redirects focus and prevents default; paste events are intercepted and inserted into searchInput manually
 - Fixed click-through: keydown events are stopPropagation()'d when overlay has focus, blocking page-level keyboard shortcuts
 
+## v1.2.7
+
+- Fixed click-through: backdrop pointerdown stopPropagation() blocks clicks from leaking to the webpage when overlay is open
+
