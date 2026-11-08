@@ -1,3 +1,4 @@
+
 # 📚 CleanShelf
 
 ![Version](https://img.shields.io/badge/version-1.2.5-blue.svg)
@@ -8,6 +9,8 @@
 
 CleanShelf is a lightweight, privacy-first extension that replaces the clunky "popup window" experience with a sleek, on-demand overlay. Whether you're a developer saving snippets of code, a student storing research notes, or just someone who needs to copy-paste the same text repeatedly, CleanShelf keeps it organized and instantly accessible.
 
+---
+<img width="1024" height="522" alt="4JTUqoyNHD-ezgif com-optimize" src="https://github.com/user-attachments/assets/5833b830-cae6-4b0d-b0cf-eeda78ed7147" />
 ---
 
 ## ✨ Why CleanShelf?
