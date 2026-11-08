@@ -1,7 +1,7 @@
 
 # 📚 CleanShelf
 
-![Version](https://img.shields.io/badge/version-1.2.5-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.7-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Chrome%20%7C%20Brave%20%7C%20Edge-lightgrey.svg)
 ![Privacy](https://img.shields.io/badge/privacy-100%25%20Local-success.svg)
 
