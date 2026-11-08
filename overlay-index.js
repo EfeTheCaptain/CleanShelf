@@ -111,6 +111,18 @@
   CS.ui.listEl = listEl;
   mainLayout.appendChild(leftPanel);
 
+  // --- Manual scrolling during Drag & Drop ---
+  listEl.addEventListener("dragover", (e) => {
+    const threshold = 60;
+    const rect = listEl.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    if (y < threshold) {
+      listEl.scrollTop -= 20;
+    } else if (y > rect.height - threshold) {
+      listEl.scrollTop += 20;
+    }
+  }, { passive: true });
+
   // --- RIGHT PANEL ---
   const rightPanel = el("div", "cs-right-panel");
   rightPanel.prepend(searchRow);
@@ -512,7 +524,10 @@
 
     const path = typeof e.composedPath === "function" ? e.composedPath() : [];
     const insideOverlay = path.includes(host);
-    if (!insideOverlay && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (insideOverlay) {
+      // Block keydown from reaching page-level keyboard shortcuts when overlay has focus
+      e.stopPropagation();
+    } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
       const typing = e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter";
       if (typing) {
         focusPrimary();
@@ -529,6 +544,22 @@
 
   const ac = new AbortController();
   document.addEventListener("keydown", onKey, { capture: true, signal: ac.signal });
+  document.addEventListener("paste", (e) => {
+    const path = typeof e.composedPath === "function" ? e.composedPath() : [];
+    const insideOverlay = path.includes(host);
+    if (!insideOverlay) {
+      e.preventDefault();
+      e.stopPropagation();
+      focusPrimary();
+      const clipboardData = e.clipboardData || window.clipboardData;
+      const text = clipboardData && typeof clipboardData.getData === "function" ? clipboardData.getData("text") : "";
+      if (text) {
+        searchInput.value += text;
+        CS.state.searchQuery = searchInput.value;
+        CS.snippets.renderSnippets();
+      }
+    }
+  }, { capture: true, signal: ac.signal });
   host.__csCleanup = () => {
     try { ac.abort(); } catch (_) {}
   };
