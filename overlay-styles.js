@@ -1,8 +1,15 @@
 (() => {
-  "use strict";
+  'use strict';
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
 
+  /**
+   * @typedef {Object} CleanShelfStylesModule
+   * @property {string} STYLES
+   * @property {(shadowRoot: ShadowRoot) => void} applyStyles
+   */
+
+  /** @type {string} */
   const STYLES = `
 * { box-sizing: border-box; }
 
@@ -1166,11 +1173,13 @@
       sheet.replaceSync(STYLES);
       shadowRoot.adoptedStyleSheets = [sheet];
     } catch (_) {
-      const s = document.createElement("style");
+      const s = document.createElement('style');
       s.textContent = STYLES;
       shadowRoot.appendChild(s);
     }
   }
 
-  CS.styles = { STYLES, applyStyles };
+  /** @type {CleanShelfStylesModule} */
+  const styles = { STYLES, applyStyles };
+  CS.styles = styles;
 })();

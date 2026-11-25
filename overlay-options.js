@@ -1,29 +1,42 @@
 (() => {
-  "use strict";
+  'use strict';
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
+
+  /**
+   * @typedef {Object} CleanShelfOptionsModule
+   * @property {(onBack: () => void) => {view: HTMLDivElement, backBtn: HTMLButtonElement, fileInput: HTMLInputElement}} buildOptionsView
+   * @property {() => void} syncOptionRadios
+   * @property {() => void} applySettingsToDom
+   * @property {(layout: "grid"|"list") => void} setLayout
+   * @property {(theme: CleanShelfSettings["theme"]) => void} setTheme
+   * @property {(contrast: "normal"|"high") => void} setContrast
+   * @property {(size: "sm"|"md"|"lg") => void} setFontSize
+   * @property {(rate: "fast"|"relaxed") => void} setDraftRate
+   * @property {(lang: "en"|"tr") => void} setLanguage
+   */
 
   const radioGroups = {};
 
   function buildRadioGroup(titleKey, title, name, options) {
     const { el } = CS.dom;
-    const group = el("div", "cs-options-group");
-    const titleLabel = el("label", "cs-label", title);
-    if (titleKey) titleLabel.setAttribute("data-i18n", titleKey);
+    const group = el('div', 'cs-options-group');
+    const titleLabel = el('label', 'cs-label', title);
+    if (titleKey) titleLabel.setAttribute('data-i18n', titleKey);
     group.appendChild(titleLabel);
     const inputs = {};
     for (const opt of options) {
-      const wrap = el("label", "cs-option-radio");
-      const input = document.createElement("input");
-      input.type = "radio";
+      const wrap = el('label', 'cs-option-radio');
+      const input = document.createElement('input');
+      input.type = 'radio';
       input.name = name;
       input.value = opt.value;
-      input.addEventListener("change", () => {
+      input.addEventListener('change', () => {
         if (input.checked) opt.onSelect(opt.value);
       });
       wrap.appendChild(input);
-      const span = el("span", null, opt.label);
-      if (opt.i18nKey) span.setAttribute("data-i18n", opt.i18nKey);
+      const span = el('span', null, opt.label);
+      if (opt.i18nKey) span.setAttribute('data-i18n', opt.i18nKey);
       wrap.appendChild(span);
       group.appendChild(wrap);
       inputs[opt.value] = input;
@@ -33,103 +46,137 @@
 
   function buildOptionsView(onBack) {
     const { el } = CS.dom;
-    const view = el("div", "cs-options-view");
-    view.dataset.view = "options";
+    const view = el('div', 'cs-options-view');
+    view.dataset.view = 'options';
     view.hidden = true;
 
-    const header = el("div", "cs-options-header");
-    const backBtn = el("button", "cs-back-btn", "← Back");
-    backBtn.type = "button";
-    backBtn.setAttribute("data-i18n", "btn_back");
-    backBtn.addEventListener("click", onBack);
+    const header = el('div', 'cs-options-header');
+    const backBtn = el('button', 'cs-back-btn', '← Back');
+    backBtn.type = 'button';
+    backBtn.setAttribute('data-i18n', 'btn_back');
+    backBtn.addEventListener('click', onBack);
     header.appendChild(backBtn);
-    const titleEl = el("h2", "cs-options-title", "Options");
-    titleEl.setAttribute("data-i18n", "opt_title");
+    const titleEl = el('h2', 'cs-options-title', 'Options');
+    titleEl.setAttribute('data-i18n', 'opt_title');
     header.appendChild(titleEl);
     view.appendChild(header);
 
-    const body = el("div", "cs-options-body");
-    const colLeft = el("div", "cs-options-col");
-    const colRight = el("div", "cs-options-col");
+    const body = el('div', 'cs-options-body');
+    const colLeft = el('div', 'cs-options-col');
+    const colRight = el('div', 'cs-options-col');
 
-    radioGroups.layout = buildRadioGroup("opt_layout", "Layout", "cs-layout", [
-      { value: "grid", label: "Folder grid (icons, 3 columns)", i18nKey: "opt_grid", onSelect: setLayout },
-      { value: "list", label: "List (grouped by folder)", i18nKey: "opt_list", onSelect: setLayout },
+    radioGroups.layout = buildRadioGroup('opt_layout', 'Layout', 'cs-layout', [
+      {
+        value: 'grid',
+        label: 'Folder grid (icons, 3 columns)',
+        i18nKey: 'opt_grid',
+        onSelect: setLayout,
+      },
+      {
+        value: 'list',
+        label: 'List (grouped by folder)',
+        i18nKey: 'opt_list',
+        onSelect: setLayout,
+      },
     ]);
     colLeft.appendChild(radioGroups.layout.group);
 
-    radioGroups.theme = buildRadioGroup("opt_theme", "Color scheme", "cs-theme", [
-      { value: "dark", label: "Dark", i18nKey: "opt_dark", onSelect: setTheme },
-      { value: "light", label: "Light", i18nKey: "opt_light", onSelect: setTheme },
-      { value: "dracula", label: "Dracula", i18nKey: "opt_dracula", onSelect: setTheme },
-      { value: "nord", label: "Nord", i18nKey: "opt_nord", onSelect: setTheme },
-      { value: "sepia", label: "Sepia", i18nKey: "opt_sepia", onSelect: setTheme },
-      { value: "dark-sepia", label: "Dark Sepia", i18nKey: "opt_dark_sepia", onSelect: setTheme },
+    radioGroups.theme = buildRadioGroup('opt_theme', 'Color scheme', 'cs-theme', [
+      { value: 'dark', label: 'Dark', i18nKey: 'opt_dark', onSelect: setTheme },
+      { value: 'light', label: 'Light', i18nKey: 'opt_light', onSelect: setTheme },
+      { value: 'dracula', label: 'Dracula', i18nKey: 'opt_dracula', onSelect: setTheme },
+      { value: 'nord', label: 'Nord', i18nKey: 'opt_nord', onSelect: setTheme },
+      { value: 'sepia', label: 'Sepia', i18nKey: 'opt_sepia', onSelect: setTheme },
+      { value: 'dark-sepia', label: 'Dark Sepia', i18nKey: 'opt_dark_sepia', onSelect: setTheme },
     ]);
     colLeft.appendChild(radioGroups.theme.group);
 
-    radioGroups.contrast = buildRadioGroup("opt_contrast", "Contrast", "cs-contrast", [
-      { value: "normal", label: "Normal", i18nKey: "opt_normal", onSelect: setContrast },
-      { value: "high", label: "High", i18nKey: "opt_high", onSelect: setContrast },
+    radioGroups.contrast = buildRadioGroup('opt_contrast', 'Contrast', 'cs-contrast', [
+      { value: 'normal', label: 'Normal', i18nKey: 'opt_normal', onSelect: setContrast },
+      { value: 'high', label: 'High', i18nKey: 'opt_high', onSelect: setContrast },
     ]);
     colLeft.appendChild(radioGroups.contrast.group);
 
-    radioGroups.fontSize = buildRadioGroup("opt_font_size", "Font size", "cs-fontsize", [
-      { value: "sm", label: "Small", i18nKey: "opt_sm", onSelect: setFontSize },
-      { value: "md", label: "Medium", i18nKey: "opt_md", onSelect: setFontSize },
-      { value: "lg", label: "Large", i18nKey: "opt_lg", onSelect: setFontSize },
+    radioGroups.fontSize = buildRadioGroup('opt_font_size', 'Font size', 'cs-fontsize', [
+      { value: 'sm', label: 'Small', i18nKey: 'opt_sm', onSelect: setFontSize },
+      { value: 'md', label: 'Medium', i18nKey: 'opt_md', onSelect: setFontSize },
+      { value: 'lg', label: 'Large', i18nKey: 'opt_lg', onSelect: setFontSize },
     ]);
     colLeft.appendChild(radioGroups.fontSize.group);
 
     // Language and Draft Save Rate moved to right column (Data section)
-    radioGroups.draftRate = buildRadioGroup("opt_draft_rate", "Draft Save Rate", "cs-draftrate", [
-      { value: "fast", label: "Fast (400ms after typing stops)", i18nKey: "opt_fast", onSelect: setDraftRate },
-      { value: "relaxed", label: "Relaxed (2 seconds after typing stops)", i18nKey: "opt_relaxed", onSelect: setDraftRate },
+    radioGroups.draftRate = buildRadioGroup('opt_draft_rate', 'Draft Save Rate', 'cs-draftrate', [
+      {
+        value: 'fast',
+        label: 'Fast (400ms after typing stops)',
+        i18nKey: 'opt_fast',
+        onSelect: setDraftRate,
+      },
+      {
+        value: 'relaxed',
+        label: 'Relaxed (2 seconds after typing stops)',
+        i18nKey: 'opt_relaxed',
+        onSelect: setDraftRate,
+      },
     ]);
-    radioGroups.language = buildRadioGroup("opt_language", "Language", "cs-language", [
-      { value: "en", label: "English", i18nKey: "opt_english", onSelect: setLanguage },
-      { value: "tr", label: "Turkish", i18nKey: "opt_turkish", onSelect: setLanguage },
+    radioGroups.language = buildRadioGroup('opt_language', 'Language', 'cs-language', [
+      { value: 'en', label: 'English', i18nKey: 'opt_english', onSelect: setLanguage },
+      { value: 'tr', label: 'Turkish', i18nKey: 'opt_turkish', onSelect: setLanguage },
     ]);
 
     // Data Group (Right Column)
-    const dataGroup = el("div", "cs-options-group");
-    const dataLabel = el("label", "cs-label", "Data");
-    dataLabel.setAttribute("data-i18n", "opt_data");
+    const dataGroup = el('div', 'cs-options-group');
+    const dataLabel = el('label', 'cs-label', 'Data');
+    dataLabel.setAttribute('data-i18n', 'opt_data');
     dataGroup.appendChild(dataLabel);
-    
-    const exportBtn = el("button", "cs-btn cs-option-action", "Export JSON");
-    exportBtn.type = "button";
-    exportBtn.setAttribute("data-i18n", "opt_export");
-    exportBtn.addEventListener("click", () => CS.exportImport.exportSnippets());
-    
-    const importReplaceBtn = el("button", "cs-btn cs-option-action", "Import (Replace)");
-    importReplaceBtn.type = "button";
-    importReplaceBtn.setAttribute("data-i18n", "opt_import_replace");
-    
-    const importMergeBtn = el("button", "cs-btn cs-option-action cs-option-secondary", "Import (Merge)");
-    importMergeBtn.type = "button";
-    importMergeBtn.setAttribute("data-i18n", "opt_import_merge");
 
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = ".json,application/json";
-    fileInput.className = "cs-hidden";
-    
-    importReplaceBtn.addEventListener("click", () => { fileInput.dataset.mode = "replace"; fileInput.click(); });
-    importMergeBtn.addEventListener("click", () => { fileInput.dataset.mode = "merge"; fileInput.click(); });
-    
-    fileInput.addEventListener("change", () => {
+    const exportBtn = el('button', 'cs-btn cs-option-action', 'Export JSON');
+    exportBtn.type = 'button';
+    exportBtn.setAttribute('data-i18n', 'opt_export');
+    exportBtn.addEventListener('click', () => CS.exportImport.exportSnippets());
+
+    const importReplaceBtn = el('button', 'cs-btn cs-option-action', 'Import (Replace)');
+    importReplaceBtn.type = 'button';
+    importReplaceBtn.setAttribute('data-i18n', 'opt_import_replace');
+
+    const importMergeBtn = el(
+      'button',
+      'cs-btn cs-option-action cs-option-secondary',
+      'Import (Merge)'
+    );
+    importMergeBtn.type = 'button';
+    importMergeBtn.setAttribute('data-i18n', 'opt_import_merge');
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json,application/json';
+    fileInput.className = 'cs-hidden';
+
+    importReplaceBtn.addEventListener('click', () => {
+      fileInput.dataset.mode = 'replace';
+      fileInput.click();
+    });
+    importMergeBtn.addEventListener('click', () => {
+      fileInput.dataset.mode = 'merge';
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
       const file = fileInput.files && fileInput.files[0];
       if (file) CS.exportImport.importFromFile(file, fileInput.dataset.mode);
-      fileInput.value = "";
+      fileInput.value = '';
     });
 
     dataGroup.appendChild(exportBtn);
     dataGroup.appendChild(importReplaceBtn);
     dataGroup.appendChild(importMergeBtn);
     dataGroup.appendChild(fileInput);
-    const dataHint = el("p", "cs-options-hint", "Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends.");
-    dataHint.setAttribute("data-i18n", "opt_data_hint");
+    const dataHint = el(
+      'p',
+      'cs-options-hint',
+      'Export downloads all snippets. Replace overwrites everything. Merge checks for ID conflicts and updates or appends.'
+    );
+    dataHint.setAttribute('data-i18n', 'opt_data_hint');
     dataGroup.appendChild(dataHint);
     colRight.appendChild(dataGroup);
 
@@ -148,30 +195,30 @@
   function syncOptionRadios() {
     const s = CS.state.settings;
     if (radioGroups.layout) {
-      radioGroups.layout.inputs.grid.checked = s.layout === "grid";
-      radioGroups.layout.inputs.list.checked = s.layout === "list";
+      radioGroups.layout.inputs.grid.checked = s.layout === 'grid';
+      radioGroups.layout.inputs.list.checked = s.layout === 'list';
     }
     if (radioGroups.theme) {
-      for (const k of ["dark", "light", "dracula", "nord", "sepia", "dark-sepia"]) {
+      for (const k of ['dark', 'light', 'dracula', 'nord', 'sepia', 'dark-sepia']) {
         radioGroups.theme.inputs[k].checked = s.theme === k;
       }
     }
     if (radioGroups.contrast) {
-      radioGroups.contrast.inputs.normal.checked = s.contrast === "normal";
-      radioGroups.contrast.inputs.high.checked = s.contrast === "high";
+      radioGroups.contrast.inputs.normal.checked = s.contrast === 'normal';
+      radioGroups.contrast.inputs.high.checked = s.contrast === 'high';
     }
     if (radioGroups.fontSize) {
-      radioGroups.fontSize.inputs.sm.checked = s.fontSize === "sm";
-      radioGroups.fontSize.inputs.md.checked = s.fontSize === "md";
-      radioGroups.fontSize.inputs.lg.checked = s.fontSize === "lg";
+      radioGroups.fontSize.inputs.sm.checked = s.fontSize === 'sm';
+      radioGroups.fontSize.inputs.md.checked = s.fontSize === 'md';
+      radioGroups.fontSize.inputs.lg.checked = s.fontSize === 'lg';
     }
     if (radioGroups.draftRate) {
-      radioGroups.draftRate.inputs.fast.checked = s.draftRate === "fast";
-      radioGroups.draftRate.inputs.relaxed.checked = s.draftRate === "relaxed";
+      radioGroups.draftRate.inputs.fast.checked = s.draftRate === 'fast';
+      radioGroups.draftRate.inputs.relaxed.checked = s.draftRate === 'relaxed';
     }
     if (radioGroups.language) {
-      radioGroups.language.inputs.en.checked = s.language === "en";
-      radioGroups.language.inputs.tr.checked = s.language === "tr";
+      radioGroups.language.inputs.en.checked = s.language === 'en';
+      radioGroups.language.inputs.tr.checked = s.language === 'tr';
     }
   }
 
@@ -184,35 +231,40 @@
   }
 
   function setLanguage(lang) {
-    if (lang !== "en" && lang !== "tr") return;
+    if (lang !== 'en' && lang !== 'tr') return;
     if (CS.state.settings.language === lang) return;
     CS.state.settings.language = lang;
     CS.storage.persistSettings();
-    if (CS.i18n && typeof CS.i18n.applyTranslations === "function") {
-      try { CS.i18n.applyTranslations(); } catch (err) { CS.recordError("i18n", err); }
+    if (CS.i18n && typeof CS.i18n.applyTranslations === 'function') {
+      try {
+        CS.i18n.applyTranslations();
+      } catch (err) {
+        CS.recordError('i18n', err);
+      }
     }
   }
 
   function setDraftRate(rate) {
-    if (rate !== "fast" && rate !== "relaxed") return;
+    if (rate !== 'fast' && rate !== 'relaxed') return;
     if (CS.state.settings.draftRate === rate) return;
     CS.state.settings.draftRate = rate;
     CS.storage.persistSettings();
   }
 
   function setLayout(layout) {
-    if (layout !== "grid" && layout !== "list") return;
+    if (layout !== 'grid' && layout !== 'list') return;
     if (CS.state.settings.layout === layout) return;
     const wasDrilled = CS.state.drilledFolder !== null;
     CS.state.settings.layout = layout;
     CS.state.drilledFolder = null;
-    if (wasDrilled && !CS.state.editingSnippetId && CS.ui && CS.ui.folderInput) CS.ui.folderInput.value = "";
+    if (wasDrilled && !CS.state.editingSnippetId && CS.ui && CS.ui.folderInput)
+      CS.ui.folderInput.value = '';
     CS.snippets.renderSnippets();
     CS.storage.persistSettings();
   }
 
   function setTheme(theme) {
-    const validThemes = ["dark", "light", "dracula", "nord", "sepia", "dark-sepia"];
+    const validThemes = ['dark', 'light', 'dracula', 'nord', 'sepia', 'dark-sepia'];
     if (!validThemes.includes(theme)) return;
     if (CS.state.settings.theme === theme) return;
     CS.state.settings.theme = theme;
@@ -221,7 +273,7 @@
   }
 
   function setContrast(contrast) {
-    if (contrast !== "normal" && contrast !== "high") return;
+    if (contrast !== 'normal' && contrast !== 'high') return;
     if (CS.state.settings.contrast === contrast) return;
     CS.state.settings.contrast = contrast;
     applySettingsToDom();
@@ -229,12 +281,24 @@
   }
 
   function setFontSize(size) {
-    if (size !== "sm" && size !== "md" && size !== "lg") return;
+    if (size !== 'sm' && size !== 'md' && size !== 'lg') return;
     if (CS.state.settings.fontSize === size) return;
     CS.state.settings.fontSize = size;
     applySettingsToDom();
     CS.storage.persistSettings();
   }
 
-  CS.options = { buildOptionsView, syncOptionRadios, applySettingsToDom, setLayout, setTheme, setContrast, setFontSize, setDraftRate, setLanguage };
+  /** @type {CleanShelfOptionsModule} */
+  const options = {
+    buildOptionsView,
+    syncOptionRadios,
+    applySettingsToDom,
+    setLayout,
+    setTheme,
+    setContrast,
+    setFontSize,
+    setDraftRate,
+    setLanguage,
+  };
+  CS.options = options;
 })();

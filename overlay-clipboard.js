@@ -1,37 +1,54 @@
 (() => {
-  "use strict";
+  'use strict';
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
 
+  /**
+   * @param {string} text
+   * @returns {Promise<void>}
+   */
   async function copyText(text) {
     try {
       await navigator.clipboard.writeText(text);
       return;
     } catch (_) {
       const host = CS.ui && CS.ui.host;
-      const ta = document.createElement("textarea");
+      const ta = document.createElement('textarea');
       ta.value = text;
-      ta.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;";
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
       (host || document.body).appendChild(ta);
       ta.select();
       let ok = false;
-      try { ok = document.execCommand("copy"); } catch (_) {}
+      try {
+        ok = document.execCommand('copy');
+      } catch (_) {
+        /* ignore */
+      }
       ta.remove();
-      if (!ok) throw new Error("clipboard write failed");
+      if (!ok) throw new Error('clipboard write failed');
     }
   }
 
+  /**
+   * @param {CleanShelfSnippet} snippet
+   * @returns {Promise<void>}
+   */
   async function copySnippet(snippet) {
-    const text = snippet && snippet.content ? snippet.content : "";
-    if (!text) { CS.toast.showToast(CS.i18n.t("toast_nothing"), "error"); return; }
+    const text = snippet && snippet.content ? snippet.content : '';
+    if (!text) {
+      CS.toast.showToast(CS.i18n.t('toast_nothing'), 'error');
+      return;
+    }
     try {
       await copyText(text);
-      CS.toast.showToast(CS.i18n.t("toast_copied"));
+      CS.toast.showToast(CS.i18n.t('toast_copied'));
     } catch (err) {
-      CS.recordError("clipboard", err);
-      CS.toast.showToast(CS.i18n.t("err_copy"), "error");
+      CS.recordError('clipboard', err);
+      CS.toast.showToast(CS.i18n.t('err_copy'), 'error');
     }
   }
 
-  CS.clipboard = { copyText, copySnippet };
+  /** @type {CleanShelfClipboardModule} */
+  const clipboard = { copyText, copySnippet };
+  CS.clipboard = clipboard;
 })();

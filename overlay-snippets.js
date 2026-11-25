@@ -1,25 +1,69 @@
 (() => {
-  "use strict";
+  'use strict';
   const CS = globalThis.CleanShelf;
   if (!CS || CS.aborted) return;
+
+  /**
+   * @typedef {Object} CleanShelfSnippet
+   * @property {string} id
+   * @property {string} title
+   * @property {string} folder
+   * @property {string} content
+   * @property {"subfolder"} [type]
+   * @property {string} [subfolder]
+   * @property {number} [sortOrder]
+   * @property {number} createdAt
+   * @property {number} [updatedAt]
+   */
+
+  /**
+   * @typedef {Object} CleanShelfFolderGroup
+   * @property {string} name
+   * @property {CleanShelfSnippet[]} items
+   * @property {number} subfolders
+   * @property {number} snippetCount
+   */
+
+  /**
+   * @typedef {Object} CleanShelfSnippetsModule
+   * @property {(snippets: CleanShelfSnippet[]) => CleanShelfFolderGroup[]} groupByFolder
+   * @property {(snippets: CleanShelfSnippet[]) => void} renderFolderList
+   * @property {(snippet: CleanShelfSnippet) => HTMLDivElement} buildSnippetCard
+   * @property {() => void} renderListView
+   * @property {() => void} renderGridView
+   * @property {() => void} renderSnippets
+   * @property {() => Promise<CleanShelfSnippet[]>} load
+   * @property {() => Promise<boolean>} handleSave
+   * @property {(snippet: CleanShelfSnippet) => void} startEdit
+   * @property {() => void} cancelEdit
+   * @property {(id: string) => Promise<void>} deleteSnippet
+   * @property {() => boolean} hasEditChanges
+   * @property {(oldName: string) => void} startRenameFolder
+   * @property {(folderName: string) => Promise<void>} deleteFolder
+   * @property {() => void} updateFolderInputState
+   * @property {() => Promise<void>} createNewFolder
+   * @property {(folderName: string) => Promise<void>} insertSubfolder
+   * @property {() => void} updateLeftActionBtn
+   * @property {(baseTitle: string, folder: string, snippets: CleanShelfSnippet[]) => string} getUniqueTitle
+   */
+
   function getFilteredSnippets() {
-    const q = (CS.state.searchQuery || "").trim();
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+    const q = (CS.state.searchQuery || '').trim();
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
     const qLower = q.toLocaleLowerCase(lang);
-    
+
     const all = CS.state.snippets || [];
     if (!qLower) return all;
-    
-    return all.filter(s => 
-      s.type !== "subfolder" && (
-        (s.title || "").toLocaleLowerCase(lang).includes(qLower) || 
-        (s.content || "").toLocaleLowerCase(lang).includes(qLower) || 
-        (s.folder || "").toLocaleLowerCase(lang).includes(qLower) ||
-        (s.subfolder || "").toLocaleLowerCase(lang).includes(qLower)
-      )
+
+    return all.filter(
+      s =>
+        s.type !== 'subfolder' &&
+        ((s.title || '').toLocaleLowerCase(lang).includes(qLower) ||
+          (s.content || '').toLocaleLowerCase(lang).includes(qLower) ||
+          (s.folder || '').toLocaleLowerCase(lang).includes(qLower) ||
+          (s.subfolder || '').toLocaleLowerCase(lang).includes(qLower))
     );
   }
-
 
   function queryOverlay(selector) {
     const root = CS.ui && CS.ui.shadow;
@@ -27,7 +71,7 @@
   }
 
   function isSearchActive() {
-    return !!(CS.state.searchQuery || "").trim();
+    return !!(CS.state.searchQuery || '').trim();
   }
 
   function groupByFolder(snippets) {
@@ -38,33 +82,37 @@
       }
     }
     for (const s of snippets) {
-      const key = (s && s.folder) ? s.folder : CS.constants.UNFILED;
+      const key = s && s.folder ? s.folder : CS.constants.UNFILED;
       if (!map.has(key)) map.set(key, []);
       map.get(key).push(s);
     }
-    
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
     for (const [key, items] of map.entries()) {
-      if (CS.state.sortMode === "title") {
-        items.sort((a, b) => (a.title || "").localeCompare(b.title || "", lang));
-      } else if (CS.state.sortMode === "manual") {
+      if (CS.state.sortMode === 'title') {
+        items.sort((a, b) => (a.title || '').localeCompare(b.title || '', lang));
+      } else if (CS.state.sortMode === 'manual') {
         items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       } else {
         items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       }
     }
 
-
     const isSearching = isSearchActive();
-    let names = [...map.keys()].filter((k) => k !== CS.constants.UNFILED).sort((a, b) => a.localeCompare(b, lang));
-    if (isSearching) names = names.filter((name) => (map.get(name) || []).length > 0);
-    if (map.has(CS.constants.UNFILED) && (!isSearching || (map.get(CS.constants.UNFILED) || []).length > 0)) {
+    let names = [...map.keys()]
+      .filter(k => k !== CS.constants.UNFILED)
+      .sort((a, b) => a.localeCompare(b, lang));
+    if (isSearching) names = names.filter(name => (map.get(name) || []).length > 0);
+    if (
+      map.has(CS.constants.UNFILED) &&
+      (!isSearching || (map.get(CS.constants.UNFILED) || []).length > 0)
+    ) {
       names.push(CS.constants.UNFILED);
     }
-    
-    return names.map((name) => {
+
+    return names.map(name => {
       const items = map.get(name);
-      const subfolders = items.filter(s => s.type === "subfolder").length;
+      const subfolders = items.filter(s => s.type === 'subfolder').length;
       const snippetCount = items.length - subfolders;
       return { name, items, subfolders, snippetCount };
     });
@@ -73,14 +121,14 @@
   function renderFolderList(snippets) {
     const datalist = CS.ui && CS.ui.folderDatalist;
     if (!datalist) return;
-    datalist.innerHTML = "";
-    
+    datalist.innerHTML = '';
+
     const folderSet = new Set(CS.state.folders || []);
     for (const s of snippets) if (s && s.folder) folderSet.add(s.folder);
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
-    
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
+
     for (const f of [...folderSet].sort((a, b) => a.localeCompare(b, lang))) {
-      const opt = document.createElement("option");
+      const opt = document.createElement('option');
       opt.value = f;
       datalist.appendChild(opt);
     }
@@ -89,64 +137,69 @@
   function updateFolderInputState() {
     const ui = CS.ui;
     if (!ui || !ui.folderInput) return;
-    
+
     if (CS.state.drilledFolder !== null) {
       ui.folderInput.value = CS.state.drilledFolder;
       ui.folderInput.disabled = true;
-      ui.folderInput.placeholder = CS.i18n.t("folder_locked");
+      ui.folderInput.placeholder = CS.i18n.t('folder_locked');
     } else {
       ui.folderInput.disabled = false;
-      ui.folderInput.placeholder = CS.i18n.t("folder_placeholder");
+      ui.folderInput.placeholder = CS.i18n.t('folder_placeholder');
     }
   }
 
   function hasEditChanges() {
     if (!CS.state.editingSnippetId || !CS.state.originalEditData) return false;
     const ui = CS.ui;
-    const currentTitle = ui.titleInput ? ui.titleInput.value.trim() : "";
-    const currentFolder = ui.folderInput ? ui.folderInput.value.trim() : "";
-    const currentContent = ui.contentInput ? ui.contentInput.value.trim() : "";
+    const currentTitle = ui.titleInput ? ui.titleInput.value.trim() : '';
+    const currentFolder = ui.folderInput ? ui.folderInput.value.trim() : '';
+    const currentContent = ui.contentInput ? ui.contentInput.value.trim() : '';
     const orig = CS.state.originalEditData;
-    return currentTitle !== orig.title || currentFolder !== orig.folder || currentContent !== orig.content;
+    return (
+      currentTitle !== orig.title ||
+      currentFolder !== orig.folder ||
+      currentContent !== orig.content
+    );
   }
 
   function timeAgo(ts) {
-    if (!ts) return "";
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+    if (!ts) return '';
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
     const diff = Date.now() - ts;
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return CS.i18n.t("time_just_now");
-    if (mins < 60) return CS.i18n.t("time_minutes", { count: mins });
+    if (mins < 1) return CS.i18n.t('time_just_now');
+    if (mins < 60) return CS.i18n.t('time_minutes', { count: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return CS.i18n.t("time_hours", { count: hrs });
+    if (hrs < 24) return CS.i18n.t('time_hours', { count: hrs });
     const days = Math.floor(hrs / 24);
-    if (days < 30) return CS.i18n.t("time_days", { count: days });
-    return new Date(ts).toLocaleDateString(lang === "tr" ? "tr-TR" : undefined);
+    if (days < 30) return CS.i18n.t('time_days', { count: days });
+    return new Date(ts).toLocaleDateString(lang === 'tr' ? 'tr-TR' : undefined);
   }
 
   async function renameSubfolder(subfolder, newName) {
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
     try {
       const snippets = await CS.storage.getSnippets();
-      const marker = snippets.find(s => s.id === subfolder.id && s.type === "subfolder");
+      const marker = snippets.find(s => s.id === subfolder.id && s.type === 'subfolder');
       if (!marker) return;
 
-      const oldName = marker.title || "";
-      const folder = marker.folder || "";
-      const collision = snippets.some(s =>
-        s.type === "subfolder" &&
-        s.id !== marker.id &&
-        (s.folder || "") === folder &&
-        (s.title || "").toLocaleLowerCase(lang) === newName.toLocaleLowerCase(lang)
+      const oldName = marker.title || '';
+      const folder = marker.folder || '';
+      const collision = snippets.some(
+        s =>
+          s.type === 'subfolder' &&
+          s.id !== marker.id &&
+          (s.folder || '') === folder &&
+          (s.title || '').toLocaleLowerCase(lang) === newName.toLocaleLowerCase(lang)
       );
       if (collision) {
-        CS.toast.showToast(CS.i18n.t("err_folder_exists"), "error");
+        CS.toast.showToast(CS.i18n.t('err_folder_exists'), 'error');
         return;
       }
 
       marker.title = newName;
       for (const s of snippets) {
-        if (s.type !== "subfolder" && (s.folder || "") === folder && s.subfolder === oldName) {
+        if (s.type !== 'subfolder' && (s.folder || '') === folder && s.subfolder === oldName) {
           s.subfolder = newName;
         }
       }
@@ -157,24 +210,24 @@
         CS.state.collapsedSubfolders.add(newName);
       }
       await load();
-      CS.toast.showToast(CS.i18n.t("toast_saved"));
+      CS.toast.showToast(CS.i18n.t('toast_saved'));
     } catch (err) {
-      CS.recordError("subfolder/rename", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('subfolder/rename', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
   async function deleteSubfolder(subfolder) {
     try {
       const snippets = await CS.storage.getSnippets();
-      const marker = snippets.find(s => s.id === subfolder.id && s.type === "subfolder");
-      const title = marker ? (marker.title || "") : (subfolder.title || "");
-      const folder = marker ? (marker.folder || "") : (subfolder.folder || "");
+      const marker = snippets.find(s => s.id === subfolder.id && s.type === 'subfolder');
+      const title = marker ? marker.title || '' : subfolder.title || '';
+      const folder = marker ? marker.folder || '' : subfolder.folder || '';
       const affectedIds = snippets
-        .filter(s => s.type !== "subfolder" && (s.folder || "") === folder && s.subfolder === title)
+        .filter(s => s.type !== 'subfolder' && (s.folder || '') === folder && s.subfolder === title)
         .map(s => s.id);
 
-      const filtered = snippets.filter(s => !(s.type === "subfolder" && s.id === subfolder.id));
+      const filtered = snippets.filter(s => !(s.type === 'subfolder' && s.id === subfolder.id));
       for (const s of filtered) {
         if (affectedIds.includes(s.id)) delete s.subfolder;
       }
@@ -182,30 +235,35 @@
       await CS.storage.saveSnippets(filtered);
       CS.state.collapsedSubfolders.delete(title);
       await load();
-      CS.toast.showToast(CS.i18n.t("toast_subfolder_deleted"), "success", CS.i18n.t("btn_undo"), async () => {
-        const current = await CS.storage.getSnippets();
-        if (marker) current.push(marker);
-        for (const s of current) {
-          if (affectedIds.includes(s.id) && !s.subfolder) s.subfolder = title;
+      CS.toast.showToast(
+        CS.i18n.t('toast_subfolder_deleted'),
+        'success',
+        CS.i18n.t('btn_undo'),
+        async () => {
+          const current = await CS.storage.getSnippets();
+          if (marker) current.push(marker);
+          for (const s of current) {
+            if (affectedIds.includes(s.id) && !s.subfolder) s.subfolder = title;
+          }
+          await CS.storage.saveSnippets(current);
+          await load();
+          CS.toast.showToast(CS.i18n.t('toast_restored'));
         }
-        await CS.storage.saveSnippets(current);
-        await load();
-        CS.toast.showToast(CS.i18n.t("toast_restored"));
-      });
+      );
     } catch (err) {
-      CS.recordError("subfolder/delete", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('subfolder/delete', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
   function buildSubfolderHeader(subfolder) {
     const { el } = CS.dom;
-    const header = el("div", "cs-subfolder-header");
+    const header = el('div', 'cs-subfolder-header');
     const isCollapsed = CS.state.collapsedSubfolders.has(subfolder.title);
-    header.appendChild(el("span", "cs-folder-caret", isCollapsed ? "▸" : "▾"));
-    header.appendChild(el("span", null, subfolder.title || CS.i18n.t("untitled")));
-    
-    header.addEventListener("click", () => {
+    header.appendChild(el('span', 'cs-folder-caret', isCollapsed ? '▸' : '▾'));
+    header.appendChild(el('span', null, subfolder.title || CS.i18n.t('untitled')));
+
+    header.addEventListener('click', () => {
       if (CS.state.collapsedSubfolders.has(subfolder.title)) {
         CS.state.collapsedSubfolders.delete(subfolder.title);
       } else {
@@ -214,64 +272,62 @@
       renderSnippets();
     });
 
-
-    header.addEventListener("dblclick", async (e) => {
+    header.addEventListener('dblclick', async e => {
       e.stopPropagation();
-      const newName = prompt(CS.i18n.t("prompt_rename_subfolder"), subfolder.title || "");
+      const newName = prompt(CS.i18n.t('prompt_rename_subfolder'), subfolder.title || '');
       if (newName !== null && newName.trim() && newName.trim() !== subfolder.title) {
         await renameSubfolder(subfolder, newName.trim());
       }
     });
 
-
-    header.addEventListener("contextmenu", async (e) => {
+    header.addEventListener('contextmenu', async e => {
       e.preventDefault();
       e.stopPropagation();
-      if (confirm(CS.i18n.t("confirm_delete_subfolder", { name: subfolder.title }))) {
+      if (confirm(CS.i18n.t('confirm_delete_subfolder', { name: subfolder.title }))) {
         await deleteSubfolder(subfolder);
       }
     });
 
-
     // Added Drag/Drop listeners back to the header
-    header.addEventListener("dragover", (e) => {
+    header.addEventListener('dragover', e => {
       e.preventDefault();
       e.stopPropagation();
-      e.dataTransfer.dropEffect = "move";
-      header.classList.add("cs-drag-over");
+      e.dataTransfer.dropEffect = 'move';
+      header.classList.add('cs-drag-over');
     });
-    header.addEventListener("dragleave", (e) => {
-      if (!header.contains(e.relatedTarget)) header.classList.remove("cs-drag-over");
+    header.addEventListener('dragleave', e => {
+      if (!header.contains(e.relatedTarget)) header.classList.remove('cs-drag-over');
     });
-    header.addEventListener("drop", async (e) => {
+    header.addEventListener('drop', async e => {
       e.preventDefault();
       e.stopPropagation();
-      header.classList.remove("cs-drag-over");
-      
-      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
-      if (!draggedId) return;
+      header.classList.remove('cs-drag-over');
 
+      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
+      if (!draggedId) return;
 
       try {
         const snippets = await CS.storage.getSnippets();
         const dragged = snippets.find(s => s.id === draggedId);
-        if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== subfolder.title) {
+        if (dragged && dragged.type !== 'subfolder' && dragged.subfolder !== subfolder.title) {
           dragged.subfolder = subfolder.title;
           dragged.folder = subfolder.folder;
-          
-          const maxOrder = Math.max(0, ...snippets.filter(s => s.subfolder === subfolder.title).map(s => s.sortOrder || 0));
+
+          const maxOrder = Math.max(
+            0,
+            ...snippets.filter(s => s.subfolder === subfolder.title).map(s => s.sortOrder || 0)
+          );
           dragged.sortOrder = maxOrder + 1;
-          
-          CS.state.sortMode = "manual";
+
+          CS.state.sortMode = 'manual';
           await CS.storage.saveSnippets(snippets);
           await load();
-          CS.toast.showToast(CS.i18n.t("toast_moved", { folder: subfolder.title }));
+          CS.toast.showToast(CS.i18n.t('toast_moved', { folder: subfolder.title }));
         }
       } catch (err) {
-        CS.recordError("move-subfolder", err);
+        CS.recordError('move-subfolder', err);
       }
     });
-
 
     return header;
   }
@@ -279,164 +335,157 @@
   function buildSnippetCard(snippet) {
     const { el } = CS.dom;
     // (The isSubfolder check and header rendering are now gone, because it's in Chunk 1)
-    
-    const cardEl = el("div", "cs-item");
-    cardEl.setAttribute("role", "button");
-    cardEl.setAttribute("tabindex", "0");
-    cardEl.title = CS.i18n.t("card_hint");
+
+    const cardEl = el('div', 'cs-item');
+    cardEl.setAttribute('role', 'button');
+    cardEl.setAttribute('tabindex', '0');
+    cardEl.title = CS.i18n.t('card_hint');
     cardEl.draggable = true;
     cardEl.dataset.id = snippet.id;
 
+    cardEl.appendChild(el('div', 'cs-item-title', snippet.title || CS.i18n.t('untitled')));
+    cardEl.appendChild(el('p', 'cs-item-content', snippet.content || ''));
 
-    cardEl.appendChild(el("div", "cs-item-title", snippet.title || CS.i18n.t("untitled")));
-    cardEl.appendChild(el("p", "cs-item-content", snippet.content || ""));
-    
     const timeStr = timeAgo(snippet.updatedAt || snippet.createdAt);
-    if (timeStr) cardEl.appendChild(el("div", "cs-item-time", timeStr));
-    cardEl.appendChild(el("span", "cs-item-copy", CS.i18n.t("copy")));
-    
-    cardEl.addEventListener("click", () => CS.clipboard.copySnippet(snippet));
-    cardEl.addEventListener("contextmenu", (e) => {
+    if (timeStr) cardEl.appendChild(el('div', 'cs-item-time', timeStr));
+    cardEl.appendChild(el('span', 'cs-item-copy', CS.i18n.t('copy')));
+
+    cardEl.addEventListener('click', () => CS.clipboard.copySnippet(snippet));
+    cardEl.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
       if (CS.ui && CS.ui.contextMenu) {
-        CS.ui.contextMenu.show("snippet", snippet, e.clientX, e.clientY);
+        CS.ui.contextMenu.show('snippet', snippet, e.clientX, e.clientY);
       }
     });
 
-
-    cardEl.addEventListener("dragstart", (e) => {
+    cardEl.addEventListener('dragstart', e => {
       CS.state.draggingSnippetId = snippet.id;
-      e.dataTransfer.setData("text/plain", snippet.id);
-      e.dataTransfer.effectAllowed = "move";
-      setTimeout(() => cardEl.classList.add("cs-dragging"), 0);
+      e.dataTransfer.setData('text/plain', snippet.id);
+      e.dataTransfer.effectAllowed = 'move';
+      setTimeout(() => cardEl.classList.add('cs-dragging'), 0);
     });
 
-
-    cardEl.addEventListener("dragend", () => {
+    cardEl.addEventListener('dragend', () => {
       CS.state.draggingSnippetId = null;
-      cardEl.classList.remove("cs-dragging");
-      queryOverlay(".cs-drop-before, .cs-drop-after, .cs-drag-over").forEach(el => {
-        el.classList.remove("cs-drop-before", "cs-drop-after", "cs-drag-over");
+      cardEl.classList.remove('cs-dragging');
+      queryOverlay('.cs-drop-before, .cs-drop-after, .cs-drag-over').forEach(el => {
+        el.classList.remove('cs-drop-before', 'cs-drop-after', 'cs-drag-over');
       });
     });
 
-
-    cardEl.addEventListener("dragover", (e) => {
+    cardEl.addEventListener('dragover', e => {
       e.preventDefault();
       e.stopPropagation();
-      e.dataTransfer.dropEffect = "move";
-      
-      queryOverlay(".cs-drop-before, .cs-drop-after").forEach(el => {
-        if (el !== cardEl) el.classList.remove("cs-drop-before", "cs-drop-after");
-      });
+      e.dataTransfer.dropEffect = 'move';
 
+      queryOverlay('.cs-drop-before, .cs-drop-after').forEach(el => {
+        if (el !== cardEl) el.classList.remove('cs-drop-before', 'cs-drop-after');
+      });
 
       const rect = cardEl.getBoundingClientRect();
       const offset = e.clientY - rect.top;
-      
+
       if (offset < rect.height / 2) {
-        cardEl.classList.add("cs-drop-before");
-        cardEl.classList.remove("cs-drop-after");
+        cardEl.classList.add('cs-drop-before');
+        cardEl.classList.remove('cs-drop-after');
       } else {
-        cardEl.classList.add("cs-drop-after");
-        cardEl.classList.remove("cs-drop-before");
+        cardEl.classList.add('cs-drop-after');
+        cardEl.classList.remove('cs-drop-before');
       }
     });
 
-
-    cardEl.addEventListener("dragleave", () => {
-      cardEl.classList.remove("cs-drop-before", "cs-drop-after");
+    cardEl.addEventListener('dragleave', () => {
+      cardEl.classList.remove('cs-drop-before', 'cs-drop-after');
     });
 
-
     // Drop to reorder
-    cardEl.addEventListener("drop", async (e) => {
+    cardEl.addEventListener('drop', async e => {
       e.preventDefault();
       e.stopPropagation();
-      
-      const isBefore = cardEl.classList.contains("cs-drop-before");
-      cardEl.classList.remove("cs-drop-before", "cs-drop-after");
-      
-      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
-      if (!draggedId || draggedId === snippet.id) return;
 
+      const isBefore = cardEl.classList.contains('cs-drop-before');
+      cardEl.classList.remove('cs-drop-before', 'cs-drop-after');
+
+      const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
+      if (!draggedId || draggedId === snippet.id) return;
 
       try {
         const snippets = await CS.storage.getSnippets();
         const dragged = snippets.find(s => s.id === draggedId);
         if (!dragged) return;
 
-
         dragged.folder = snippet.folder;
         dragged.subfolder = snippet.subfolder; // Inherit target's subfolder
 
-
         const currentFolderItems = snippets
-          .filter(s => s.folder === snippet.folder && s.subfolder === snippet.subfolder && s.type !== "subfolder")
+          .filter(
+            s =>
+              s.folder === snippet.folder &&
+              s.subfolder === snippet.subfolder &&
+              s.type !== 'subfolder'
+          )
           .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-        
+
         const targetIdx = currentFolderItems.findIndex(s => s.id === snippet.id);
         let insertIdx = isBefore ? targetIdx : targetIdx + 1;
-
 
         const draggedIdx = currentFolderItems.findIndex(s => s.id === draggedId);
         if (draggedIdx !== -1) {
           currentFolderItems.splice(draggedIdx, 1);
           if (draggedIdx < insertIdx) insertIdx--;
         }
-        
+
         currentFolderItems.splice(insertIdx, 0, dragged);
 
+        currentFolderItems.forEach((s, idx) => {
+          s.sortOrder = idx;
+        });
 
-        currentFolderItems.forEach((s, idx) => { s.sortOrder = idx; });
-
-
-        CS.state.sortMode = "manual";
+        CS.state.sortMode = 'manual';
         await CS.storage.saveSnippets(snippets);
         await load();
       } catch (err) {
-        CS.recordError("drag-reorder", err);
+        CS.recordError('drag-reorder', err);
       }
     });
-
 
     return cardEl;
   }
 
   function bindFolderContextMenu(element, folderName) {
     if (folderName === CS.constants.UNFILED) return;
-    element.addEventListener("contextmenu", (e) => {
+    element.addEventListener('contextmenu', e => {
       e.preventDefault();
       e.stopPropagation();
       if (CS.ui && CS.ui.contextMenu) {
-        CS.ui.contextMenu.show("folder", folderName, e.clientX, e.clientY);
+        CS.ui.contextMenu.show('folder', folderName, e.clientX, e.clientY);
       }
     });
   }
 
   function bindFolderDragDrop(element, folderName) {
     if (folderName === CS.constants.UNFILED) return;
-    element.addEventListener("dragover", (e) => {
+    element.addEventListener('dragover', e => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      element.classList.add("cs-drag-over");
+      e.dataTransfer.dropEffect = 'move';
+      element.classList.add('cs-drag-over');
     });
-    element.addEventListener("dragleave", () => {
-      element.classList.remove("cs-drag-over");
+    element.addEventListener('dragleave', () => {
+      element.classList.remove('cs-drag-over');
     });
-    element.addEventListener("drop", async (e) => {
+    element.addEventListener('drop', async e => {
       e.preventDefault();
       e.stopPropagation();
-      element.classList.remove("cs-drag-over");
-      const snippetId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+      element.classList.remove('cs-drag-over');
+      const snippetId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
       if (!snippetId) return;
 
       try {
         const snippets = await CS.storage.getSnippets();
         const idx = snippets.findIndex(s => s.id === snippetId);
-        if (idx !== -1 && snippets[idx].type !== "subfolder") {
-          const targetFolder = folderName === CS.constants.UNFILED ? "" : folderName;
+        if (idx !== -1 && snippets[idx].type !== 'subfolder') {
+          const targetFolder = folderName === CS.constants.UNFILED ? '' : folderName;
           const item = snippets[idx];
           if (item.folder !== targetFolder || item.subfolder) {
             item.folder = targetFolder;
@@ -445,12 +494,12 @@
             item.sortOrder = -1;
             await CS.storage.saveSnippets(snippets);
             await load();
-            CS.toast.showToast(CS.i18n.t("toast_moved", { folder: folderName }));
+            CS.toast.showToast(CS.i18n.t('toast_moved', { folder: folderName }));
           }
         }
       } catch (err) {
-        CS.recordError("move", err);
-        CS.toast.showToast(CS.i18n.t("err_save"), "error");
+        CS.recordError('move', err);
+        CS.toast.showToast(CS.i18n.t('err_save'), 'error');
       }
     });
   }
@@ -458,28 +507,30 @@
   function startRenameFolder(oldName) {
     const listEl = CS.ui.listEl;
     if (!listEl) return;
-    
-    const target = Array.from(listEl.querySelectorAll(".cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count), .cs-drill-title")).find(el => el.textContent === oldName);
+
+    const target = Array.from(
+      listEl.querySelectorAll(
+        '.cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count), .cs-drill-title'
+      )
+    ).find(el => el.textContent === oldName);
     if (!target) return;
 
-
     const parent = target.parentElement;
-    const input = document.createElement("input");
-    input.className = "cs-input";
-    input.style.padding = "2px 4px";
-    input.style.fontSize = "inherit";
-    input.style.height = "auto";
-    input.style.width = "100%";
+    const input = document.createElement('input');
+    input.className = 'cs-input';
+    input.style.padding = '2px 4px';
+    input.style.fontSize = 'inherit';
+    input.style.height = 'auto';
+    input.style.width = '100%';
     input.value = oldName;
-    
+
     parent.replaceChild(input, target);
     input.focus();
     input.select();
 
-
-    const finish = async (save) => {
-      input.removeEventListener("blur", onBlur);
-      input.removeEventListener("keydown", onKey);
+    const finish = async save => {
+      input.removeEventListener('blur', onBlur);
+      input.removeEventListener('keydown', onKey);
       if (save) {
         const newName = input.value.trim();
         if (newName && newName !== oldName) {
@@ -490,24 +541,28 @@
       parent.replaceChild(target, input);
     };
 
-
     const onBlur = () => finish(true);
-    const onKey = (e) => {
-      if (e.key === "Enter") { e.preventDefault(); finish(true); }
-      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+    const onKey = e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        finish(true);
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        finish(false);
+      }
     };
 
-
-    input.addEventListener("blur", onBlur);
-    input.addEventListener("keydown", onKey);
+    input.addEventListener('blur', onBlur);
+    input.addEventListener('keydown', onKey);
   }
-
 
   async function renameFolder(oldName, newName) {
     try {
       const snippets = await CS.storage.getSnippets();
-      const wasEditingOld = CS.state.editingSnippetId &&
-        snippets.some((s) => s.id === CS.state.editingSnippetId && s.folder === oldName);
+      const wasEditingOld =
+        CS.state.editingSnippetId &&
+        snippets.some(s => s.id === CS.state.editingSnippetId && s.folder === oldName);
       let changed = false;
       for (const s of snippets) {
         if (s.folder === oldName) {
@@ -518,13 +573,12 @@
       if (changed) {
         await CS.storage.saveSnippets(snippets);
       }
-      
+
       if (CS.state.folders) {
         CS.state.folders.delete(oldName);
         CS.state.folders.add(newName);
         await CS.storage.saveFolders([...CS.state.folders]);
       }
-
 
       // If we are currently inside the folder being renamed, keep us inside it
       if (CS.state.drilledFolder === oldName) {
@@ -537,37 +591,42 @@
       if (wasEditingOld && CS.state.originalEditData) {
         CS.state.originalEditData.folder = newName;
       }
-      if (CS.ui.folderInput && !CS.ui.folderInput.disabled &&
-          (wasEditingOld || CS.ui.folderInput.value === oldName)) {
+      if (
+        CS.ui.folderInput &&
+        !CS.ui.folderInput.disabled &&
+        (wasEditingOld || CS.ui.folderInput.value === oldName)
+      ) {
         CS.ui.folderInput.value = newName;
       }
-      
+
       await load();
-      CS.toast.showToast(CS.i18n.t("toast_folder_renamed"));
+      CS.toast.showToast(CS.i18n.t('toast_folder_renamed'));
     } catch (err) {
-      CS.recordError("folder/rename", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('folder/rename', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
   async function deleteFolder(folderName) {
     try {
       const snippets = await CS.storage.getSnippets();
-      const toDelete = snippets.filter((s) => s.folder === folderName);
-      
+      const toDelete = snippets.filter(s => s.folder === folderName);
+
       if (toDelete.length > 0) {
-        const ok = confirm(CS.i18n.t("confirm_delete_folder", { count: toDelete.length, folder: folderName }));
+        const ok = confirm(
+          CS.i18n.t('confirm_delete_folder', { count: toDelete.length, folder: folderName })
+        );
         if (!ok) return;
       }
 
       const subfolderTitles = toDelete
-        .filter((s) => s.type === "subfolder" && s.title)
-        .map((s) => s.title);
-      const editingHere = CS.state.editingSnippetId &&
-        toDelete.some((s) => s.id === CS.state.editingSnippetId);
-      const filtered = snippets.filter((s) => s.folder !== folderName);
+        .filter(s => s.type === 'subfolder' && s.title)
+        .map(s => s.title);
+      const editingHere =
+        CS.state.editingSnippetId && toDelete.some(s => s.id === CS.state.editingSnippetId);
+      const filtered = snippets.filter(s => s.folder !== folderName);
       await CS.storage.saveSnippets(filtered);
-      
+
       if (CS.state.folders) {
         CS.state.folders.delete(folderName);
         await CS.storage.saveFolders([...CS.state.folders]);
@@ -577,26 +636,30 @@
       if (editingHere) cancelEdit();
       if (CS.state.drilledFolder === folderName) {
         CS.state.drilledFolder = null;
-        if (CS.ui.folderInput) CS.ui.folderInput.value = "";
+        if (CS.ui.folderInput) CS.ui.folderInput.value = '';
       }
-      
-      await load();
-      
-      CS.toast.showToast(CS.i18n.t("toast_folder_deleted"), "success", CS.i18n.t("btn_undo"), async () => {
-        if (CS.state.folders) {
-          CS.state.folders.add(folderName);
-          await CS.storage.saveFolders([...CS.state.folders]);
-        }
-        const current = await CS.storage.getSnippets();
-        const restored = [...current, ...toDelete];
-        await CS.storage.saveSnippets(restored);
-        await load();
-        CS.toast.showToast(CS.i18n.t("toast_restored"));
-      });
 
+      await load();
+
+      CS.toast.showToast(
+        CS.i18n.t('toast_folder_deleted'),
+        'success',
+        CS.i18n.t('btn_undo'),
+        async () => {
+          if (CS.state.folders) {
+            CS.state.folders.add(folderName);
+            await CS.storage.saveFolders([...CS.state.folders]);
+          }
+          const current = await CS.storage.getSnippets();
+          const restored = [...current, ...toDelete];
+          await CS.storage.saveSnippets(restored);
+          await load();
+          CS.toast.showToast(CS.i18n.t('toast_restored'));
+        }
+      );
     } catch (err) {
-      CS.recordError("folder/delete", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('folder/delete', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
@@ -604,104 +667,107 @@
     const { el } = CS.dom;
     const listEl = CS.ui.listEl;
     if (!listEl) return;
-    listEl.innerHTML = "";
+    listEl.innerHTML = '';
     const snippets = getFilteredSnippets();
     const groups = groupByFolder(snippets);
-    
+
     if (groups.length === 0) {
-      listEl.appendChild(el("p", "cs-empty", CS.i18n.t("empty_no_snippets")));
+      listEl.appendChild(el('p', 'cs-empty', CS.i18n.t('empty_no_snippets')));
       return;
     }
-    
+
     const frag = document.createDocumentFragment();
     for (const group of groups) {
-      const wrap = el("section", "cs-folder");
-      if (CS.state.collapsedFolders.has(group.name)) wrap.classList.add("collapsed");
+      const wrap = el('section', 'cs-folder');
+      if (CS.state.collapsedFolders.has(group.name)) wrap.classList.add('collapsed');
 
-
-      const headerBtn = el("button", "cs-folder-header");
-      headerBtn.type = "button";
-      headerBtn.appendChild(el("span", "cs-folder-caret",
-        CS.state.collapsedFolders.has(group.name) ? "▸" : "▾"));
-      const nameSpan = el("span", null, group.name);
+      const headerBtn = el('button', 'cs-folder-header');
+      headerBtn.type = 'button';
+      headerBtn.appendChild(
+        el('span', 'cs-folder-caret', CS.state.collapsedFolders.has(group.name) ? '▸' : '▾')
+      );
+      const nameSpan = el('span', null, group.name);
       headerBtn.appendChild(nameSpan);
-      headerBtn.appendChild(el("span", "cs-folder-count",
-        group.subfolders > 0
-          ? `${group.snippetCount} · ${group.subfolders}sf`
-          : String(group.snippetCount)));
-      
+      headerBtn.appendChild(
+        el(
+          'span',
+          'cs-folder-count',
+          group.subfolders > 0
+            ? `${group.snippetCount} · ${group.subfolders}sf`
+            : String(group.snippetCount)
+        )
+      );
+
       bindFolderContextMenu(headerBtn, group.name);
       bindFolderDragDrop(headerBtn, group.name);
 
-
-      headerBtn.addEventListener("click", (e) => {
-        if (e.target.tagName === "INPUT") return;
+      headerBtn.addEventListener('click', e => {
+        if (e.target.tagName === 'INPUT') return;
         if (CS.state.collapsedFolders.has(group.name)) CS.state.collapsedFolders.delete(group.name);
         else CS.state.collapsedFolders.add(group.name);
         renderSnippets();
       });
 
+      const items = el('div', 'cs-folder-items');
 
-      const items = el("div", "cs-folder-items");
-      
       // Root Drop Zone for List View
-      items.addEventListener("dragover", (e) => {
+      items.addEventListener('dragover', e => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        if (e.target === items) items.classList.add("cs-drag-over");
+        e.dataTransfer.dropEffect = 'move';
+        if (e.target === items) items.classList.add('cs-drag-over');
       });
-      items.addEventListener("dragleave", (e) => {
-        if (!items.contains(e.relatedTarget)) items.classList.remove("cs-drag-over");
+      items.addEventListener('dragleave', e => {
+        if (!items.contains(e.relatedTarget)) items.classList.remove('cs-drag-over');
       });
-      items.addEventListener("drop", async (e) => {
-        items.classList.remove("cs-drag-over");
+      items.addEventListener('drop', async e => {
+        items.classList.remove('cs-drag-over');
         e.preventDefault();
         e.stopPropagation();
-        
-        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+
+        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
         if (!draggedId) return;
-        
+
         try {
           const snippets = await CS.storage.getSnippets();
           const dragged = snippets.find(s => s.id === draggedId);
-          
-          if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
+
+          if (dragged && dragged.type !== 'subfolder' && dragged.subfolder) {
             delete dragged.subfolder;
             dragged.sortOrder = -1;
             await CS.storage.saveSnippets(snippets);
             await load();
-            CS.toast.showToast(CS.i18n.t("toast_moved_main"));
+            CS.toast.showToast(CS.i18n.t('toast_moved_main'));
           }
         } catch (err) {
-          CS.recordError("move-main", err);
-          CS.toast.showToast(CS.i18n.t("err_save"), "error");
+          CS.recordError('move-main', err);
+          CS.toast.showToast(CS.i18n.t('err_save'), 'error');
         }
       });
 
-
       const searching = isSearchActive();
-      const subfolders = searching ? [] : group.items.filter(s => s.type === "subfolder");
-      const unassigned = group.items.filter(s => s.type !== "subfolder" && (searching || !s.subfolder));
-
+      const subfolders = searching ? [] : group.items.filter(s => s.type === 'subfolder');
+      const unassigned = group.items.filter(
+        s => s.type !== 'subfolder' && (searching || !s.subfolder)
+      );
 
       for (const s of unassigned) {
         items.appendChild(buildSnippetCard(s));
       }
 
-
       for (const sub of subfolders) {
         items.appendChild(buildSubfolderHeader(sub));
         const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
         if (!isCollapsed) {
-          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
+          const subItems = group.items.filter(
+            s => s.type !== 'subfolder' && s.subfolder === sub.title
+          );
           if (subItems.length > 0) {
-            const subContainer = el("div", "cs-subfolder-items");
+            const subContainer = el('div', 'cs-subfolder-items');
             for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
             items.appendChild(subContainer);
           }
         }
       }
-
 
       wrap.appendChild(headerBtn);
       wrap.appendChild(items);
@@ -714,215 +780,226 @@
     const { el, makeFolderIcon } = CS.dom;
     const listEl = CS.ui.listEl;
     if (!listEl) return;
-    listEl.innerHTML = "";
+    listEl.innerHTML = '';
     const snippets = getFilteredSnippets();
     const groups = groupByFolder(snippets);
 
     if (CS.state.drilledFolder !== null) {
-      const group = groups.find((g) => g.name === CS.state.drilledFolder);
+      const group = groups.find(g => g.name === CS.state.drilledFolder);
       if (!group) {
         const searching = isSearchActive();
         CS.state.drilledFolder = null;
         if (CS.ui.folderInput && (!searching || !CS.state.editingSnippetId)) {
-          CS.ui.folderInput.value = "";
+          CS.ui.folderInput.value = '';
         }
         if (!searching && CS.state.editingSnippetId) cancelEdit();
         updateFolderInputState();
         return renderGridView();
       }
-      const drillHeader = el("div", "cs-drill-header");
-      
-      const backBtn = el("button", "cs-back-btn", CS.i18n.t("btn_back"));
-      backBtn.type = "button";
-      backBtn.addEventListener("click", () => {
+      const drillHeader = el('div', 'cs-drill-header');
+
+      const backBtn = el('button', 'cs-back-btn', CS.i18n.t('btn_back'));
+      backBtn.type = 'button';
+      backBtn.addEventListener('click', () => {
         CS.state.drilledFolder = null;
         if (CS.state.editingSnippetId) cancelEdit();
-        if (CS.ui.folderInput) CS.ui.folderInput.value = "";
+        if (CS.ui.folderInput) CS.ui.folderInput.value = '';
         updateFolderInputState();
         renderSnippets();
       });
       drillHeader.appendChild(backBtn);
-      
-      const titleSpan = el("span", "cs-drill-title", group.name);
+
+      const titleSpan = el('span', 'cs-drill-title', group.name);
       drillHeader.appendChild(titleSpan);
-      
-      const countSpan = el("span", "cs-drill-count",
+
+      const countSpan = el(
+        'span',
+        'cs-drill-count',
         group.subfolders > 0
           ? `${group.snippetCount} · ${group.subfolders}sf`
-          : String(group.snippetCount));
+          : String(group.snippetCount)
+      );
       drillHeader.appendChild(countSpan);
-      
+
       // Toggle Compact View
-      const compactBtn = el("button", "cs-back-btn", CS.i18n.t(CS.state.compactView ? "btn_expand" : "btn_compact"));
-      compactBtn.type = "button";
-      compactBtn.style.marginLeft = "8px";
-      compactBtn.style.fontSize = "var(--cs-fs-xs)";
-      compactBtn.addEventListener("click", () => {
+      const compactBtn = el(
+        'button',
+        'cs-back-btn',
+        CS.i18n.t(CS.state.compactView ? 'btn_expand' : 'btn_compact')
+      );
+      compactBtn.type = 'button';
+      compactBtn.style.marginLeft = '8px';
+      compactBtn.style.fontSize = 'var(--cs-fs-xs)';
+      compactBtn.addEventListener('click', () => {
         CS.state.compactView = !CS.state.compactView;
         renderSnippets();
       });
       drillHeader.appendChild(compactBtn);
-      
+
       // Context menu toggle button
-      const ctxBtn = el("button", "cs-back-btn cs-ctx-btn", "...");
-      ctxBtn.type = "button";
-      ctxBtn.addEventListener("click", (e) => {
+      const ctxBtn = el('button', 'cs-back-btn cs-ctx-btn', '...');
+      ctxBtn.type = 'button';
+      ctxBtn.addEventListener('click', e => {
         e.stopPropagation();
         const rect = ctxBtn.getBoundingClientRect();
         if (CS.ui && CS.ui.contextMenu) {
-          CS.ui.contextMenu.show("folder", group.name, rect.left, rect.bottom + 4);
+          CS.ui.contextMenu.show('folder', group.name, rect.left, rect.bottom + 4);
         }
       });
       drillHeader.appendChild(ctxBtn);
-      
+
       // NEW: Allow right-clicking anywhere on the header
       bindFolderContextMenu(drillHeader, group.name);
 
-
       listEl.appendChild(drillHeader);
-      const itemsContainer = el("div", "cs-drill-items");
-      if (CS.state.compactView) itemsContainer.classList.add("cs-compact");
-
+      const itemsContainer = el('div', 'cs-drill-items');
+      if (CS.state.compactView) itemsContainer.classList.add('cs-compact');
 
       // 1. Root Drop Zone Logic (to drag OUT of a subfolder)
-      itemsContainer.addEventListener("dragover", (e) => {
+      itemsContainer.addEventListener('dragover', e => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-        if (e.target === itemsContainer) itemsContainer.classList.add("cs-drag-over");
+        e.dataTransfer.dropEffect = 'move';
+        if (e.target === itemsContainer) itemsContainer.classList.add('cs-drag-over');
       });
-      itemsContainer.addEventListener("dragleave", (e) => {
-        if (!itemsContainer.contains(e.relatedTarget)) itemsContainer.classList.remove("cs-drag-over");
+      itemsContainer.addEventListener('dragleave', e => {
+        if (!itemsContainer.contains(e.relatedTarget))
+          itemsContainer.classList.remove('cs-drag-over');
       });
-      itemsContainer.addEventListener("drop", async (e) => {
-        itemsContainer.classList.remove("cs-drag-over");
-        // REMOVED: if (e.target !== itemsContainer) return; 
+      itemsContainer.addEventListener('drop', async e => {
+        itemsContainer.classList.remove('cs-drag-over');
+        // REMOVED: if (e.target !== itemsContainer) return;
         e.preventDefault();
         e.stopPropagation();
-        
-        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
+
+        const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
         if (!draggedId) return;
-        
+
         try {
           const snippets = await CS.storage.getSnippets();
           const dragged = snippets.find(s => s.id === draggedId);
-          
-          if (dragged && dragged.type !== "subfolder" && dragged.subfolder) {
+
+          if (dragged && dragged.type !== 'subfolder' && dragged.subfolder) {
             delete dragged.subfolder;
             dragged.sortOrder = -1;
             await CS.storage.saveSnippets(snippets);
             await load();
-            CS.toast.showToast(CS.i18n.t("toast_moved_main"));
+            CS.toast.showToast(CS.i18n.t('toast_moved_main'));
           }
         } catch (err) {
-          CS.recordError("move-main", err);
-          CS.toast.showToast(CS.i18n.t("err_save"), "error");
+          CS.recordError('move-main', err);
+          CS.toast.showToast(CS.i18n.t('err_save'), 'error');
         }
       });
 
-
       const searching = isSearchActive();
-      const subfolders = searching ? [] : group.items.filter(s => s.type === "subfolder");
-      const unassigned = group.items.filter(s => s.type !== "subfolder" && (searching || !s.subfolder));
-
+      const subfolders = searching ? [] : group.items.filter(s => s.type === 'subfolder');
+      const unassigned = group.items.filter(
+        s => s.type !== 'subfolder' && (searching || !s.subfolder)
+      );
 
       // 2. Render unassigned snippets
       for (const s of unassigned) {
         itemsContainer.appendChild(buildSnippetCard(s));
       }
 
-
       // 3. Render subfolder boxes
       for (const sub of subfolders) {
-        const box = el("div", "cs-subfolder-box");
-        
-        // Box Drop Zone Logic (to drag INTO a subfolder)
-        box.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.dataTransfer.dropEffect = "move";
-          box.classList.add("cs-drag-over");
-        });
-        box.addEventListener("dragleave", (e) => {
-          if (!box.contains(e.relatedTarget)) box.classList.remove("cs-drag-over");
-        });
-        box.addEventListener("drop", async (e) => {
-          box.classList.remove("cs-drag-over");
-          // REMOVED: if (e.target !== box) return; 
-          e.preventDefault();
-          e.stopPropagation();
-          
-          const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData("text/plain");
-          if (!draggedId) return;
+        const box = el('div', 'cs-subfolder-box');
 
+        // Box Drop Zone Logic (to drag INTO a subfolder)
+        box.addEventListener('dragover', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          box.classList.add('cs-drag-over');
+        });
+        box.addEventListener('dragleave', e => {
+          if (!box.contains(e.relatedTarget)) box.classList.remove('cs-drag-over');
+        });
+        box.addEventListener('drop', async e => {
+          box.classList.remove('cs-drag-over');
+          // REMOVED: if (e.target !== box) return;
+          e.preventDefault();
+          e.stopPropagation();
+
+          const draggedId = CS.state.draggingSnippetId || e.dataTransfer.getData('text/plain');
+          if (!draggedId) return;
 
           try {
             const snippets = await CS.storage.getSnippets();
             const dragged = snippets.find(s => s.id === draggedId);
-            if (dragged && dragged.type !== "subfolder" && dragged.subfolder !== sub.title) {
+            if (dragged && dragged.type !== 'subfolder' && dragged.subfolder !== sub.title) {
               dragged.subfolder = sub.title;
               dragged.folder = sub.folder;
-              
-              const maxOrder = Math.max(0, ...snippets.filter(s => s.subfolder === sub.title).map(s => s.sortOrder || 0));
+
+              const maxOrder = Math.max(
+                0,
+                ...snippets.filter(s => s.subfolder === sub.title).map(s => s.sortOrder || 0)
+              );
               dragged.sortOrder = maxOrder + 1;
-              
-              CS.state.sortMode = "manual";
+
+              CS.state.sortMode = 'manual';
               await CS.storage.saveSnippets(snippets);
               await load();
-              CS.toast.showToast(CS.i18n.t("toast_moved", { folder: sub.title }));
+              CS.toast.showToast(CS.i18n.t('toast_moved', { folder: sub.title }));
             }
           } catch (err) {
-            CS.recordError("move-subfolder", err);
+            CS.recordError('move-subfolder', err);
           }
         });
 
-
         box.appendChild(buildSubfolderHeader(sub));
-
 
         const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
         if (!isCollapsed) {
-          const subItems = group.items.filter(s => s.type !== "subfolder" && s.subfolder === sub.title);
+          const subItems = group.items.filter(
+            s => s.type !== 'subfolder' && s.subfolder === sub.title
+          );
           if (subItems.length > 0) {
-            const subContainer = el("div", "cs-subfolder-items");
+            const subContainer = el('div', 'cs-subfolder-items');
             for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
             box.appendChild(subContainer);
           }
         }
-        
+
         itemsContainer.appendChild(box);
       }
 
-
       if (group.items.length === 0) {
-        itemsContainer.appendChild(el("p", "cs-empty", CS.i18n.t("empty_folder")));
+        itemsContainer.appendChild(el('p', 'cs-empty', CS.i18n.t('empty_folder')));
       }
-      
+
       listEl.appendChild(itemsContainer);
       return;
     }
 
     if (groups.length === 0) {
-      listEl.appendChild(el("p", "cs-empty", CS.i18n.t("empty_no_snippets")));
+      listEl.appendChild(el('p', 'cs-empty', CS.i18n.t('empty_no_snippets')));
       return;
     }
 
-    const grid = el("div", "cs-folder-grid");
+    const grid = el('div', 'cs-folder-grid');
     for (const group of groups) {
-      const tile = el("button", "cs-folder-tile");
-      tile.type = "button";
+      const tile = el('button', 'cs-folder-tile');
+      tile.type = 'button';
       tile.appendChild(makeFolderIcon());
-      const nameDiv = el("div", "cs-folder-tile-name", group.name);
+      const nameDiv = el('div', 'cs-folder-tile-name', group.name);
       tile.appendChild(nameDiv);
-      tile.appendChild(el("div", "cs-folder-tile-count",
-        group.subfolders > 0
-          ? `${group.snippetCount} · ${group.subfolders}sf`
-          : String(group.snippetCount)));
-      
+      tile.appendChild(
+        el(
+          'div',
+          'cs-folder-tile-count',
+          group.subfolders > 0
+            ? `${group.snippetCount} · ${group.subfolders}sf`
+            : String(group.snippetCount)
+        )
+      );
+
       bindFolderContextMenu(tile, group.name);
       bindFolderDragDrop(tile, group.name);
 
-      tile.addEventListener("click", (e) => {
-        if (e.target.tagName === "INPUT") return;
+      tile.addEventListener('click', e => {
+        if (e.target.tagName === 'INPUT') return;
         CS.state.drilledFolder = group.name;
         if (CS.state.editingSnippetId) cancelEdit();
         renderSnippets();
@@ -936,24 +1013,24 @@
     const btn = CS.ui.leftActionBtn;
     const subBtn = CS.ui.leftSubfolderBtn;
     if (!btn) return;
-    
+
     if (CS.state.drilledFolder !== null) {
-      btn.textContent = CS.i18n.t("btn_snippet");
-      btn.onclick = (e) => {
+      btn.textContent = CS.i18n.t('btn_snippet');
+      btn.onclick = e => {
         e.preventDefault();
         startInlineSnippetPrompt();
       };
       if (subBtn) {
         subBtn.hidden = false;
-        subBtn.textContent = CS.i18n.t("btn_subfolder");
-        subBtn.onclick = (e) => {
+        subBtn.textContent = CS.i18n.t('btn_subfolder');
+        subBtn.onclick = e => {
           e.preventDefault();
           insertSubfolder(CS.state.drilledFolder);
         };
       }
     } else {
-      btn.textContent = CS.i18n.t("btn_folder");
-      btn.onclick = (e) => {
+      btn.textContent = CS.i18n.t('btn_folder');
+      btn.onclick = e => {
         e.preventDefault();
         createNewFolder();
       };
@@ -961,32 +1038,31 @@
     }
   }
 
-
   function startInlineSnippetPrompt() {
     const btn = CS.ui.leftActionBtn;
     if (!btn || !btn.parentElement) return;
-    
+
     const parent = btn.parentElement;
-    const input = document.createElement("input");
-    input.className = "cs-input";
-    input.style.padding = "2px 8px";
-    input.style.fontSize = "var(--cs-fs-xs)";
-    input.style.width = "140px";
-    input.style.height = "auto";
-    input.placeholder = CS.i18n.t("title_placeholder");
-    
+    const input = document.createElement('input');
+    input.className = 'cs-input';
+    input.style.padding = '2px 8px';
+    input.style.fontSize = 'var(--cs-fs-xs)';
+    input.style.width = '140px';
+    input.style.height = 'auto';
+    input.placeholder = CS.i18n.t('title_placeholder');
+
     parent.replaceChild(input, btn);
     input.focus();
-    
-    const finish = (save) => {
-      input.removeEventListener("blur", onBlur);
-      input.removeEventListener("keydown", onKey);
-      
+
+    const finish = save => {
+      input.removeEventListener('blur', onBlur);
+      input.removeEventListener('keydown', onKey);
+
       // Put the button back
       if (input.parentElement) {
         input.parentElement.replaceChild(btn, input);
       }
-      
+
       if (save) {
         const title = input.value.trim();
         if (title) {
@@ -998,61 +1074,68 @@
       }
       updateLeftActionBtn();
     };
-    
+
     const onBlur = () => finish(false);
-    const onKey = (e) => {
-      if (e.key === "Enter") { e.preventDefault(); finish(true); }
-      if (e.key === "Escape") { e.preventDefault(); finish(false); }
+    const onKey = e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        finish(true);
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        finish(false);
+      }
     };
-    
-    input.addEventListener("blur", onBlur);
-    input.addEventListener("keydown", onKey);
+
+    input.addEventListener('blur', onBlur);
+    input.addEventListener('keydown', onKey);
   }
 
-
   async function insertSubfolder(folderName) {
-    const name = prompt(CS.i18n.t("prompt_new_subfolder"));
+    const name = prompt(CS.i18n.t('prompt_new_subfolder'));
     if (!name || !name.trim()) return;
-    
+
     try {
       const snippets = await CS.storage.getSnippets();
-      const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+      const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
       const base = name.trim();
       let unique = base;
       let counter = 2;
-      while (snippets.some(s =>
-        s.type === "subfolder" &&
-        (s.folder || "") === folderName &&
-        (s.title || "").toLocaleLowerCase(lang) === unique.toLocaleLowerCase(lang)
-      )) {
+      while (
+        snippets.some(
+          s =>
+            s.type === 'subfolder' &&
+            (s.folder || '') === folderName &&
+            (s.title || '').toLocaleLowerCase(lang) === unique.toLocaleLowerCase(lang)
+        )
+      ) {
         unique = `${base} (${counter})`;
         counter++;
       }
 
       const newSubfolder = {
         id: crypto.randomUUID(),
-        type: "subfolder",
+        type: 'subfolder',
         title: unique,
         folder: folderName,
         createdAt: Date.now(),
-        sortOrder: -1
+        sortOrder: -1,
       };
       snippets.push(newSubfolder);
-      CS.state.sortMode = "manual";
+      CS.state.sortMode = 'manual';
       await CS.storage.saveSnippets(snippets);
       await load();
-      CS.toast.showToast(CS.i18n.t("toast_subfolder_created"));
+      CS.toast.showToast(CS.i18n.t('toast_subfolder_created'));
     } catch (err) {
-      CS.recordError("insert-subfolder", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('insert-subfolder', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
-
 
   function renderSnippets() {
     updateLeftActionBtn();
     updateFolderInputState(); // Sync input state with drilledFolder on every render
-    if (CS.state.settings.layout === "grid") renderGridView();
+    if (CS.state.settings.layout === 'grid') renderGridView();
     else renderListView();
   }
 
@@ -1060,9 +1143,9 @@
     try {
       const snippets = await CS.storage.getSnippets();
       const savedFolders = await CS.storage.getFolders();
-      
+
       CS.state.folders = new Set(savedFolders);
-      
+
       let foldersUpdated = false;
       for (const s of snippets) {
         if (s.folder && !CS.state.folders.has(s.folder)) {
@@ -1080,12 +1163,12 @@
       renderSnippets();
       return snippets;
     } catch (err) {
-      CS.recordError("load", err);
+      CS.recordError('load', err);
       const listEl = CS.ui.listEl;
       if (listEl) {
-        listEl.innerHTML = "";
-        const p = CS.dom.el("p", "cs-empty", CS.i18n.t("load_failed"));
-        p.style.color = "var(--cs-error)";
+        listEl.innerHTML = '';
+        const p = CS.dom.el('p', 'cs-empty', CS.i18n.t('load_failed'));
+        p.style.color = 'var(--cs-error)';
         listEl.appendChild(p);
       }
       return null;
@@ -1094,21 +1177,21 @@
 
   function startEdit(snippet) {
     const ui = CS.ui;
-    if (ui.titleInput) ui.titleInput.value = snippet.title || "";
-    if (ui.folderInput) ui.folderInput.value = snippet.folder || "";
-    if (ui.contentInput) ui.contentInput.value = snippet.content || "";
-    
+    if (ui.titleInput) ui.titleInput.value = snippet.title || '';
+    if (ui.folderInput) ui.folderInput.value = snippet.folder || '';
+    if (ui.contentInput) ui.contentInput.value = snippet.content || '';
+
     CS.state.editingSnippetId = snippet.id;
     CS.state.originalEditData = {
-      title: snippet.title || "",
-      folder: snippet.folder || "",
-      content: snippet.content || ""
+      title: snippet.title || '',
+      folder: snippet.folder || '',
+      content: snippet.content || '',
     };
 
-    if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t("edit_snippet");
-    if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t("btn_update");
+    if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t('edit_snippet');
+    if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t('btn_update');
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = false;
-    
+
     updateFolderInputState();
     CS.drafts.clearDraft();
 
@@ -1119,135 +1202,134 @@
     const ui = CS.ui;
     CS.state.editingSnippetId = null;
     CS.state.originalEditData = null;
-    
-    if (ui.titleInput) ui.titleInput.value = "";
-    if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
-    if (ui.contentInput) ui.contentInput.value = "";
-    
-    if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t("new_snippet");
-    if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t("btn_save");
+
+    if (ui.titleInput) ui.titleInput.value = '';
+    if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || '';
+    if (ui.contentInput) ui.contentInput.value = '';
+
+    if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t('new_snippet');
+    if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t('btn_save');
     if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
-    
+
     updateFolderInputState();
     CS.drafts.clearDraft();
     if (ui.titleInput) ui.titleInput.focus();
   }
 
   function getUniqueTitle(baseTitle, folder, snippets) {
-    const lang = CS.state.settings.language === "tr" ? "tr" : "en";
-    const cleanBase = baseTitle.replace(/\s*\(\d+\)$/, "").trim() || CS.i18n.t("untitled");
+    const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
+    const cleanBase = baseTitle.replace(/\s*\(\d+\)$/, '').trim() || CS.i18n.t('untitled');
     let candidate = cleanBase;
     let counter = 2;
 
-
-    while (snippets.some(s => (s.title || "").toLocaleLowerCase(lang) === candidate.toLocaleLowerCase(lang) && (s.folder || "") === folder)) {
+    while (
+      snippets.some(
+        s =>
+          (s.title || '').toLocaleLowerCase(lang) === candidate.toLocaleLowerCase(lang) &&
+          (s.folder || '') === folder
+      )
+    ) {
       candidate = `${cleanBase} (${counter})`;
       counter++;
     }
     return candidate;
   }
 
-
   async function handleSave() {
     const ui = CS.ui;
-    const title = ui.titleInput ? ui.titleInput.value.trim() : "";
-    
-    let folder = ui.folderInput ? ui.folderInput.value.trim() : "";
+    const title = ui.titleInput ? ui.titleInput.value.trim() : '';
+
+    let folder = ui.folderInput ? ui.folderInput.value.trim() : '';
     if (CS.state.drilledFolder !== null) {
       folder = CS.state.drilledFolder;
     }
 
-
-    const content = ui.contentInput ? ui.contentInput.value.trim() : "";
+    const content = ui.contentInput ? ui.contentInput.value.trim() : '';
     if (!title && !content) {
-      CS.toast.showToast(CS.i18n.t("err_empty"), "error");
+      CS.toast.showToast(CS.i18n.t('err_empty'), 'error');
       return false;
     }
-    
+
     const isEditing = !!CS.state.editingSnippetId;
     if (ui.saveBtn) ui.saveBtn.disabled = true;
-
 
     try {
       let snippets = await CS.storage.getSnippets();
       let finalTitle = title;
 
-
       // Duplicate check
       if (finalTitle) {
-        const lang = CS.state.settings.language === "tr" ? "tr" : "en";
-        const existingSnippet = snippets.find(s =>
-          s.type !== "subfolder" &&
-          (s.title || "").toLocaleLowerCase(lang) === finalTitle.toLocaleLowerCase(lang) &&
-          (s.folder || "") === (folder || "") &&
-          s.id !== CS.state.editingSnippetId
+        const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
+        const existingSnippet = snippets.find(
+          s =>
+            s.type !== 'subfolder' &&
+            (s.title || '').toLocaleLowerCase(lang) === finalTitle.toLocaleLowerCase(lang) &&
+            (s.folder || '') === (folder || '') &&
+            s.id !== CS.state.editingSnippetId
         );
 
-
         if (existingSnippet) {
-          const replace = confirm(CS.i18n.t("confirm_duplicate", { title: finalTitle }));
-          
+          const replace = confirm(CS.i18n.t('confirm_duplicate', { title: finalTitle }));
+
           if (replace) {
             // Overwrite target
             existingSnippet.content = content;
             existingSnippet.updatedAt = Date.now();
-            
+
             // If we were editing a different snippet, remove the old one
             if (isEditing) {
               snippets = snippets.filter(s => s.id !== CS.state.editingSnippetId);
             }
-            
+
             await CS.storage.saveSnippets(snippets);
-            
+
             // Reset UI and exit early
             CS.state.editingSnippetId = null;
             CS.state.originalEditData = null;
-            if (ui.titleInput) ui.titleInput.value = "";
-            if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
-            if (ui.contentInput) ui.contentInput.value = "";
-            if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t("new_snippet");
-            if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t("btn_save");
+            if (ui.titleInput) ui.titleInput.value = '';
+            if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || '';
+            if (ui.contentInput) ui.contentInput.value = '';
+            if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t('new_snippet');
+            if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t('btn_save');
             if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
             updateFolderInputState();
             await CS.drafts.clearDraft();
             await load();
-            CS.toast.showToast(CS.i18n.t("toast_saved"));
+            CS.toast.showToast(CS.i18n.t('toast_saved'));
             return true;
           } else {
-            finalTitle = getUniqueTitle(finalTitle, folder || "", snippets);
+            finalTitle = getUniqueTitle(finalTitle, folder || '', snippets);
           }
         }
       }
 
-
       // Proceed with normal save/update
       if (isEditing) {
-        const idx = snippets.findIndex((s) => s.id === CS.state.editingSnippetId);
+        const idx = snippets.findIndex(s => s.id === CS.state.editingSnippetId);
         if (idx !== -1) {
           const prev = snippets[idx];
           const next = {
             ...prev,
             title: finalTitle,
-            folder: folder || "",
+            folder: folder || '',
             content,
             updatedAt: Date.now(),
           };
-          if ((prev.folder || "") !== (folder || "")) delete next.subfolder;
+          if ((prev.folder || '') !== (folder || '')) delete next.subfolder;
           snippets[idx] = next;
         }
       } else {
         snippets.push({
           id: crypto.randomUUID(),
           title: finalTitle,
-          folder: folder || "",
+          folder: folder || '',
           content,
           createdAt: Date.now(),
         });
       }
 
-
       await CS.storage.saveSnippets(snippets);
-      
+
       if (folder) {
         if (!CS.state.folders) CS.state.folders = new Set();
         if (!CS.state.folders.has(folder)) {
@@ -1255,27 +1337,26 @@
           await CS.storage.saveFolders([...CS.state.folders]);
         }
       }
-      
+
       CS.state.editingSnippetId = null;
       CS.state.originalEditData = null;
-      
-      if (ui.titleInput) ui.titleInput.value = "";
-      if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || "";
-      if (ui.contentInput) ui.contentInput.value = "";
-      
-      if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t("new_snippet");
-      if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t("btn_save");
-      if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
 
+      if (ui.titleInput) ui.titleInput.value = '';
+      if (ui.folderInput) ui.folderInput.value = CS.state.drilledFolder || '';
+      if (ui.contentInput) ui.contentInput.value = '';
+
+      if (ui.formLabel) ui.formLabel.textContent = CS.i18n.t('new_snippet');
+      if (ui.saveBtn) ui.saveBtn.textContent = CS.i18n.t('btn_save');
+      if (ui.cancelEditBtn) ui.cancelEditBtn.hidden = true;
 
       updateFolderInputState();
       await CS.drafts.clearDraft();
       await load();
-      CS.toast.showToast(CS.i18n.t(isEditing ? "toast_updated" : "toast_saved"));
+      CS.toast.showToast(CS.i18n.t(isEditing ? 'toast_updated' : 'toast_saved'));
       return true;
     } catch (err) {
-      CS.recordError("save", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('save', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
       return false;
     } finally {
       if (ui.saveBtn) ui.saveBtn.disabled = false;
@@ -1291,50 +1372,66 @@
       if (CS.state.editingSnippetId === id) {
         cancelEdit();
       }
-      
-      const filtered = snippets.filter((s) => s.id !== id);
+
+      const filtered = snippets.filter(s => s.id !== id);
       await CS.storage.saveSnippets(filtered);
       await load();
-      
-      CS.toast.showToast(CS.i18n.t("toast_deleted"), "success", CS.i18n.t("btn_undo"), async () => {
+
+      CS.toast.showToast(CS.i18n.t('toast_deleted'), 'success', CS.i18n.t('btn_undo'), async () => {
         const current = await CS.storage.getSnippets();
         current.push(snippetToDelete);
         await CS.storage.saveSnippets(current);
         await load();
-        CS.toast.showToast(CS.i18n.t("toast_restored"));
+        CS.toast.showToast(CS.i18n.t('toast_restored'));
       });
-      
     } catch (err) {
-      CS.recordError("delete", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('delete', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
   async function createNewFolder() {
-    const name = prompt(CS.i18n.t("prompt_new_folder"));
+    const name = prompt(CS.i18n.t('prompt_new_folder'));
     if (!name || !name.trim()) return;
     const trimmed = name.trim();
     try {
       const folders = await CS.storage.getFolders();
-      const lang = CS.state.settings.language === "tr" ? "tr" : "en";
+      const lang = CS.state.settings.language === 'tr' ? 'tr' : 'en';
       if (folders.some(f => f.toLocaleLowerCase(lang) === trimmed.toLocaleLowerCase(lang))) {
-        CS.toast.showToast(CS.i18n.t("err_folder_exists"), "error");
+        CS.toast.showToast(CS.i18n.t('err_folder_exists'), 'error');
         return;
       }
       folders.push(trimmed);
       await CS.storage.saveFolders(folders);
       await CS.snippets.load();
-      CS.toast.showToast(CS.i18n.t("toast_folder_created"));
+      CS.toast.showToast(CS.i18n.t('toast_folder_created'));
     } catch (err) {
-      CS.recordError("folder/create", err);
-      CS.toast.showToast(CS.i18n.t("err_save"), "error");
+      CS.recordError('folder/create', err);
+      CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
 
-  CS.snippets = {
-    groupByFolder, renderFolderList, buildSnippetCard, renderListView, renderGridView,
-    renderSnippets, load, handleSave, startEdit, cancelEdit, deleteSnippet, hasEditChanges,
-    startRenameFolder, deleteFolder, updateFolderInputState, createNewFolder,
-    insertSubfolder, updateLeftActionBtn, getUniqueTitle
+  /** @type {CleanShelfSnippetsModule} */
+  const snippets = {
+    groupByFolder,
+    renderFolderList,
+    buildSnippetCard,
+    renderListView,
+    renderGridView,
+    renderSnippets,
+    load,
+    handleSave,
+    startEdit,
+    cancelEdit,
+    deleteSnippet,
+    hasEditChanges,
+    startRenameFolder,
+    deleteFolder,
+    updateFolderInputState,
+    createNewFolder,
+    insertSubfolder,
+    updateLeftActionBtn,
+    getUniqueTitle,
   };
+  CS.snippets = snippets;
 })();
