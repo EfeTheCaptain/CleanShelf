@@ -40,6 +40,7 @@
         /* ignore */
       }
     }
+    globalThis.CleanShelf = { aborted: true };
     return;
   }
   /** @type {CleanShelfConstants} */

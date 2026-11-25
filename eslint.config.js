@@ -13,15 +13,16 @@ export default [
         chrome: 'readonly',
         crypto: 'readonly',
         globalThis: 'readonly',
-        CS: 'readonly',
-        NodeFilter: 'readonly',
       },
     },
   },
   pluginJs.configs.recommended,
   {
     rules: {
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
       'no-undef': 'off',
       'no-constant-binary-expression': 'off',
       'no-irregular-whitespace': 'warn',

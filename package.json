@@ -4,12 +4,11 @@
   "description": "Save, folder, and copy snippets locally.",
   "type": "module",
   "scripts": {
-    "lint": "eslint . --ext .js",
-    "lint:fix": "eslint . --ext .js --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{js,json,css,md}\"",
-    "typecheck": "tsc --noEmit --skipLibCheck",
-    "build": "node build.js"
+    "typecheck": "tsc --noEmit --skipLibCheck"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.8",

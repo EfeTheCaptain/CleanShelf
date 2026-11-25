@@ -24,7 +24,16 @@
 - Added JSDoc `@typedef` and `@type` annotations to all 15 overlay modules
 - Added @types/chrome for Chrome API types
 - Added tsconfig.json for type checking
-- Added package.json with npm scripts: lint, lint:fix, format, format:check, typecheck, build
+- Added package.json with npm scripts: lint, lint:fix, format, format:check, typecheck
 - Fixed all ESLint errors (empty catch blocks)
 - Formatted all files with Prettier
 - TypeScript check passes (no errors)
+
+## 2026-11-26 - Reviewer Fixes (COMPLETED)
+
+- Fixed HIGH: Restored `globalThis.CleanShelf = { aborted: true }` in overlay-constants.js to preserve toggle-close behavior
+- Fixed MEDIUM: Rewrote `sanitizeHtml()` in overlay-i18n.js to use querySelectorAll instead of TreeWalker (fixes incomplete sanitization)
+- Fixed MEDIUM: Exported `sanitizeHtml` from i18n module and used it in overlay-index.js:328 for tips first-paint
+- Fixed MEDIUM: Updated package.json lint scripts for ESLint 9 (removed deprecated `--ext` flag)
+- Fixed MEDIUM: Updated eslint.config.js - removed dead globals (CS, NodeFilter), added `caughtErrorsIgnorePattern`
+- Fixed LOW: Removed non-existent `build` script from package.json

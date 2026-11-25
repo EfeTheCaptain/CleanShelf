@@ -325,7 +325,9 @@
   for (const tip of tipsData) {
     const li = el('li', tip.type === 'warning' ? 'cs-tip cs-tip-warning' : 'cs-tip');
     li.setAttribute('data-i18n-html', tip.key);
-    li.innerHTML = CS.i18n && typeof CS.i18n.t === 'function' ? CS.i18n.t(tip.key) : tip.key;
+    const html = CS.i18n && typeof CS.i18n.t === 'function' ? CS.i18n.t(tip.key) : tip.key;
+    li.innerHTML =
+      CS.i18n && typeof CS.i18n.sanitizeHtml === 'function' ? CS.i18n.sanitizeHtml(html) : html;
     tipsList.appendChild(li);
   }
   tipsPanel.appendChild(tipsList);

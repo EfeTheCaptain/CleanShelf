@@ -11,6 +11,7 @@
    * @typedef {Object} CleanShelfI18nModule
    * @property {(key: string, params?: Record<string, string|number>) => string} t
    * @property {() => void} applyTranslations
+   * @property {(html: string) => string} sanitizeHtml
    */
 
   const dict = {
@@ -320,11 +321,10 @@
   function sanitizeHtml(html) {
     const template = document.createElement('template');
     template.innerHTML = html;
-    const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
     const allowedTags = new Set(['strong', 'b', 'em', 'i', 'br', 'span']);
     const allowedAttrs = new Set(['class', 'style']);
-    while (walker.nextNode()) {
-      const el = walker.currentNode;
+    const elements = [...template.content.querySelectorAll('*')];
+    for (const el of elements) {
       if (!allowedTags.has(el.tagName.toLowerCase())) {
         el.replaceWith(...el.childNodes);
         continue;
@@ -379,6 +379,6 @@
   }
 
   /** @type {CleanShelfI18nModule} */
-  const i18n = { t, applyTranslations };
+  const i18n = { t, applyTranslations, sanitizeHtml };
   CS.i18n = i18n;
 })();

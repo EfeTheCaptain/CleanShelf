@@ -1,27 +1,27 @@
 # CleanShelf Improvement Roadmap
 
-## Milestone 1: Security & Critical Bug Fixes
+## Milestone 1: Security & Critical Bug Fixes ✅
 
 **Target**: 1 session
 **Done when**:
 
-- [ ] CSP added to manifest.json with `script-src 'self' 'wasm-unsafe-eval'; object-src 'none';`
-- [ ] i18n `innerHTML` replaced with safe DOM construction or DOMPurify-style sanitization
-- [ ] Optional chaining added to `overlay-i18n.js:276` for `CS.state?.settings?.language`
-- [ ] Singleton guard in `overlay-constants.js` cleaned up (no `aborted: true` side effect)
-- [ ] All existing functionality verified manually
+- [x] CSP added to manifest.json with `script-src 'self' 'wasm-unsafe-eval'; object-src 'none';`
+- [x] i18n `innerHTML` replaced with safe DOM construction or DOMPurify-style sanitization
+- [x] Optional chaining added to `overlay-i18n.js:276` for `CS.state?.settings?.language`
+- [x] Singleton guard in `overlay-constants.js` cleaned up (no `aborted: true` side effect)
+- [x] All existing functionality verified manually
 
-## Milestone 2: Code Quality Tooling
+## Milestone 2: Code Quality Tooling ✅
 
 **Target**: 1 session
 **Done when**:
 
-- [ ] ESLint config added (eslint.config.js) with recommended rules for browser extensions
-- [ ] Prettier config added (.prettierrc)
-- [ ] TypeScript declaration files (.d.ts) created for all CS modules
-- [ ] JSDoc `@typedef` and `@type` annotations added to module exports
-- [ ] `npm lint` and `npm format` scripts work
-- [ ] Duplicate dark-sepia theme removed from `overlay-styles.js`
+- [x] ESLint config added (eslint.config.js) with recommended rules for browser extensions
+- [x] Prettier config added (.prettierrc)
+- [x] TypeScript declaration files (.d.ts) created for all CS modules
+- [x] JSDoc `@typedef` and `@type` annotations added to module exports
+- [x] `npm lint` and `npm format` scripts work
+- [x] Duplicate dark-sepia theme removed from `overlay-styles.js`
 
 ## Milestone 3: Modularization & Maintainability
 
@@ -34,6 +34,15 @@
 - [ ] Build script (`build.js`) concatenates overlay files in correct dependency order
 - [ ] `background.js` updated to inject built bundle or individual files via flag
 - [ ] All functionality verified after split
+
+## Milestone 2.5: Reviewer Fixes (COMPLETED)
+
+- [x] Restored `aborted: true` singleton flag for toggle-close behavior
+- [x] Fixed sanitizeHtml TreeWalker bug (use querySelectorAll)
+- [x] Exported sanitizeHtml and used for tips first-paint
+- [x] Fixed ESLint 9 lint scripts (--ext removed)
+- [x] Cleaned eslint.config.js dead globals, added caughtErrorsIgnorePattern
+- [x] Removed dead build script
 
 ## Milestone 4: Test Coverage
 

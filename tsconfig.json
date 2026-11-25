@@ -22,10 +22,6 @@
     "noUnusedParameters": false,
     "types": ["chrome"]
   },
-  "include": [
-    "overlay-*.js",
-    "background.js",
-    "types/**/*.d.ts"
-  ],
+  "include": ["overlay-*.js", "background.js", "types/**/*.d.ts"],
   "exclude": ["node_modules", "dist", "icons", "docs"]
 }
