@@ -236,28 +236,6 @@
   --cs-fs-card-title: 24px;
 }
 
-:host([data-theme="dark-sepia"]) {
-  --cs-backdrop: rgba(20, 16, 14, 0.85);
-  --cs-bg-card: #241c18;
-  --cs-bg-panel: #1a1411;
-  --cs-bg-surface: #2e241f;
-  --cs-bg-surface-hover: #382c26;
-  --cs-bg-elevated: #2e241f;
-  --cs-bg-elevated-hover: #382c26;
-  --cs-bg-chip: #4a3c33;
-  --cs-border: #3a2d26;
-  --cs-border-strong: #4a3c33;
-  --cs-border-hover: #d68c45;
-  --cs-text: #e8d8c8;
-  --cs-text-strong: #fdf6e3;
-  --cs-text-title: #fdf6e3;
-  --cs-text-muted: #c4b5a5;
-  --cs-text-dim: #9a8878;
-  --cs-text-faint: #6b5a4d;
-  --cs-accent: #d68c45;
-  --cs-accent-strong: #c07333;
-}
-
 .cs-backdrop {
   position: absolute;
   inset: 0;

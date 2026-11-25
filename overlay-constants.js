@@ -16,7 +16,6 @@
         existing.remove();
       } catch (_) {}
     }
-    globalThis.CleanShelf = { aborted: true };
     return;
   }
   globalThis.CleanShelf = {

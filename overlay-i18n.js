@@ -273,7 +273,7 @@
   };
 
   function t(key, params) {
-    const lang = (CS.state && CS.state.settings && CS.state.settings.language) || "en";
+    const lang = (CS.state?.settings?.language) || "en";
     const list = dict[lang] || dict.en;
     let str = list[key] || dict.en[key] || key;
     
@@ -285,10 +285,29 @@
     return str;
   }
 
+  function sanitizeHtml(html) {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
+    const allowedTags = new Set(["strong", "b", "em", "i", "br", "span"]);
+    const allowedAttrs = new Set(["class", "style"]);
+    while (walker.nextNode()) {
+      const el = walker.currentNode;
+      if (!allowedTags.has(el.tagName.toLowerCase())) {
+        el.replaceWith(...el.childNodes);
+        continue;
+      }
+      for (const attr of [...el.attributes]) {
+        if (!allowedAttrs.has(attr.name)) el.removeAttribute(attr.name);
+      }
+    }
+    return template.innerHTML;
+  }
+
   function applyTranslations() {
     const shadow = CS.ui && CS.ui.shadow;
     if (!shadow) return;
-    const lang = (CS.state && CS.state.settings && CS.state.settings.language) || "en";
+    const lang = (CS.state?.settings?.language) || "en";
     if (CS.ui && CS.ui.host) CS.ui.host.lang = lang;
 
     shadow.querySelectorAll("[data-i18n]").forEach(el => {
@@ -298,7 +317,7 @@
 
     shadow.querySelectorAll("[data-i18n-html]").forEach(el => {
       const key = el.getAttribute("data-i18n-html");
-      el.innerHTML = t(key);
+      el.innerHTML = sanitizeHtml(t(key));
     });
 
     shadow.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
