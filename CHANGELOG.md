@@ -400,6 +400,20 @@
 
 - Fixed click-through: backdrop pointerdown stopPropagation() blocks clicks from leaking to the webpage when overlay is open
 
+## v1.2.9
+
+- Details view now opens Compact by default
+- Back button pinned at the top of the panel in details view (no longer scrolls away)
+- Drag-scroll now works while holding an item near the list edge
+- Dropping an item into a subfolder box no longer moves the box
+- Back-button `...` menu now closes on left-click outside (was right-click only)
+- View density is now a three-state cycle: Expanded, Compact, Minimum. Minimum shows subfolder headers only, with a `+N loose snippets` line so hidden notes are still counted
+- Subfolder move up/down buttons are always visible and pinned to the right of the header; long folder names now shorten with an ellipsis instead of pushing the buttons out of view
+- Chosen density and manual subfolder order are saved and restored when the overlay is reopened
+- Removed the Keyboard assist option (its arrows are now always shown) and the unused subfolder drag-by-gap-lines code
+- Page behind the overlay no longer scrolls while the overlay is open, and scrolling is restored when it closes
+- Fixed: extension failed to start after the density changes (startup read a saved preference before the settings existed)
+
 ## v1.2.8
 
 - Fixed AI-site event interception: moved keydown/paste listeners from document to window with capture:true; replaced stopPropagation() with stopImmediatePropagation() so ChatGPT/Claude/Gemini can't steal keystrokes before CleanShelf sees them

@@ -11,6 +11,14 @@
   /** @type {CleanShelfUI} */
   CS.ui = {};
 
+  // --- PAGE SCROLL LOCK (save originals once) ---
+  const docEl = document.documentElement;
+  const bodyEl = document.body;
+  const hadDocOverflow = docEl.style.overflow;
+  const hadBodyOverflow = bodyEl.style.overflow;
+  docEl.style.overflow = 'hidden';
+  bodyEl.style.overflow = 'hidden';
+
   const host = document.createElement('div');
   host.id = HOST_ID;
   host.style.cssText = 'all:initial;position:fixed;inset:0;z-index:2147483647;display:block;';
@@ -116,6 +124,7 @@
   listSection.appendChild(listEl);
   leftPanel.appendChild(listSection);
   CS.ui.listEl = listEl;
+  CS.ui.leftPanel = leftPanel;
   mainLayout.appendChild(leftPanel);
 
   // --- Manual scrolling during Drag & Drop ---
@@ -202,6 +211,7 @@
   CS.ui.contentInput = contentInput;
   CS.ui.saveBtn = saveBtn;
   CS.ui.cancelEditBtn = cancelEditBtn;
+  CS.ui.rightPanel = rightPanel;
   mainLayout.appendChild(rightPanel);
 
   mainView.appendChild(mainLayout);
@@ -625,6 +635,9 @@
     } catch (_) {
       /* ignore */
     }
+    // Restore page scroll (save-then-restore pattern guarantees no frozen page)
+    docEl.style.overflow = hadDocOverflow;
+    bodyEl.style.overflow = hadBodyOverflow;
   };
 
   // Placed after all elements are created to prevent ReferenceErrors

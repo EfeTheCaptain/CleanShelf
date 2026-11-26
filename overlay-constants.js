@@ -20,6 +20,8 @@
    * @property {"sm"|"md"|"lg"} fontSize
    * @property {"fast"|"relaxed"} draftRate
    * @property {"en"|"tr"} language
+   * @property {"expanded"|"compact"|"minimum"} density
+   * @property {"newest"|"title"|"manual"} sortMode
    */
 
   const HOST_ID = '__cleanshelf_host__';
@@ -59,6 +61,8 @@
       fontSize: 'md',
       draftRate: 'fast',
       language: 'en',
+      density: 'compact',
+      sortMode: 'newest',
     },
   };
   globalThis.CleanShelf = { constants };

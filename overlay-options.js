@@ -123,6 +123,10 @@
       { value: 'en', label: 'English', i18nKey: 'opt_english', onSelect: setLanguage },
       { value: 'tr', label: 'Turkish', i18nKey: 'opt_turkish', onSelect: setLanguage },
     ]);
+    radioGroups.language = buildRadioGroup('opt_language', 'Language', 'cs-language', [
+      { value: 'en', label: 'English', i18nKey: 'opt_english', onSelect: setLanguage },
+      { value: 'tr', label: 'Turkish', i18nKey: 'opt_turkish', onSelect: setLanguage },
+    ]);
 
     // Data Group (Right Column)
     const dataGroup = el('div', 'cs-options-group');

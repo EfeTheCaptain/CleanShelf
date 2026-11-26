@@ -355,6 +355,7 @@
 .cs-right-panel .cs-textarea {
   flex: 1 1 auto;
   min-height: 150px;
+  overscroll-behavior: contain;
   margin-bottom: 12px;
 }
 
@@ -492,6 +493,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
   background: var(--cs-bg-panel);
   border: 1px solid var(--cs-border);
@@ -598,6 +600,7 @@
   padding: 4px 4px 10px;
   margin-bottom: 6px;
   border-bottom: 1px solid var(--cs-border);
+  flex-shrink: 0;
 }
 
 .cs-drill-title {
@@ -1120,7 +1123,7 @@
 .cs-subfolder-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 6px 10px;
   background: var(--cs-bg-surface);
   border: 1px solid var(--cs-border);
@@ -1137,6 +1140,21 @@
 .cs-subfolder-header:hover {
   background: var(--cs-bg-surface-hover);
   border-color: var(--cs-border-hover);
+}
+
+.cs-subfolder-header > .cs-subfolder-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cs-subfolder-header > .cs-folder-caret {
+  flex: 0 0 auto;
+}
+
+.cs-subfolder-kb {
+  flex: 0 0 auto;
 }
 
 .cs-subfolder-items {
@@ -1163,6 +1181,60 @@
 
 .cs-item.cs-dragging {
   opacity: 0.4;
+}
+
+/* Keyboard-assist up/down buttons in subfolder header */
+.cs-subfolder-kb {
+  flex: 0 0 auto;
+  font-size: var(--cs-fs-xs);
+  cursor: pointer;
+  border: none;
+  background: var(--cs-bg-surface);
+  color: var(--cs-text);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.cs-subfolder-kb:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Settle flash after reorder. A background glow is used instead of a ring
+   because .cs-subfolder-box clips overflow, which would hide a box-shadow ring
+   drawn on the header. */
+@keyframes cs-drop-settle {
+  0%   { background-color: color-mix(in srgb, var(--cs-accent) 40%, transparent); }
+  100% { background-color: transparent; }
+}
+
+.cs-item.cs-drop-settle,
+.cs-subfolder-header.cs-drop-settle {
+  animation: cs-drop-settle 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-item.cs-drop-settle,
+  .cs-subfolder-header.cs-drop-settle {
+    animation: none;
+  }
+}
+
+/* Minimum density: collapse subfolder contents, show only headers */
+.cs-drill-items.cs-minimum .cs-subfolder-items {
+  display: none;
+}
+
+.cs-drill-items.cs-minimum .cs-subfolder-box {
+  padding: 4px 8px;
+}
+
+/* Loose snippets hint below the folder grid */
+.cs-loose-hint {
+  grid-column: 1 / -1;
+  font-size: var(--cs-fs-xs);
+  color: var(--cs-text-muted);
+  padding: 4px 12px;
 }
 
 `;

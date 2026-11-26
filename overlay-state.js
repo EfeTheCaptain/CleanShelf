@@ -17,7 +17,7 @@
    * @property {ReturnType<typeof setTimeout>|null} draftTimer
    * @property {string|null} editingSnippetId
    * @property {CleanShelfSnippet|null} originalEditData
-   * @property {boolean} compactView
+   *
    * @property {"newest"|"title"|"manual"} sortMode
    * @property {string|null} draggingSnippetId
    * @property {string} searchQuery
@@ -37,8 +37,11 @@
     draftTimer: null,
     editingSnippetId: null,
     originalEditData: null,
-    compactView: false,
-    sortMode: 'newest',
+    sortMode:
+      CS.constants.DEFAULT_SETTINGS.sortMode === 'title' ||
+      CS.constants.DEFAULT_SETTINGS.sortMode === 'manual'
+        ? CS.constants.DEFAULT_SETTINGS.sortMode
+        : 'newest',
     draggingSnippetId: null,
     searchQuery: '',
   });

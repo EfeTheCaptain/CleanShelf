@@ -37,3 +37,13 @@
 - Fixed MEDIUM: Updated package.json lint scripts for ESLint 9 (removed deprecated `--ext` flag)
 - Fixed MEDIUM: Updated eslint.config.js - removed dead globals (CS, NodeFilter), added `caughtErrorsIgnorePattern`
 - Fixed LOW: Removed non-existent `build` script from package.json
+
+## 2026-11-26 - UI/UX Fixes (COMPLETED, pending commit)
+
+- Fix 1: Details-view drill header (`.cs-back-btn`) now pinned above the scrollable list via `listEl.parentElement.insertBefore`, with `flex-shrink:0`; stale header cleared on non-drill renders
+- Fix 2: Drag-scroll now works while dragging over a `.cs-item` (edge auto-scroll replicated at card `dragover`; card `stopPropagation` was blocking the list listener)
+- Fix 3: Dropping an item into a subfolder box no longer moves the box (subfolders keyed by stable insertion order in manual sort, grid + list)
+- Fix 4a: Details view defaults to Compact (`compactView: true`)
+- Fix 4b: Back-button context menu now dismisses on left-click outside (capture `pointerdown` + `e.composedPath()` for Shadow DOM)
+- Reviewer caught 2 HIGH blockers (Shadow DOM retargeting broke menu-item selection; orphan drill header leaked into non-drill views) - both fixed
+- Verified: lint 0 errors, typecheck 0 errors. Runtime behavior not browser-tested.

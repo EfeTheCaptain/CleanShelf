@@ -43,6 +43,8 @@ interface CleanShelfSettings {
   fontSize: "sm" | "md" | "lg";
   draftRate: "fast" | "relaxed";
   language: "en" | "tr";
+  density: 'expanded' | 'compact' | 'minimum';
+  sortMode: 'newest' | 'title' | 'manual';
 }
 
 interface CleanShelfState {
@@ -58,7 +60,6 @@ interface CleanShelfState {
   draftTimer: ReturnType<typeof setTimeout> | null;
   editingSnippetId: string | null;
   originalEditData: CleanShelfSnippet | null;
-  compactView: boolean;
   sortMode: "newest" | "title" | "manual";
   draggingSnippetId: string | null;
   searchQuery: string;

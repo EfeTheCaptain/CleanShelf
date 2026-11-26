@@ -74,6 +74,84 @@
     return !!(CS.state.searchQuery || '').trim();
   }
 
+  // Continuous rAF-driven edge auto-scroll: holds the last dragover Y;
+  // one loop runs while an item is dragged so holding still at an edge never stalls.
+  const EDGE_THRESHOLD = 60;
+  const EDGE_SCROLL_SPEED = 13;
+  let scrollDrag = null; // { y, raf }
+
+  function stopEdgeScroll() {
+    if (scrollDrag && scrollDrag.raf) cancelAnimationFrame(scrollDrag.raf);
+    scrollDrag = null;
+  }
+
+  function tickEdgeScroll() {
+    const listEl = CS.ui && CS.ui.listEl;
+    if (!listEl) {
+      stopEdgeScroll();
+      return;
+    }
+    const r = listEl.getBoundingClientRect();
+    const y = scrollDrag.y - r.top;
+    if (y < EDGE_THRESHOLD) listEl.scrollTop -= EDGE_SCROLL_SPEED;
+    else if (y > r.height - EDGE_THRESHOLD) listEl.scrollTop += EDGE_SCROLL_SPEED;
+    scrollDrag.raf = requestAnimationFrame(tickEdgeScroll);
+  }
+
+  function startEdgeScroll(clientY) {
+    if (!scrollDrag) {
+      scrollDrag = { y: clientY, raf: 0 };
+      tickEdgeScroll();
+    } else {
+      scrollDrag.y = clientY;
+    }
+  }
+
+  // Single source of truth for subfolder order. A folder's subfolders are either
+  // normalized (every entry has a distinct integer sortOrder >= 0; order =
+  // sortOrder ascending) or not yet (any missing/negative; order = storage-array
+  // order). Never a mix of the two scales. Render AND every reorder writer use
+  // this helper so a dropped box lands exactly where the highlight showed it.
+  function orderedSubfolders(snippets, folder) {
+    const same = snippets.filter(
+      s => s.type === 'subfolder' && (s.folder || '') === (folder || '')
+    );
+    if (same.every(s => Number.isInteger(s.sortOrder) && s.sortOrder >= 0)) {
+      return same.slice().sort((a, b) => a.sortOrder - b.sortOrder);
+    }
+    return same;
+  }
+
+  // Normalize-on-write: renumber every same-folder subfolder to a clean 0..n-1
+  // block, in its current orderedSubfolders order. Called at the START of every
+  // mutation for the folder so it stays normalized forever after.
+  function normalizeSubfolderOrder(snippets, folder) {
+    orderedSubfolders(snippets, folder).forEach((s, idx) => {
+      s.sortOrder = idx;
+    });
+  }
+
+  // Serialize write cycles: two in-flight read-modify-write passes would clobber
+  // each other's sortOrder changes; queue every save behind the previous one.
+  let writeChain = Promise.resolve();
+  function enqueueWrite(fn) {
+    const run = writeChain.then(fn, fn);
+    writeChain = run.catch(() => {});
+    return run;
+  }
+
+  // Settle flash marks: consumed on the next build after a reorder (cleared in
+  // buildSnippetCard / buildSubfolderHeader, and at the top of renderSnippets so
+  // a filtered/aborted render can't leave a stale mark behind).
+  let movedSnippetId = null;
+  let movedSubfolderId = null;
+
+  const DENSITIES = ['expanded', 'compact', 'minimum'];
+  function currentDensity() {
+    const d = CS.state.settings && CS.state.settings.density;
+    return DENSITIES.includes(d) ? d : 'compact';
+  }
+
   function groupByFolder(snippets) {
     const map = new Map();
     if (CS.state.folders) {
@@ -92,7 +170,14 @@
       if (CS.state.sortMode === 'title') {
         items.sort((a, b) => (a.title || '').localeCompare(b.title || '', lang));
       } else if (CS.state.sortMode === 'manual') {
-        items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        // Subfolders use orderedSubfolders order ONLY (never mixed with the
+        // snippet sortOrder scale); snippet sort is untouched.
+        const subIdx = new Map(orderedSubfolders(items, key).map((s, i) => [s.id, i]));
+        items.sort((a, b) => {
+          if (a.type === 'subfolder' && b.type === 'subfolder')
+            return subIdx.get(a.id) - subIdx.get(b.id);
+          return (a.sortOrder || 0) - (b.sortOrder || 0);
+        });
       } else {
         items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       }
@@ -204,7 +289,7 @@
         }
       }
 
-      await CS.storage.saveSnippets(snippets);
+      await enqueueWrite(() => CS.storage.saveSnippets(snippets));
       if (CS.state.collapsedSubfolders.has(oldName)) {
         CS.state.collapsedSubfolders.delete(oldName);
         CS.state.collapsedSubfolders.add(newName);
@@ -232,7 +317,7 @@
         if (affectedIds.includes(s.id)) delete s.subfolder;
       }
 
-      await CS.storage.saveSnippets(filtered);
+      await enqueueWrite(() => CS.storage.saveSnippets(filtered));
       CS.state.collapsedSubfolders.delete(title);
       await load();
       CS.toast.showToast(
@@ -245,7 +330,7 @@
           for (const s of current) {
             if (affectedIds.includes(s.id) && !s.subfolder) s.subfolder = title;
           }
-          await CS.storage.saveSnippets(current);
+          await enqueueWrite(() => CS.storage.saveSnippets(current));
           await load();
           CS.toast.showToast(CS.i18n.t('toast_restored'));
         }
@@ -261,7 +346,65 @@
     const header = el('div', 'cs-subfolder-header');
     const isCollapsed = CS.state.collapsedSubfolders.has(subfolder.title);
     header.appendChild(el('span', 'cs-folder-caret', isCollapsed ? '▸' : '▾'));
-    header.appendChild(el('span', null, subfolder.title || CS.i18n.t('untitled')));
+    header.appendChild(el('span', 'cs-subfolder-title', subfolder.title || CS.i18n.t('untitled')));
+
+    if (movedSubfolderId === subfolder.id) {
+      header.classList.add('cs-drop-settle');
+      movedSubfolderId = null;
+    }
+
+    // Reorder: move up/down by one position among same-folder subfolders.
+    // Synchronous here (buildSubfolderHeader is not async); disable state comes
+    // from the already-loaded CS.state.snippets.
+    const stateSnippets = CS.state.snippets || [];
+    const siblings = orderedSubfolders(stateSnippets, subfolder.folder);
+    const myIdx = siblings.findIndex(s => s.id === subfolder.id);
+
+    const t = CS.i18n && CS.i18n.t ? CS.i18n.t : k => k;
+    const upBtn = el('button', 'cs-subfolder-kb cs-subfolder-kb-up', '▲');
+    upBtn.type = 'button';
+    upBtn.setAttribute('aria-label', t('btn_move_up'));
+    upBtn.disabled = myIdx <= 0;
+    upBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      moveSubfolderTo(subfolder, 'up');
+    });
+    header.appendChild(upBtn);
+
+    const downBtn = el('button', 'cs-subfolder-kb cs-subfolder-kb-down', '▼');
+    downBtn.type = 'button';
+    downBtn.setAttribute('aria-label', t('btn_move_down'));
+    downBtn.disabled = myIdx === siblings.length - 1;
+    downBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      moveSubfolderTo(subfolder, 'down');
+    });
+    header.appendChild(downBtn);
+
+    // `myIdx` is only used for the disabled state on render; the actual target
+    // is recomputed at click time so a stale render can't no-op or move the
+    // wrong box.
+    async function moveSubfolderTo(sub, direction) {
+      try {
+        const fresh = await CS.storage.getSnippets();
+        normalizeSubfolderOrder(fresh, sub.folder);
+        const freshSiblings = orderedSubfolders(fresh, sub.folder);
+        const curIdx = freshSiblings.findIndex(s => s.id === sub.id);
+        const targetIdx = direction === 'up' ? curIdx - 1 : curIdx + 1;
+        if (curIdx === -1 || targetIdx < 0 || targetIdx >= freshSiblings.length) return;
+        const target = freshSiblings.splice(curIdx, 1)[0];
+        freshSiblings.splice(targetIdx, 0, target);
+        freshSiblings.forEach((s, idx) => {
+          s.sortOrder = idx;
+        });
+        CS.state.sortMode = 'manual';
+        movedSubfolderId = target.id;
+        await enqueueWrite(() => CS.storage.saveSnippets(fresh));
+        await load();
+      } catch (err) {
+        CS.recordError('subfolder-kb-move', err);
+      }
+    }
 
     header.addEventListener('click', () => {
       if (CS.state.collapsedSubfolders.has(subfolder.title)) {
@@ -288,7 +431,8 @@
       }
     });
 
-    // Added Drag/Drop listeners back to the header
+    // Header is a snippet drop target only (drag a snippet onto a subfolder
+    // header to move it into that subfolder).
     header.addEventListener('dragover', e => {
       e.preventDefault();
       e.stopPropagation();
@@ -296,7 +440,9 @@
       header.classList.add('cs-drag-over');
     });
     header.addEventListener('dragleave', e => {
-      if (!header.contains(e.relatedTarget)) header.classList.remove('cs-drag-over');
+      if (!header.contains(e.relatedTarget)) {
+        header.classList.remove('cs-drag-over');
+      }
     });
     header.addEventListener('drop', async e => {
       e.preventDefault();
@@ -320,7 +466,7 @@
           dragged.sortOrder = maxOrder + 1;
 
           CS.state.sortMode = 'manual';
-          await CS.storage.saveSnippets(snippets);
+          await enqueueWrite(() => CS.storage.saveSnippets(snippets));
           await load();
           CS.toast.showToast(CS.i18n.t('toast_moved', { folder: subfolder.title }));
         }
@@ -342,6 +488,10 @@
     cardEl.title = CS.i18n.t('card_hint');
     cardEl.draggable = true;
     cardEl.dataset.id = snippet.id;
+    if (movedSnippetId === snippet.id) {
+      cardEl.classList.add('cs-drop-settle');
+      movedSnippetId = null;
+    }
 
     cardEl.appendChild(el('div', 'cs-item-title', snippet.title || CS.i18n.t('untitled')));
     cardEl.appendChild(el('p', 'cs-item-content', snippet.content || ''));
@@ -367,6 +517,7 @@
     });
 
     cardEl.addEventListener('dragend', () => {
+      stopEdgeScroll();
       CS.state.draggingSnippetId = null;
       cardEl.classList.remove('cs-dragging');
       queryOverlay('.cs-drop-before, .cs-drop-after, .cs-drag-over').forEach(el => {
@@ -393,6 +544,9 @@
         cardEl.classList.add('cs-drop-after');
         cardEl.classList.remove('cs-drop-before');
       }
+
+      // Record pointer Y; the rAF loop handles continuous edge auto-scroll
+      startEdgeScroll(e.clientY);
     });
 
     cardEl.addEventListener('dragleave', () => {
@@ -403,6 +557,7 @@
     cardEl.addEventListener('drop', async e => {
       e.preventDefault();
       e.stopPropagation();
+      stopEdgeScroll();
 
       const isBefore = cardEl.classList.contains('cs-drop-before');
       cardEl.classList.remove('cs-drop-before', 'cs-drop-after');
@@ -443,7 +598,8 @@
         });
 
         CS.state.sortMode = 'manual';
-        await CS.storage.saveSnippets(snippets);
+        movedSnippetId = draggedId;
+        await enqueueWrite(() => CS.storage.saveSnippets(snippets));
         await load();
       } catch (err) {
         CS.recordError('drag-reorder', err);
@@ -492,7 +648,7 @@
             delete item.subfolder;
             item.updatedAt = Date.now();
             item.sortOrder = -1;
-            await CS.storage.saveSnippets(snippets);
+            await enqueueWrite(() => CS.storage.saveSnippets(snippets));
             await load();
             CS.toast.showToast(CS.i18n.t('toast_moved', { folder: folderName }));
           }
@@ -508,11 +664,23 @@
     const listEl = CS.ui.listEl;
     if (!listEl) return;
 
-    const target = Array.from(
-      listEl.querySelectorAll(
-        '.cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count), .cs-drill-title'
-      )
-    ).find(el => el.textContent === oldName);
+    const scope = listEl.parentElement || listEl;
+    const roots = [scope, listEl];
+    if (CS.ui && CS.ui.shadow && !roots.includes(CS.ui.shadow)) roots.push(CS.ui.shadow);
+
+    let target = null;
+    for (const root of roots) {
+      if (!root || typeof root.querySelectorAll !== 'function') continue;
+      const found = Array.from(
+        root.querySelectorAll(
+          '.cs-folder-tile-name, .cs-folder-header span:not(.cs-folder-caret):not(.cs-folder-count), .cs-drill-title'
+        )
+      ).find(el => el.textContent === oldName);
+      if (found) {
+        target = found;
+        break;
+      }
+    }
     if (!target) return;
 
     const parent = target.parentElement;
@@ -571,7 +739,7 @@
         }
       }
       if (changed) {
-        await CS.storage.saveSnippets(snippets);
+        await enqueueWrite(() => CS.storage.saveSnippets(snippets));
       }
 
       if (CS.state.folders) {
@@ -625,7 +793,7 @@
       const editingHere =
         CS.state.editingSnippetId && toDelete.some(s => s.id === CS.state.editingSnippetId);
       const filtered = snippets.filter(s => s.folder !== folderName);
-      await CS.storage.saveSnippets(filtered);
+      await enqueueWrite(() => CS.storage.saveSnippets(filtered));
 
       if (CS.state.folders) {
         CS.state.folders.delete(folderName);
@@ -652,7 +820,7 @@
           }
           const current = await CS.storage.getSnippets();
           const restored = [...current, ...toDelete];
-          await CS.storage.saveSnippets(restored);
+          await enqueueWrite(() => CS.storage.saveSnippets(restored));
           await load();
           CS.toast.showToast(CS.i18n.t('toast_restored'));
         }
@@ -667,6 +835,11 @@
     const { el } = CS.dom;
     const listEl = CS.ui.listEl;
     if (!listEl) return;
+    const panel = listEl.parentElement;
+    if (panel) {
+      const stale = panel.querySelector('.cs-drill-header');
+      if (stale) stale.remove();
+    }
     listEl.innerHTML = '';
     const snippets = getFilteredSnippets();
     const groups = groupByFolder(snippets);
@@ -734,7 +907,7 @@
           if (dragged && dragged.type !== 'subfolder' && dragged.subfolder) {
             delete dragged.subfolder;
             dragged.sortOrder = -1;
-            await CS.storage.saveSnippets(snippets);
+            await enqueueWrite(() => CS.storage.saveSnippets(snippets));
             await load();
             CS.toast.showToast(CS.i18n.t('toast_moved_main'));
           }
@@ -821,20 +994,25 @@
       );
       drillHeader.appendChild(countSpan);
 
-      // Toggle Compact View
-      const compactBtn = el(
-        'button',
-        'cs-back-btn',
-        CS.i18n.t(CS.state.compactView ? 'btn_expand' : 'btn_compact')
-      );
-      compactBtn.type = 'button';
-      compactBtn.style.marginLeft = '8px';
-      compactBtn.style.fontSize = 'var(--cs-fs-xs)';
-      compactBtn.addEventListener('click', () => {
-        CS.state.compactView = !CS.state.compactView;
+      // Density toggle: cycle expanded -> compact -> minimum -> expanded
+      const densityLabels = {
+        expanded: 'btn_compact',
+        compact: 'btn_minimum',
+        minimum: 'btn_expand',
+      };
+      const densityBtn = el('button', 'cs-back-btn', CS.i18n.t(densityLabels[currentDensity()]));
+      densityBtn.type = 'button';
+      densityBtn.style.marginLeft = '8px';
+      densityBtn.style.fontSize = 'var(--cs-fs-xs)';
+      densityBtn.addEventListener('click', () => {
+        const order = DENSITIES;
+        const cur = currentDensity();
+        const next = order[(order.indexOf(cur) + 1) % order.length];
+        CS.state.settings.density = next;
+        CS.storage.persistSettings();
         renderSnippets();
       });
-      drillHeader.appendChild(compactBtn);
+      drillHeader.appendChild(densityBtn);
 
       // Context menu toggle button
       const ctxBtn = el('button', 'cs-back-btn cs-ctx-btn', '...');
@@ -851,13 +1029,27 @@
       // NEW: Allow right-clicking anywhere on the header
       bindFolderContextMenu(drillHeader, group.name);
 
-      listEl.appendChild(drillHeader);
+      const panel = listEl.parentElement;
+      if (panel) {
+        const stale = panel.querySelector('.cs-drill-header');
+        if (stale) stale.remove();
+        panel.insertBefore(drillHeader, listEl);
+      } else {
+        listEl.appendChild(drillHeader);
+      }
       const itemsContainer = el('div', 'cs-drill-items');
-      if (CS.state.compactView) itemsContainer.classList.add('cs-compact');
+      const d = currentDensity();
+      if (d === 'compact') itemsContainer.classList.add('cs-compact');
+      else if (d === 'minimum') {
+        itemsContainer.classList.add('cs-compact', 'cs-minimum');
+      }
 
       // 1. Root Drop Zone Logic (to drag OUT of a subfolder)
       itemsContainer.addEventListener('dragover', e => {
         e.preventDefault();
+        // #advisory: stop propagation so the listEl stepped auto-scroll doesn't
+        // double-fire with the rAF edge loop over gaps between cards.
+        e.stopPropagation();
         e.dataTransfer.dropEffect = 'move';
         if (e.target === itemsContainer) itemsContainer.classList.add('cs-drag-over');
       });
@@ -881,7 +1073,7 @@
           if (dragged && dragged.type !== 'subfolder' && dragged.subfolder) {
             delete dragged.subfolder;
             dragged.sortOrder = -1;
-            await CS.storage.saveSnippets(snippets);
+            await enqueueWrite(() => CS.storage.saveSnippets(snippets));
             await load();
             CS.toast.showToast(CS.i18n.t('toast_moved_main'));
           }
@@ -897,16 +1089,29 @@
         s => s.type !== 'subfolder' && (searching || !s.subfolder)
       );
 
-      // 2. Render unassigned snippets
-      for (const s of unassigned) {
-        itemsContainer.appendChild(buildSnippetCard(s));
+      // 2. Render unassigned snippets (Minimum density hides them behind a count)
+      if (currentDensity() === 'minimum') {
+        if (unassigned.length > 0) {
+          const hint = el('p', 'cs-loose-hint');
+          const key = 'loose_snippets_hint';
+          const txt = CS.i18n && CS.i18n.t ? CS.i18n.t(key, { count: unassigned.length }) : key;
+          hint.textContent = /\{count\}/.test(txt)
+            ? txt.replace('{count}', String(unassigned.length))
+            : '+' + unassigned.length + ' loose snippets';
+          itemsContainer.appendChild(hint);
+        }
+      } else {
+        for (const s of unassigned) {
+          itemsContainer.appendChild(buildSnippetCard(s));
+        }
       }
 
       // 3. Render subfolder boxes
-      for (const sub of subfolders) {
+      for (let i = 0; i < subfolders.length; i++) {
+        const sub = subfolders[i];
         const box = el('div', 'cs-subfolder-box');
 
-        // Box Drop Zone Logic (to drag INTO a subfolder)
+        // Box Drop Zone Logic (to drag INTO a subfolder with a snippet).
         box.addEventListener('dragover', e => {
           e.preventDefault();
           e.stopPropagation();
@@ -939,7 +1144,7 @@
               dragged.sortOrder = maxOrder + 1;
 
               CS.state.sortMode = 'manual';
-              await CS.storage.saveSnippets(snippets);
+              await enqueueWrite(() => CS.storage.saveSnippets(snippets));
               await load();
               CS.toast.showToast(CS.i18n.t('toast_moved', { folder: sub.title }));
             }
@@ -952,13 +1157,17 @@
 
         const isCollapsed = CS.state.collapsedSubfolders.has(sub.title);
         if (!isCollapsed) {
-          const subItems = group.items.filter(
-            s => s.type !== 'subfolder' && s.subfolder === sub.title
-          );
-          if (subItems.length > 0) {
-            const subContainer = el('div', 'cs-subfolder-items');
-            for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
-            box.appendChild(subContainer);
+          const density = currentDensity();
+          // Minimum density: only render header, no child snippet cards
+          if (density !== 'minimum') {
+            const subItems = group.items.filter(
+              s => s.type !== 'subfolder' && s.subfolder === sub.title
+            );
+            if (subItems.length > 0) {
+              const subContainer = el('div', 'cs-subfolder-items');
+              for (const s of subItems) subContainer.appendChild(buildSnippetCard(s));
+              box.appendChild(subContainer);
+            }
           }
         }
 
@@ -971,6 +1180,12 @@
 
       listEl.appendChild(itemsContainer);
       return;
+    }
+
+    const _panel = listEl.parentElement;
+    if (_panel) {
+      const _stale = _panel.querySelector('.cs-drill-header');
+      if (_stale) _stale.remove();
     }
 
     if (groups.length === 0) {
@@ -1113,17 +1328,23 @@
         counter++;
       }
 
+      const currentOrder = orderedSubfolders(snippets, folderName);
+      const maxOrder = currentOrder.reduce(
+        (m, s) => Math.max(m, Number.isInteger(s.sortOrder) ? s.sortOrder : -1),
+        -1
+      );
+      // next sortOrder = displayed last; do NOT normalize here (normalize falls back to storage order while any -1 exists)
       const newSubfolder = {
         id: crypto.randomUUID(),
         type: 'subfolder',
         title: unique,
         folder: folderName,
         createdAt: Date.now(),
-        sortOrder: -1,
+        sortOrder: maxOrder + 1,
       };
       snippets.push(newSubfolder);
       CS.state.sortMode = 'manual';
-      await CS.storage.saveSnippets(snippets);
+      await enqueueWrite(() => CS.storage.saveSnippets(snippets));
       await load();
       CS.toast.showToast(CS.i18n.t('toast_subfolder_created'));
     } catch (err) {
@@ -1137,6 +1358,8 @@
     updateFolderInputState(); // Sync input state with drilledFolder on every render
     if (CS.state.settings.layout === 'grid') renderGridView();
     else renderListView();
+    movedSnippetId = null;
+    movedSubfolderId = null;
   }
 
   async function load() {
@@ -1281,7 +1504,7 @@
               snippets = snippets.filter(s => s.id !== CS.state.editingSnippetId);
             }
 
-            await CS.storage.saveSnippets(snippets);
+            await enqueueWrite(() => CS.storage.saveSnippets(snippets));
 
             // Reset UI and exit early
             CS.state.editingSnippetId = null;
@@ -1328,7 +1551,7 @@
         });
       }
 
-      await CS.storage.saveSnippets(snippets);
+      await enqueueWrite(() => CS.storage.saveSnippets(snippets));
 
       if (folder) {
         if (!CS.state.folders) CS.state.folders = new Set();
@@ -1374,13 +1597,13 @@
       }
 
       const filtered = snippets.filter(s => s.id !== id);
-      await CS.storage.saveSnippets(filtered);
+      await enqueueWrite(() => CS.storage.saveSnippets(filtered));
       await load();
 
       CS.toast.showToast(CS.i18n.t('toast_deleted'), 'success', CS.i18n.t('btn_undo'), async () => {
         const current = await CS.storage.getSnippets();
         current.push(snippetToDelete);
-        await CS.storage.saveSnippets(current);
+        await enqueueWrite(() => CS.storage.saveSnippets(current));
         await load();
         CS.toast.showToast(CS.i18n.t('toast_restored'));
       });
@@ -1410,6 +1633,25 @@
       CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
+
+  // Fix 4b: left-click outside the open context menu closes it, like right-click.
+  // overlay-snippets.js loads before overlay-index.js creates CS.ui.contextMenu, so
+  // wire a persistent capture listener that checks open state at event time.
+  function wireContextMenuDismiss() {
+    const onOutsideLeftClick = e => {
+      const ctx = CS.ui && CS.ui.contextMenu;
+      const ui = CS.ui;
+      if (!ctx || !ui || e.button !== 0 || !ctx.targetType) return;
+      const shadow = ui.shadow;
+      if (!shadow) return;
+      const menu = shadow.querySelector('.cs-context-menu');
+      if (!menu) return;
+      const path = e.composedPath();
+      if (!path.includes(menu)) ctx.hide();
+    };
+    document.addEventListener('pointerdown', onOutsideLeftClick, true);
+  }
+  wireContextMenuDismiss();
 
   /** @type {CleanShelfSnippetsModule} */
   const snippets = {

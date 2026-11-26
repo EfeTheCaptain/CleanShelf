@@ -65,6 +65,14 @@
         contrast: s.contrast === 'high' ? 'high' : 'normal',
         fontSize: s.fontSize === 'sm' ? 'sm' : s.fontSize === 'lg' ? 'lg' : 'md',
         draftRate: s.draftRate === 'relaxed' ? 'relaxed' : 'fast',
+        density:
+          s.density === 'expanded' || s.density === 'compact' || s.density === 'minimum'
+            ? s.density
+            : CS.constants.DEFAULT_SETTINGS.density,
+        sortMode:
+          s.sortMode === 'newest' || s.sortMode === 'title' || s.sortMode === 'manual'
+            ? s.sortMode
+            : 'newest',
         language: s.language === 'tr' ? 'tr' : 'en',
       };
     } catch (_) {
@@ -75,7 +83,13 @@
   /** @returns {Promise<void>} */
   async function persistSettings() {
     try {
-      await chrome.storage.local.set({ [CS.constants.SETTINGS_KEY]: { ...CS.state.settings } });
+      await chrome.storage.local.set({
+        [CS.constants.SETTINGS_KEY]: {
+          ...CS.state.settings,
+          density: CS.state.settings.density,
+          sortMode: CS.state.settings.sortMode,
+        },
+      });
     } catch (err) {
       CS.recordError('settings/save', err);
     }
