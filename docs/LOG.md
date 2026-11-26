@@ -47,3 +47,13 @@
 - Fix 4b: Back-button context menu now dismisses on left-click outside (capture `pointerdown` + `e.composedPath()` for Shadow DOM)
 - Reviewer caught 2 HIGH blockers (Shadow DOM retargeting broke menu-item selection; orphan drill header leaked into non-drill views) - both fixed
 - Verified: lint 0 errors, typecheck 0 errors. Runtime behavior not browser-tested.
+
+## 2026-11-27 - v1.2.10 Context-menu regression (COMPLETED, pending browser test)
+
+- Symptom: right-click -> Edit did nothing; every context-menu item (Edit, Delete, Rename, Sort, Insert Subfolder) was dead
+- Root cause: the Fix 4b left-click dismiss listened on `document` and tested `e.composedPath()`. The overlay's shadow root is `mode: 'closed'`, so composedPath() is empty there, the check always read "outside the menu", and `ctx.hide()` ran on pointerdown - before the item's click event - nulling `ctx.targetData` before `startEdit` was called
+- This was the same defect class the reviewer flagged HIGH during the 1.2.9 fixes; the previous repair patched the check instead of its location
+- Fix: removed the document-level listener; the dismiss now observes `pointerdown` on the shadow root in the CAPTURE phase, where `e.target` is the real node and the card's bubble-phase `stopPropagation` (index.js:40) cannot hide card/folder clicks. Capture is required, not optional
+- Hardening: `startEdit` gained `if (!snippet) return;` - it is an exported API and previously threw on a non-snippet target
+- Version 1.2.9 -> 1.2.10 (package.json, manifest.json, README badge, CHANGELOG)
+- Verified: lint 0 errors, typecheck 0 errors, manifest parses. Runtime behavior NOT yet browser-tested.

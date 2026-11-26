@@ -1399,6 +1399,7 @@
   }
 
   function startEdit(snippet) {
+    if (!snippet) return;
     const ui = CS.ui;
     if (ui.titleInput) ui.titleInput.value = snippet.title || '';
     if (ui.folderInput) ui.folderInput.value = snippet.folder || '';
@@ -1633,25 +1634,6 @@
       CS.toast.showToast(CS.i18n.t('err_save'), 'error');
     }
   }
-
-  // Fix 4b: left-click outside the open context menu closes it, like right-click.
-  // overlay-snippets.js loads before overlay-index.js creates CS.ui.contextMenu, so
-  // wire a persistent capture listener that checks open state at event time.
-  function wireContextMenuDismiss() {
-    const onOutsideLeftClick = e => {
-      const ctx = CS.ui && CS.ui.contextMenu;
-      const ui = CS.ui;
-      if (!ctx || !ui || e.button !== 0 || !ctx.targetType) return;
-      const shadow = ui.shadow;
-      if (!shadow) return;
-      const menu = shadow.querySelector('.cs-context-menu');
-      if (!menu) return;
-      const path = e.composedPath();
-      if (!path.includes(menu)) ctx.hide();
-    };
-    document.addEventListener('pointerdown', onOutsideLeftClick, true);
-  }
-  wireContextMenuDismiss();
 
   /** @type {CleanShelfSnippetsModule} */
   const snippets = {

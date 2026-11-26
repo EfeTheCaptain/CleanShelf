@@ -657,6 +657,19 @@
     if (!contextMenu.contains(e.target)) ctx.hide();
   });
 
+  // Left-click outside the open context menu closes it. This must observe events
+  // inside the shadow root: the root is mode 'closed', so composedPath() is empty
+  // for a document-level listener and a document-level check hid the menu on
+  // pointerdown, before a menu item's click could land.
+  shadow.addEventListener(
+    'pointerdown',
+    e => {
+      if (e.button !== 0 || ctx.targetType === null) return;
+      if (!contextMenu.contains(e.target)) ctx.hide();
+    },
+    true
+  );
+
   // --- BOOTSTRAP ---
   (async () => {
     try {

@@ -400,6 +400,11 @@
 
 - Fixed click-through: backdrop pointerdown stopPropagation() blocks clicks from leaking to the webpage when overlay is open
 
+## v1.2.10
+
+- Fixed: right-click menu items did nothing (Edit, Delete, Rename, Sort, Insert Subfolder). The click-to-close behaviour added in 1.2.9 dismissed the menu the instant the mouse button went down, before the click could register
+- The folder button (...) menu and the right-click menu now both respond to their items again
+
 ## v1.2.9
 
 - Details view now opens Compact by default
